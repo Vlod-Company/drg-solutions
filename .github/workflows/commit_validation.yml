@@ -18,7 +18,7 @@ jobs:
 
     - name: Validate format
       run: |
-        if ! [[ "$COMMIT_MSG" =~ ^[A-Z].*\.\ [A-Z].*$ ]]; then
+        if ! [[ "$COMMIT_MSG" =~ ^[A-Z].*\.\ ISSUE-[0-9]+\.\ [A-Z].*$ ]]; then
           echo "Commit message does not match format: ^[A-Z].*\.\ [A-Z].*$"
           echo "Got: $COMMIT_MSG"
           exit 1
