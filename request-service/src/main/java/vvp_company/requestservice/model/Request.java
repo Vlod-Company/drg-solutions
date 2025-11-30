@@ -23,7 +23,7 @@ public class Request {
     @Column(name = "recipient_department", nullable = false)
     private String recipientDepartment;
 
-    @Column(name = "request_code", nullable = false, unique = true)
+    @Column(name = "request_code", nullable = false)
     private String requestCode;
 
     @Column(columnDefinition = "TEXT")
