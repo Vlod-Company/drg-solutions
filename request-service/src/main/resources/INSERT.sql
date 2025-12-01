@@ -39,15 +39,15 @@ INSERT INTO stations (name, planet_id, type, status, delivery_point_id) VALUES
 ('Emergency Evac Station', 3, 'Evacuation', 'Standby', 3);
 
 -- Сотрудники с хешированными паролями
-INSERT INTO employees (name, password, post, experience, status, hired_date) VALUES 
-('Rourke', 'rocknstone', 'Driller',   120, 'active', '2023-01-15'),
-('Maggie', 'zoomzoom', 'Scout',     95,  'active', '2023-03-22'),
-('Berg', 'boomstick', 'Gunner',    110, 'active', '2022-11-10'),
-('Daisy', 'buildit', 'Engineer',  105, 'active', '2023-02-01'),
-('Lars', 'fastfast', 'Scout',     40,  'active', '2024-01-10'),
-('Gunnar', 'digdeep', 'Driller',   30,  'active', '2024-02-15'),
-('Sven', 'turretup', 'Engineer',  25,  'active', '2024-03-01'),
-('Thor', 'hammerdown', 'Gunner',    50,  'active', '2023-12-05');
+INSERT INTO employees (name, password, post, department, experience, status, hired_date) VALUES
+('Rourke', 'rocknstone', 'Driller', 'Rnd',   120, 'active', '2023-01-15'),
+('Maggie', 'zoomzoom', 'Scout',  'Management',   95,  'active', '2023-03-22'),
+('Berg', 'boomstick', 'Gunner',  'Mission control',  110, 'active', '2022-11-10'),
+('Daisy', 'buildit', 'Engineer',  'Logistics', 105, 'active', '2023-02-01'),
+('Lars', 'fastfast', 'Scout',   'Dwarf team',  40,  'active', '2024-01-10'),
+('Gunnar', 'digdeep', 'Driller',   'Mission control',30,  'active', '2024-02-15'),
+('Sven', 'turretup', 'Engineer',  'Mission control',25,  'active', '2024-03-01'),
+('Thor', 'hammerdown', 'Gunner',    'Mission control',50,  'active', '2023-12-05');
 
 -- Грузы
 INSERT INTO cargos (weight, ship_to_date, ship_to_point) VALUES 

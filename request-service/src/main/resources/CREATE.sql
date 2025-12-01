@@ -41,6 +41,7 @@ CREATE TABLE "employees" (
     "name" VARCHAR(255) NOT NULL,
     "password" VARCHAR(255) NOT NULL,
     "post" VARCHAR(255) NOT NULL,
+    "department" VARCHAR(255) NOT NULL,
     "experience" INTEGER NOT NULL DEFAULT 0 CHECK ("experience" >= 0),
     "status" VARCHAR(50) NOT NULL DEFAULT 'active',
     "hired_date" DATE NOT NULL DEFAULT CURRENT_DATE,
