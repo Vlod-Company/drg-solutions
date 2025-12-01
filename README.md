@@ -1,4 +1,6 @@
+## Структура
 Все сервисы обязаны предерживаться следующей структуры
+```text
 x-service/
 └── src/
     └── main/
@@ -18,3 +20,4 @@ x-service/
                 │   └── сервисы
                 ├── RequestServiceApplication.java  # Точка входа (Spring Boot)
                 └── ServletInitializer.java 
+```
