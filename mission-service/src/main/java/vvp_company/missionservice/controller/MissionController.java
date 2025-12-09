@@ -1,10 +1,13 @@
 package vvp_company.missionservice.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import vvp_company.missionservice.dto.CreateMissionRequest;
 import vvp_company.missionservice.dto.MissionDto;
+import vvp_company.missionservice.dto.PagedResponse;
 import vvp_company.missionservice.service.MissionService;
 
 import java.util.List;
@@ -17,8 +20,8 @@ public class MissionController {
     private final MissionService missionService;
 
     @GetMapping
-    public List<MissionDto> getAllMissions() {
-        return missionService.findAll();
+    public PagedResponse<MissionDto> getAllMissions(@NotNull @RequestParam Integer pageNumber, @NotNull @RequestParam Integer pageSize) {
+        return missionService.findAllPaged(pageNumber, pageSize);
     }
 
     @GetMapping("/{id}")

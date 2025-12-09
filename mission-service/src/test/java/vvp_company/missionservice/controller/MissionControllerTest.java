@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 import vvp_company.missionservice.dto.CreateMissionRequest;
 import vvp_company.missionservice.dto.MissionDto;
+import vvp_company.missionservice.dto.PagedResponse;
 import vvp_company.missionservice.service.MissionService;
 
 import java.time.LocalDateTime;
@@ -22,7 +23,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -43,6 +44,7 @@ class MissionControllerTest {
     private MissionDto missionDto1;
     private MissionDto missionDto2;
     private CreateMissionRequest createMissionRequest;
+    private PagedResponse<MissionDto> pagedResponse;
 
     @BeforeEach
     void setUp() {
@@ -75,6 +77,15 @@ class MissionControllerTest {
                 .biomeId(2L)
                 .build();
 
+        // Тестовые данные для пагинированного ответа
+        List<MissionDto> missions = Arrays.asList(missionDto1, missionDto2);
+        pagedResponse = PagedResponse.<MissionDto>builder()
+                .data(missions)
+                .pageNumber(0)
+                .pageSize(10)
+                .total(15)
+                .build();
+
         createMissionRequest = CreateMissionRequest.builder()
                 .name("New Mission")
                 .description("Описание новой миссии")
@@ -85,39 +96,104 @@ class MissionControllerTest {
     }
 
     @Test
-    void getAllMissions_ShouldReturnListOfMissions() throws Exception {
+    void getAllMissions_WithValidPagination_ShouldReturnPagedResponse() throws Exception {
         // Arrange
-        List<MissionDto> missions = Arrays.asList(missionDto1, missionDto2);
-        when(missionService.findAll()).thenReturn(missions);
+        when(missionService.findAllPaged(0, 10)).thenReturn(pagedResponse);
 
         // Act & Assert
         mockMvc.perform(get("/mission")
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id", is(1)))
-                .andExpect(jsonPath("$[0].name", is("Mission Alpha")))
-                .andExpect(jsonPath("$[1].id", is(2)))
-                .andExpect(jsonPath("$[1].name", is("Mission Beta")));
+                .andExpect(jsonPath("$.data", hasSize(2)))
+                .andExpect(jsonPath("$.data[0].id", is(1)))
+                .andExpect(jsonPath("$.data[0].name", is("Mission Alpha")))
+                .andExpect(jsonPath("$.data[1].id", is(2)))
+                .andExpect(jsonPath("$.data[1].name", is("Mission Beta")))
+                .andExpect(jsonPath("$.pageNumber", is(0)))
+                .andExpect(jsonPath("$.pageSize", is(10)))
+                .andExpect(jsonPath("$.total", is(15)));
 
-        verify(missionService, times(1)).findAll();
+        verify(missionService, times(1)).findAllPaged(0, 10);
+        verify(missionService, never()).findAll();
     }
 
     @Test
-    void getAllMissions_ShouldReturnEmptyList() throws Exception {
+    void getAllMissions_WithEmptyPage_ShouldReturnEmptyPagedResponse() throws Exception {
         // Arrange
-        when(missionService.findAll()).thenReturn(List.of());
+        PagedResponse<MissionDto> emptyResponse = PagedResponse.<MissionDto>builder()
+                .data(List.of())
+                .pageNumber(2)
+                .pageSize(10)
+                .total(15)
+                .build();
+
+        when(missionService.findAllPaged(2, 10)).thenReturn(emptyResponse);
 
         // Act & Assert
         mockMvc.perform(get("/mission")
+                        .param("pageNumber", "2")
+                        .param("pageSize", "10")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(jsonPath("$.data", hasSize(0)))
+                .andExpect(jsonPath("$.pageNumber", is(2)))
+                .andExpect(jsonPath("$.pageSize", is(10)))
+                .andExpect(jsonPath("$.total", is(15)));
 
-        verify(missionService, times(1)).findAll();
+        verify(missionService, times(1)).findAllPaged(2, 10);
     }
+
+    @Test
+    void getAllMissions_WithMissingPageNumber_ShouldReturnBadRequest() throws Exception {
+        // Act & Assert
+        mockMvc.perform(get("/mission")
+                        .param("pageSize", "10")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verify(missionService, never()).findAllPaged(anyInt(), anyInt());
+    }
+
+    @Test
+    void getAllMissions_WithMissingPageSize_ShouldReturnBadRequest() throws Exception {
+        // Act & Assert
+        mockMvc.perform(get("/mission")
+                        .param("pageNumber", "0")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verify(missionService, never()).findAllPaged(anyInt(), anyInt());
+    }
+
+    @Test
+    void getAllMissions_WithLargePage_ShouldReturnEmptyData() throws Exception {
+        // Arrange - страница за пределами данных
+        PagedResponse<MissionDto> emptyResponse = PagedResponse.<MissionDto>builder()
+                .data(List.of())
+                .pageNumber(10)
+                .pageSize(10)
+                .total(15)
+                .build();
+
+        when(missionService.findAllPaged(10, 10)).thenReturn(emptyResponse);
+
+        // Act & Assert
+        mockMvc.perform(get("/mission")
+                        .param("pageNumber", "10")
+                        .param("pageSize", "10")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(0)))
+                .andExpect(jsonPath("$.pageNumber", is(10)));
+
+        verify(missionService, times(1)).findAllPaged(10, 10);
+    }
+
+    // Остальные тесты остаются без изменений
 
     @Test
     void getMissionById_WithValidId_ShouldReturnMission() throws Exception {

@@ -1,11 +1,13 @@
 package vvp_company.missionservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import vvp_company.missionservice.dto.CreateMissionRequest;
 import vvp_company.missionservice.dto.MissionDto;
+import vvp_company.missionservice.dto.PagedResponse;
 import vvp_company.missionservice.dto.RecommendedWeaponDto;
 import vvp_company.missionservice.mapper.MissionMapper;
 import vvp_company.missionservice.mapper.TeamMapper;
@@ -22,6 +24,16 @@ public class MissionService {
     private final MissionMapper missionMapper;
     private final TeamService teamService;
     private final TeamMapper teamMapper;
+
+    public PagedResponse<MissionDto> findAllPaged(int pageNo, int pageSize) {
+        var missions = missionRepository.findAll(Pageable.ofSize(pageSize));
+        return PagedResponse.<MissionDto>builder()
+                .pageSize(pageSize)
+                .pageNumber(pageNo)
+                .total((int)missions.getTotalElements())
+                .data(missions.map(missionMapper::toMissionDto).toList())
+                .build();
+    }
 
     public List<MissionDto> findAll() {
         return missionRepository.findAll().stream().map(missionMapper::toMissionDto).toList();

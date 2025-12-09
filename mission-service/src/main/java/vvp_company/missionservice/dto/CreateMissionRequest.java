@@ -9,7 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import vvp_company.missionservice.enm.MissionStatus;
-import vvp_company.missionservice.model.Team;
 
 @Data
 @Builder
