@@ -5,7 +5,10 @@ import vvp_company.missionservice.dto.CreateMissionRequest;
 import vvp_company.missionservice.dto.MissionDto;
 import vvp_company.missionservice.model.Mission;
 
-@Mapper(componentModel = "spring")
+import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+
+@Mapper(componentModel = SPRING, injectionStrategy = CONSTRUCTOR)
 public interface MissionMapper {
 
     MissionDto toMissionDto(Mission m);

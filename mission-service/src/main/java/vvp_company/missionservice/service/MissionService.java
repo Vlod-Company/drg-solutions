@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import vvp_company.missionservice.dto.CreateMissionRequest;
 import vvp_company.missionservice.dto.MissionDto;
+import vvp_company.missionservice.dto.RecommendedWeaponDto;
 import vvp_company.missionservice.mapper.MissionMapper;
+import vvp_company.missionservice.mapper.TeamMapper;
 import vvp_company.missionservice.model.Mission;
 import vvp_company.missionservice.repository.MissionRepository;
 
@@ -18,6 +20,8 @@ public class MissionService {
 
     private final MissionRepository missionRepository;
     private final MissionMapper missionMapper;
+    private final TeamService teamService;
+    private final TeamMapper teamMapper;
 
     public List<MissionDto> findAll() {
         return missionRepository.findAll().stream().map(missionMapper::toMissionDto).toList();
@@ -28,11 +32,22 @@ public class MissionService {
     }
 
     public MissionDto createNewMission(CreateMissionRequest createMissionRequest) {
-        Mission mission = missionMapper.fromCreateMissionRequest(createMissionRequest);
+        var team = teamService.findTeam(createMissionRequest.getTeamId());
+        if (team == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Команда не найдена");
+        }
+        var teamEntity = teamMapper.toTeam(team);
+
+        var mission = missionMapper.fromCreateMissionRequest(createMissionRequest);
+        mission.setTeam(teamEntity);
         return missionMapper.toMissionDto(missionRepository.save(mission));
     }
 
     public void delete(Long id) {
         missionRepository.deleteById(id);
+    }
+
+    public List<RecommendedWeaponDto> getRecommendedWeaponsForMission(Long missionId) {
+        return missionRepository.getRecommendedWeapons(missionId);
     }
 }

@@ -2,12 +2,19 @@ package vvp_company.missionservice.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import vvp_company.missionservice.enm.MissionStatus;
 import vvp_company.missionservice.model.Team;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CreateMissionRequest {
 
     @NotNull
@@ -20,10 +27,11 @@ public class CreateMissionRequest {
     private String description;
 
     @NotNull
-    private Team team;
+    private Long teamId;
 
     @Min(value=0)
     private Integer requiredExperience = 0;
 
+    @Null
     private MissionStatus status = MissionStatus.CREATED;
 }

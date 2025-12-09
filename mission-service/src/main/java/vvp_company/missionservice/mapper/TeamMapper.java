@@ -4,7 +4,10 @@ import org.mapstruct.Mapper;
 import vvp_company.missionservice.dto.TeamDto;
 import vvp_company.missionservice.model.Team;
 
-@Mapper(componentModel = "spring")
+import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+
+@Mapper(componentModel = SPRING, injectionStrategy = CONSTRUCTOR)
 public interface TeamMapper {
 
     Team toTeam(TeamDto teamDto);

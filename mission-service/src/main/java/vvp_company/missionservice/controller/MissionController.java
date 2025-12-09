@@ -37,7 +37,7 @@ public class MissionController {
     }
 
     @GetMapping("/{id}/getRecommendedWeapons")
-    public void getRecommendedWeapons(@PathVariable("id") Long id) {
-
+    public void getRecommendedWeaponsForMission(@PathVariable("id") Long id) {
+        missionService.getRecommendedWeaponsForMission(id);
     }
 }

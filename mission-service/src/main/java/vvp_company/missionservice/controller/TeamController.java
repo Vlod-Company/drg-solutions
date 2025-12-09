@@ -1,5 +1,6 @@
 package vvp_company.missionservice.controller;
 
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import vvp_company.missionservice.dto.TeamDto;
@@ -15,7 +16,7 @@ public class TeamController {
     private final TeamService teamService;
 
     @PostMapping
-    public TeamDto createTeam(@RequestParam String teamName) {
+    public TeamDto createTeam(@NotEmpty @RequestParam String teamName) {
         return teamService.createTeam(teamName);
     }
 
