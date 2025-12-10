@@ -1,4 +1,4 @@
-package vvp_company.missionservice.dto;
+package vvp_company.missionservice.dto.nested;
 
 import lombok.Data;
 

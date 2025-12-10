@@ -1,7 +1,7 @@
 package vvp_company.missionservice.mapper;
 
 import org.mapstruct.Mapper;
-import vvp_company.missionservice.dto.TeamDto;
+import vvp_company.missionservice.dto.nested.TeamDto;
 import vvp_company.missionservice.model.Team;
 
 import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;

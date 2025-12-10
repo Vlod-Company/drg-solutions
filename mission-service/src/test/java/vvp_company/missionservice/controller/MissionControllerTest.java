@@ -12,9 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
-import vvp_company.missionservice.dto.CreateMissionRequest;
-import vvp_company.missionservice.dto.MissionDto;
-import vvp_company.missionservice.dto.PagedResponse;
+import vvp_company.missionservice.dto.request.CreateMissionRequest;
+import vvp_company.missionservice.dto.nested.MissionDto;
+import vvp_company.missionservice.dto.response.PagedResponse;
 import vvp_company.missionservice.service.MissionService;
 
 import java.time.LocalDateTime;

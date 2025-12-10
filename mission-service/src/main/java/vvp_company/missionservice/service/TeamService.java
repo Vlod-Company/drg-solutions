@@ -4,13 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import vvp_company.missionservice.dto.TeamDto;
+import vvp_company.missionservice.dto.nested.TeamDto;
 import vvp_company.missionservice.mapper.TeamMapper;
 import vvp_company.missionservice.model.Team;
 import vvp_company.missionservice.repository.TeamRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

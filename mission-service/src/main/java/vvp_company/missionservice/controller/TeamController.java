@@ -3,7 +3,7 @@ package vvp_company.missionservice.controller;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import vvp_company.missionservice.dto.TeamDto;
+import vvp_company.missionservice.dto.nested.TeamDto;
 import vvp_company.missionservice.service.TeamService;
 
 import java.util.List;

@@ -11,7 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
-import vvp_company.missionservice.dto.TeamDto;
+import vvp_company.missionservice.dto.nested.TeamDto;
 import vvp_company.missionservice.service.TeamService;
 
 import java.util.Arrays;
