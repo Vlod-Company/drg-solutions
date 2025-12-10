@@ -22,9 +22,8 @@ public class Mission {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id", nullable = false)
-    private Team team;
+    @Column(name = "teamId")
+    private Long teamId;
 
     @Column(name = "required_experience", nullable = false)
     private Integer requiredExperience = 0;

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import vvp_company.missionservice.client.dto.RequestDTO;
+import vvp_company.missionservice.dto.nested.RecommendedWeaponDto;
 import vvp_company.missionservice.dto.nested.SendItemDTO;
 import vvp_company.missionservice.dto.request.CreateMissionRequest;
 import vvp_company.missionservice.dto.nested.MissionDto;
@@ -41,8 +42,8 @@ public class MissionController {
     }
 
     @GetMapping("/{id}/getRecommendedWeapons")
-    public void getRecommendedWeaponsForMission(@PathVariable("id") Long id) {
-        missionService.getRecommendedWeaponsForMission(id);
+    public List<RecommendedWeaponDto> getRecommendedWeaponsForMission(@PathVariable("id") Long id) {
+        return missionService.getRecommendedWeaponsForMission(id);
     }
 
     @PostMapping("/send/{missionId}")

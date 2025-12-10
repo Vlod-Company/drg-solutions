@@ -30,8 +30,6 @@ public class MissionService {
 
     private final MissionRepository missionRepository;
     private final MissionMapper missionMapper;
-    private final TeamService teamService;
-    private final TeamMapper teamMapper;
     private final RequestServiceClient requestServiceClient;
 
     public PagedResponse<MissionDto> findAllPaged(int pageNo, int pageSize) {
@@ -53,14 +51,7 @@ public class MissionService {
     }
 
     public MissionDto createNewMission(CreateMissionRequest createMissionRequest) {
-        var team = teamService.findTeam(createMissionRequest.getTeamId());
-        if (team == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Команда не найдена");
-        }
-        var teamEntity = teamMapper.toTeam(team);
-
         var mission = missionMapper.fromCreateMissionRequest(createMissionRequest);
-        mission.setTeam(teamEntity);
         return missionMapper.toMissionDto(missionRepository.save(mission));
     }
 
@@ -79,8 +70,7 @@ public class MissionService {
             throw new ResponseStatusException(BAD_REQUEST, "Миссия не в статусе CREATED");
         }
 
-        var team = mission.getTeam();
-        var description = String.format("%s\n", team.getId().toString());
+        var description = String.format("%s\n", mission.getTeamId());
         var objectMapper = new ObjectMapper();
         description = description + objectMapper.writeValueAsString(sendItemDTOList);
         System.out.println(description);
