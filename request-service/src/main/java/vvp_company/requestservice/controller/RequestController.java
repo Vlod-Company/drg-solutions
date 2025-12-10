@@ -1,6 +1,7 @@
 package vvp_company.requestservice.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -29,26 +30,18 @@ public class RequestController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RequestDto> getRequest(@PathVariable Long id) {
-        RequestDto response = requestService.getById(id);
-        return ResponseEntity.ok(response);
+    public RequestDto getRequest(@PathVariable Long id) {
+        return requestService.getById(id);
     }
 
     @GetMapping
-    public ResponseEntity<List<RequestDto>> getRequestsToDepartment(
-            @RequestParam(name = "senderDepartment", required = false) String department) {
-
-        if (department != null && !department.isBlank()) {
-            List<RequestDto> list = requestService.getBySenderDepartment(department);
-            return ResponseEntity.ok(list);
-        }
-
-        return ResponseEntity.badRequest().build();
+    public List<RequestDto> getRequestsToDepartment(
+            @NotEmpty @RequestParam(name = "senderDepartment") String department) {
+        return requestService.getBySenderDepartment(department);
     }
 
-    // Свои отправленные заявки
     @GetMapping("/my-sent")
-    public ResponseEntity<List<RequestDto>> getMySentRequests() {
-        return ResponseEntity.ok(requestService.getMySentRequests());
+    public List<RequestDto> getMySentRequests() {
+        return requestService.getMySentRequests();
     }
 }
