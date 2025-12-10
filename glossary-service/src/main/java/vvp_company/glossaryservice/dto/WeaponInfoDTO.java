@@ -6,11 +6,13 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EquipmentInfoDTO {
+public class WeaponInfoDTO {
 
     private String name;
 
     private String description;
 
     private Double weight;
+
+    private Long impactType;
 }

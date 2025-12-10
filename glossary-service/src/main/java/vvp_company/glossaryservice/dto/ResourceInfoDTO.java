@@ -6,11 +6,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EquipmentInfoDTO {
+public class ResourceInfoDTO {
 
     private String name;
 
     private String description;
 
-    private Double weight;
+    private Double weightPerUnit;
 }
