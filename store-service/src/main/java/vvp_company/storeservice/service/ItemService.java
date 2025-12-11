@@ -3,6 +3,7 @@ package vvp_company.storeservice.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vvp_company.storeservice.client.DeliveryPointClient;
 import vvp_company.storeservice.client.GlossaryServiceClient;
 import vvp_company.storeservice.client.dto.EquipmentInfoDTO;
 import vvp_company.storeservice.client.dto.ResourceInfoDTO;
@@ -39,6 +40,7 @@ public class ItemService {
     private final ResourceRepository resourceRepository;
     private final WareHouseRepository wareHouseRepository;
     private final GlossaryServiceClient glossaryServiceClient;
+    private final DeliveryPointClient deliveryPointClient;
 
     @Transactional
     public void addItemsToDeliveryPoint(Long deliveryPointId, List<SendItemDTO> items) {
@@ -99,6 +101,8 @@ public class ItemService {
     public List<DeliveryPointResponseDTO> findItemsInDeliveryPoint(Long deliveryPointId) {
         var items = wareHouseRepository.howMuchAtTimeInDeliveryPoint(deliveryPointId, LocalDateTime.now());
 
+        var deliveryPoint = deliveryPointClient.getDeliveryPointById(deliveryPointId);
+
         var weaponInfos = glossaryServiceClient.getAllWeaponInfos().stream()
                 .collect(groupingBy(WeaponInfoDTO::getName));
         var equipmentInfos = glossaryServiceClient.getAllEquipmentInfos().stream()
@@ -121,6 +125,12 @@ public class ItemService {
                     .build();
         }).toList();
 
-        return null;
+        var deliveryPointResponse = DeliveryPointResponseDTO.builder()
+                .deliveryPointType(deliveryPoint.getDeliveryType())
+                .deliveryPointId(deliveryPointId)
+                .data(itemDTOs)
+                .build();
+
+        return List.of(deliveryPointResponse);
     }
 }
