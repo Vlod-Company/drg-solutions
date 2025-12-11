@@ -8,18 +8,20 @@ import vvp_company.storeservice.client.dto.EquipmentInfoDTO;
 import vvp_company.storeservice.client.dto.ResourceInfoDTO;
 import vvp_company.storeservice.client.dto.WeaponInfoDTO;
 
+import java.util.List;
+
 @FeignClient(
         url = "${services.glossary.base-url}",
         name = "glossary-service"
 )
 public interface GlossaryServiceClient {
 
-    @GetMapping("resourceInfo")
-    ResourceInfoDTO getResourceInfoByName(@RequestParam("resourceName") String name);
+    @GetMapping("resourceInfo/all")
+    List<ResourceInfoDTO> getAllResourceInfos();
 
-    @GetMapping("equipmentInfo")
-    EquipmentInfoDTO getEquipmentInfoByName(@RequestParam("equipmentName") String name);
+    @GetMapping("equipmentInfo/all")
+    List<EquipmentInfoDTO> getAllEquipmentInfos();
 
-    @GetMapping("weapongInfo")
-    WeaponInfoDTO getWeaponInfoByName(@RequestParam("weaponName") String name);
+    @GetMapping("weaponInfo/all")
+    List<WeaponInfoDTO> getAllWeaponInfos();
 }

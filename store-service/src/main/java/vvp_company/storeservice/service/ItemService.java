@@ -4,6 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import vvp_company.storeservice.client.GlossaryServiceClient;
+import vvp_company.storeservice.client.dto.EquipmentInfoDTO;
+import vvp_company.storeservice.client.dto.ResourceInfoDTO;
+import vvp_company.storeservice.client.dto.WeaponInfoDTO;
 import vvp_company.storeservice.dto.nested.ItemResponseDTO;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemDTO;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemEquipment;
@@ -23,6 +26,9 @@ import vvp_company.storeservice.repository.WeaponRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
 
 @Service
 @RequiredArgsConstructor
@@ -93,20 +99,28 @@ public class ItemService {
     public List<DeliveryPointResponseDTO> findItemsInDeliveryPoint(Long deliveryPointId) {
         var items = wareHouseRepository.howMuchAtTimeInDeliveryPoint(deliveryPointId, LocalDateTime.now());
 
-        items.stream().map(item -> {
-            var weigth = switch (item.getItemType()) {
-                case WEAPON -> glossaryServiceClient.getWeaponInfoByName(item.getInfoName()).getWeight();
-                case RESOURCE -> glossaryServiceClient.getResourceInfoByName(item.getInfoName()).getWeightPerUnit();
-                case EQUIPMENT -> glossaryServiceClient.getEquipmentInfoByName(item.getInfoName()).getWeight();
+        var weaponInfos = glossaryServiceClient.getAllWeaponInfos().stream()
+                .collect(groupingBy(WeaponInfoDTO::getName));
+        var equipmentInfos = glossaryServiceClient.getAllEquipmentInfos().stream()
+                .collect(groupingBy(EquipmentInfoDTO::getName));
+        var resourceInfos = glossaryServiceClient.getAllResourceInfos().stream()
+                .collect(groupingBy(ResourceInfoDTO::getName));
+
+        var itemDTOs = items.stream().map(item -> {
+            var weight = switch(item.getItemType()) {
+                case WEAPON -> weaponInfos.get(item.getInfoName()).getFirst().getWeight();
+                case RESOURCE -> resourceInfos.get(item.getInfoName()).getFirst().getWeightPerUnit();
+                case EQUIPMENT -> equipmentInfos.get(item.getInfoName()).getFirst().getWeight();
             };
 
             return ItemResponseDTO.builder()
                     .itemQuantity(item.getTotalCount())
-                    .itemWeight(weigth)
-                    .itemName(item.getInfoName())
                     .itemType(item.getItemType())
+                    .itemName(item.getInfoName())
+                    .itemWeight(weight)
                     .build();
-        });
+        }).toList();
+
         return null;
     }
 }
