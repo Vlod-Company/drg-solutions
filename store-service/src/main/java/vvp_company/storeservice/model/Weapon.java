@@ -46,7 +46,7 @@ public class Weapon {
             date = LocalDateTime.now();
         }
         if (status == null) {
-            status = Status.CREATED;
+            status = Status.STORED;
         }
     }
 }
