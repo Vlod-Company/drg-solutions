@@ -6,6 +6,8 @@ import vvp_company.deliverpointservice.enm.DeliveryPointType;
 import vvp_company.deliverpointservice.model.DeliveryPoint;
 import vvp_company.deliverpointservice.service.DeliveryPointService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("deliveryPoint")
 @RequiredArgsConstructor
@@ -26,5 +28,10 @@ public class DeliveryPointController {
     @DeleteMapping("{id}")
     public void deleteDeliveryPoint(@PathVariable("id") Long id) {
         deliveryPointService.removeDeliveryPoint(id);
+    }
+
+    @GetMapping
+    public List<DeliveryPoint> getAllDeliveryPoints() {
+        return deliveryPointService.findAll();
     }
 }

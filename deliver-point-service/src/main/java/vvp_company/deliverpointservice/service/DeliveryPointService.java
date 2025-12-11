@@ -8,6 +8,8 @@ import vvp_company.deliverpointservice.enm.DeliveryPointType;
 import vvp_company.deliverpointservice.model.DeliveryPoint;
 import vvp_company.deliverpointservice.repository.DeliveryPointRepository;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class DeliveryPointService {
@@ -25,5 +27,9 @@ public class DeliveryPointService {
 
     public void removeDeliveryPoint(Long id) {
         deliveryPointRepository.deleteById(id);
+    }
+
+    public List<DeliveryPoint> findAll() {
+        return deliveryPointRepository.findAll();
     }
 }
