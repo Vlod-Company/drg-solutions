@@ -3,6 +3,8 @@ package vvp_company.storeservice.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vvp_company.storeservice.client.GlossaryServiceClient;
+import vvp_company.storeservice.dto.nested.ItemResponseDTO;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemDTO;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemEquipment;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemResource;
@@ -30,6 +32,8 @@ public class ItemService {
     private final WeaponRepository weaponRepository;
     private final ResourceRepository resourceRepository;
     private final WareHouseRepository wareHouseRepository;
+    private final GlossaryServiceClient glossaryServiceClient;
+    private final GlossaryServiceClient glossaryServiceClient;
 
     @Transactional
     public void addItemsToDeliveryPoint(Long deliveryPointId, List<SendItemDTO> items) {
@@ -87,8 +91,23 @@ public class ItemService {
         });
     }
 
-//    public List<DeliveryPointResponseDTO> findItemsInDeliveryPoint(Long deliveryPointId) {
-//        var items = wareHouseRepository.howMuchAtTimeInDeliveryPoint(deliveryPointId, LocalDateTime.now());
-//
-//    }
+    public List<DeliveryPointResponseDTO> findItemsInDeliveryPoint(Long deliveryPointId) {
+        var items = wareHouseRepository.howMuchAtTimeInDeliveryPoint(deliveryPointId, LocalDateTime.now());
+
+        items.stream().map(item -> {
+            var weigth = switch (item.getItemType()) {
+                case WEAPON -> glossaryServiceClient.getWeaponInfoByName(item.getInfoName()).getWeight();
+                case RESOURCE -> glossaryServiceClient.getResourceInfoByName(item.getInfoName()).getWeightPerUnit();
+                case EQUIPMENT -> glossaryServiceClient.getEquipmentInfoByName(item.getInfoName()).getWeight();
+            };
+
+            return ItemResponseDTO.builder()
+                    .itemQuantity(item.getTotalCount())
+                    .itemWeight(weigth)
+                    .itemName(item.getInfoName())
+                    .itemType(item.getItemType())
+                    .build();
+        });
+        return null;
+    }
 }
