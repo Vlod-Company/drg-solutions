@@ -17,13 +17,13 @@ public class ItemController {
 
     private final ItemService itemService;
 
-//    @PostMapping("/add/{deliveryPointId}")
-//    public void addItemsToDeliveryPoint(
-//            @PathVariable Long deliveryPointId,
-//            @Valid @RequestBody List<SendItemDTO> items) {
-//        itemService.addItemsToDeliveryPoint(deliveryPointId, items);
-//    }
-//
+    @PostMapping("/add/{deliveryPointId}")
+    public void addItemsToDeliveryPoint(
+            @PathVariable Long deliveryPointId,
+            @Valid @RequestBody List<SendItemDTO> items) {
+        itemService.addItemsToDeliveryPoint(deliveryPointId, items);
+    }
+
 //    @PostMapping("/{deliveryPointId}")
 //    public List<DeliveryPointResponseDTO> findItemsInDeliveryPoint(
 //            @PathVariable Long deliveryPointId,

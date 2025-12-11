@@ -7,11 +7,16 @@ import vvp_company.storeservice.dto.nested.sendItem.SendItemDTO;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemEquipment;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemResource;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemWeapon;
+import vvp_company.storeservice.enm.ResourceStatus;
+import vvp_company.storeservice.enm.Status;
 import vvp_company.storeservice.model.Equipment;
+import vvp_company.storeservice.model.Resource;
+import vvp_company.storeservice.model.Weapon;
 import vvp_company.storeservice.repository.EquipmentRepository;
 import vvp_company.storeservice.repository.ResourceRepository;
 import vvp_company.storeservice.repository.WeaponRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +42,45 @@ public class ItemService {
             }
         });
 
-        
+        equipmentList.forEach(equipment -> {
+            var entity = Equipment.builder()
+                    .name(equipment.itemName())
+                    .identificationNumber(equipment.identificationNumber())
+                    .locatedAt(deliveryPointId)
+                    .status(Status.STORED)
+                    .date(LocalDateTime.now())
+                    .build();
+
+            equipmentRepository.save(entity);
+        });
+
+        weaponList.forEach(weapon -> {
+            var entity = Weapon.builder()
+                    .name(weapon.itemName())
+                    .identificationNumber(weapon.identificationNumber())
+                    .locatedAt(deliveryPointId)
+                    .status(Status.STORED)
+                    .date(LocalDateTime.now())
+                    .build();
+
+            weaponRepository.save(entity);
+        });
+
+        resourceList.forEach(resource -> {
+            var lastResourceCount = resourceRepository
+                    .findFirstByLocatedAtAndNameAndStatusOrderByDateDesc(deliveryPointId, resource.itemName(), ResourceStatus.STORED)
+                    .map(Resource::getQuantity)
+                    .orElse(0);
+
+            var entity = Resource.builder()
+                    .name(resource.itemName())
+                    .quantity(resource.quantity() + lastResourceCount)
+                    .locatedAt(deliveryPointId)
+                    .date(LocalDateTime.now())
+                    .status(ResourceStatus.STORED)
+                    .build();
+
+            resourceRepository.save(entity);
+        });
     }
 }
