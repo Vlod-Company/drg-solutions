@@ -7,6 +7,9 @@ import vvp_company.glossaryservice.dto.ResourceInfoDTO;
 import vvp_company.glossaryservice.mapper.ResourceInfoMapper;
 import vvp_company.glossaryservice.repository.ResourceInfoRepository;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
@@ -19,5 +22,9 @@ public class ResourceInfoService {
     public ResourceInfoDTO getResourceInfoByName(String name) {
         return repository.findByName(name).map(mapper::toDTO)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Информация о ресурсе не найдена"));
+    }
+
+    public List<ResourceInfoDTO> getAllResourceInfos() {
+        return repository.findAll().stream().map(mapper::toDTO).collect(Collectors.toList());
     }
 }

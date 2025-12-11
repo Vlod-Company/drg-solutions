@@ -7,6 +7,9 @@ import vvp_company.glossaryservice.dto.EquipmentInfoDTO;
 import vvp_company.glossaryservice.mapper.EquipmentInfoMapper;
 import vvp_company.glossaryservice.repository.EquipmentInfoRepository;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
@@ -19,5 +22,9 @@ public class EquipmentInfoService {
     public EquipmentInfoDTO getEquipmentInfoByName(String equipmentName) {
         return repository.findByName(equipmentName).map(mapper::toDto)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Информация по снаряжению не найдена"));
+    }
+
+    public List<EquipmentInfoDTO> getAllEquipmentInfos() {
+        return repository.findAll().stream().map(mapper::toDto).collect(Collectors.toList());
     }
 }

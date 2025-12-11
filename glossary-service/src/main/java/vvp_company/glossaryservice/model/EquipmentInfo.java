@@ -23,6 +23,6 @@ public class EquipmentInfo {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "weight", nullable = false, precision = 10, scale = 3)
+    @Column(name = "weight", nullable = false)
     private Double weight;
 }

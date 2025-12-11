@@ -23,6 +23,6 @@ public class ResourceInfo {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "weight_per_unit", nullable = false, precision = 10, scale = 3)
+    @Column(name = "weight_per_unit", nullable = false)
     private Double weightPerUnit;
 }
