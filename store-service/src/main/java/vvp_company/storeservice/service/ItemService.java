@@ -33,7 +33,6 @@ public class ItemService {
     private final ResourceRepository resourceRepository;
     private final WareHouseRepository wareHouseRepository;
     private final GlossaryServiceClient glossaryServiceClient;
-    private final GlossaryServiceClient glossaryServiceClient;
 
     @Transactional
     public void addItemsToDeliveryPoint(Long deliveryPointId, List<SendItemDTO> items) {
