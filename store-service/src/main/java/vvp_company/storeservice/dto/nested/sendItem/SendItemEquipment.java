@@ -1,9 +1,9 @@
 package vvp_company.storeservice.dto.nested.sendItem;
 
-import vvp_company.storeservice.enm.SendItemType;
+import vvp_company.storeservice.enm.ItemType;
 
 public record SendItemEquipment(
-        SendItemType itemType,
+        ItemType itemType,
         String itemName,
         String identificationNumber
 ) implements SendItemDTO{

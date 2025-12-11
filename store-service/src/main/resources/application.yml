@@ -1,6 +1,8 @@
 spring:
   config:
-    import: "optional:file:.env[.properties]"
+    import:
+      - "optional:file:.env[.properties]"
+      - "optional:file:services.yml"
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST}:${PGPORT}/db
     username: ${POSTGRES_USER}
@@ -13,3 +15,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 5000
+        read-timeout: 10000
+        loggerLevel: full

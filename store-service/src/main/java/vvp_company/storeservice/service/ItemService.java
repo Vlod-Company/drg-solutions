@@ -7,6 +7,7 @@ import vvp_company.storeservice.dto.nested.sendItem.SendItemDTO;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemEquipment;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemResource;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemWeapon;
+import vvp_company.storeservice.dto.response.DeliveryPointResponseDTO;
 import vvp_company.storeservice.enm.ResourceStatus;
 import vvp_company.storeservice.enm.Status;
 import vvp_company.storeservice.model.Equipment;
@@ -14,6 +15,7 @@ import vvp_company.storeservice.model.Resource;
 import vvp_company.storeservice.model.Weapon;
 import vvp_company.storeservice.repository.EquipmentRepository;
 import vvp_company.storeservice.repository.ResourceRepository;
+import vvp_company.storeservice.repository.WareHouseRepository;
 import vvp_company.storeservice.repository.WeaponRepository;
 
 import java.time.LocalDateTime;
@@ -27,6 +29,7 @@ public class ItemService {
     private final EquipmentRepository equipmentRepository;
     private final WeaponRepository weaponRepository;
     private final ResourceRepository resourceRepository;
+    private final WareHouseRepository wareHouseRepository;
 
     @Transactional
     public void addItemsToDeliveryPoint(Long deliveryPointId, List<SendItemDTO> items) {
@@ -83,4 +86,9 @@ public class ItemService {
             resourceRepository.save(entity);
         });
     }
+
+//    public List<DeliveryPointResponseDTO> findItemsInDeliveryPoint(Long deliveryPointId) {
+//        var items = wareHouseRepository.howMuchAtTimeInDeliveryPoint(deliveryPointId, LocalDateTime.now());
+//
+//    }
 }

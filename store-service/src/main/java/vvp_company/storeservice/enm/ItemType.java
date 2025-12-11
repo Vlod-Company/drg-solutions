@@ -1,6 +1,6 @@
 package vvp_company.storeservice.enm;
 
-public enum SendItemType {
+public enum ItemType {
 
     EQUIPMENT,
     WEAPON,

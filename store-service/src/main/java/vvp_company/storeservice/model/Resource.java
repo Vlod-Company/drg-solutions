@@ -6,16 +6,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
 import vvp_company.storeservice.enm.ResourceStatus;
-import vvp_company.storeservice.enm.Status;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "resources")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Resource {
 
     @Id
