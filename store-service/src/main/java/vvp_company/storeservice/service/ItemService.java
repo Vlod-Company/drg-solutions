@@ -5,9 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import vvp_company.storeservice.client.DeliveryPointClient;
 import vvp_company.storeservice.client.GlossaryServiceClient;
+import vvp_company.storeservice.client.dto.DeliveryPointDTO;
 import vvp_company.storeservice.client.dto.EquipmentInfoDTO;
 import vvp_company.storeservice.client.dto.ResourceInfoDTO;
 import vvp_company.storeservice.client.dto.WeaponInfoDTO;
+import vvp_company.storeservice.dto.nested.HowMuchAtTimeItem;
 import vvp_company.storeservice.dto.nested.ItemResponseDTO;
 import vvp_company.storeservice.dto.nested.ItemSearchDTO;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemDTO;
@@ -15,6 +17,7 @@ import vvp_company.storeservice.dto.nested.sendItem.SendItemEquipment;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemResource;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemWeapon;
 import vvp_company.storeservice.dto.response.DeliveryPointResponseDTO;
+import vvp_company.storeservice.enm.ItemType;
 import vvp_company.storeservice.enm.ResourceStatus;
 import vvp_company.storeservice.enm.Status;
 import vvp_company.storeservice.model.Equipment;
@@ -28,6 +31,7 @@ import vvp_company.storeservice.repository.WeaponRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -100,16 +104,38 @@ public class ItemService {
     }
 
     public List<DeliveryPointResponseDTO> findItemsInDeliveryPoint(Long deliveryPointId, List<ItemSearchDTO> items) {
-        var searchItemsByType = items.stream().collect(groupingBy(
-                ItemSearchDTO::getItemType,
-                Collectors.mapping(ItemSearchDTO::getItemName, Collectors.toList())
-        ));
+        var searchItemsByType = itemSearchDtoToMap(items);
         var itemInDeliveryPoint = warehouseRepository.howMuchAtTimeInDeliveryPoint(deliveryPointId, LocalDateTime.now()).stream()
                 .filter(item -> searchItemsByType.get(item.getItemType()).contains(item.getInfoName()))
                 .toList();
 
         var deliveryPoint = deliveryPointClient.getDeliveryPointById(deliveryPointId);
 
+        return List.of(howMuchAtTimeItemsToDeliveryPointResponse(itemInDeliveryPoint, deliveryPoint));
+    }
+
+    public List<DeliveryPointResponseDTO> findItemsInAllDeliveryPoints(List<ItemSearchDTO> items) {
+        var searchItemsByType = itemSearchDtoToMap(items);
+
+        var deliveryPoints = deliveryPointClient.getDeliveryPoints();
+
+        return deliveryPoints.stream().map(deliveryPoint -> {
+            var itemInDeliveryPoint = warehouseRepository.howMuchAtTimeInDeliveryPoint(deliveryPoint.getId(), LocalDateTime.now()).stream()
+                    .filter(item -> searchItemsByType.get(item.getItemType()).contains(item.getInfoName()))
+                    .toList();
+
+            return howMuchAtTimeItemsToDeliveryPointResponse(itemInDeliveryPoint, deliveryPoint);
+        }).toList();
+    }
+
+    private Map<ItemType, List<String>> itemSearchDtoToMap(List<ItemSearchDTO> items) {
+        return items.stream().collect(groupingBy(
+                ItemSearchDTO::getItemType,
+                Collectors.mapping(ItemSearchDTO::getItemName, Collectors.toList())
+        ));
+    }
+
+    private DeliveryPointResponseDTO howMuchAtTimeItemsToDeliveryPointResponse(List<HowMuchAtTimeItem> items, DeliveryPointDTO deliveryPoint) {
         var weaponInfos = glossaryServiceClient.getAllWeaponInfos().stream()
                 .collect(groupingBy(WeaponInfoDTO::getName));
         var equipmentInfos = glossaryServiceClient.getAllEquipmentInfos().stream()
@@ -117,7 +143,7 @@ public class ItemService {
         var resourceInfos = glossaryServiceClient.getAllResourceInfos().stream()
                 .collect(groupingBy(ResourceInfoDTO::getName));
 
-        var itemDTOs = itemInDeliveryPoint.stream().map(item -> {
+        var itemDTOs = items.stream().map(item -> {
             var weight = switch(item.getItemType()) {
                 case WEAPON -> weaponInfos.get(item.getInfoName()).getFirst().getWeight();
                 case RESOURCE -> resourceInfos.get(item.getInfoName()).getFirst().getWeightPerUnit();
@@ -132,12 +158,10 @@ public class ItemService {
                     .build();
         }).toList();
 
-        var deliveryPointResponse = DeliveryPointResponseDTO.builder()
+        return DeliveryPointResponseDTO.builder()
                 .deliveryPointType(deliveryPoint.getDeliveryType())
-                .deliveryPointId(deliveryPointId)
+                .deliveryPointId(deliveryPoint.getId())
                 .data(itemDTOs)
                 .build();
-
-        return List.of(deliveryPointResponse);
     }
 }

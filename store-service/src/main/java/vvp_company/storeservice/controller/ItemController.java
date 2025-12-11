@@ -30,10 +30,10 @@ public class ItemController {
             @Valid @RequestBody List<ItemSearchDTO> searchItems) {
         return itemService.findItemsInDeliveryPoint(deliveryPointId, searchItems);
     }
-//
-//    @PostMapping
-//    public List<DeliveryPointResponseDTO> findItemsAnywhere(
-//            @Valid @RequestBody List<ItemSearchDTO> searchItems) {
-//        return itemService.findItemsAnywhere(searchItems);
-//    }
+
+    @PostMapping
+    public List<DeliveryPointResponseDTO> findItemsAnywhere(
+            @Valid @RequestBody List<ItemSearchDTO> searchItems) {
+        return itemService.findItemsInAllDeliveryPoints(searchItems);
+    }
 }
