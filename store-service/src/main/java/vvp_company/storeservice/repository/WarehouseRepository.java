@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface WareHouseRepository extends JpaRepository<Warehouse, Long> {
+public interface WarehouseRepository extends JpaRepository<Warehouse, Long> {
 
     @Query(value = "select * from how_much_at_time(:id, :cur_time)", nativeQuery = true)
     List<HowMuchAtTimeItem> howMuchAtTimeInDeliveryPoint(@Param("id") Long id, @Param("cur_time") LocalDateTime time);

@@ -24,12 +24,12 @@ public class ItemController {
         itemService.addItemsToDeliveryPoint(deliveryPointId, items);
     }
 
-//    @PostMapping("/{deliveryPointId}")
-//    public List<DeliveryPointResponseDTO> findItemsInDeliveryPoint(
-//            @PathVariable Long deliveryPointId,
-//            @Valid @RequestBody List<ItemSearchDTO> searchItems) {
-//        return itemService.findItemsByDeliveryPoint(deliveryPointId, searchItems);
-//    }
+    @PostMapping("/{deliveryPointId}")
+    public List<DeliveryPointResponseDTO> findItemsInDeliveryPoint(
+            @PathVariable Long deliveryPointId,
+            @Valid @RequestBody List<ItemSearchDTO> searchItems) {
+        return itemService.findItemsInDeliveryPoint(deliveryPointId, searchItems);
+    }
 //
 //    @PostMapping
 //    public List<DeliveryPointResponseDTO> findItemsAnywhere(

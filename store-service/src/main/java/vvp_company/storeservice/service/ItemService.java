@@ -9,6 +9,7 @@ import vvp_company.storeservice.client.dto.EquipmentInfoDTO;
 import vvp_company.storeservice.client.dto.ResourceInfoDTO;
 import vvp_company.storeservice.client.dto.WeaponInfoDTO;
 import vvp_company.storeservice.dto.nested.ItemResponseDTO;
+import vvp_company.storeservice.dto.nested.ItemSearchDTO;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemDTO;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemEquipment;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemResource;
@@ -21,7 +22,7 @@ import vvp_company.storeservice.model.Resource;
 import vvp_company.storeservice.model.Weapon;
 import vvp_company.storeservice.repository.EquipmentRepository;
 import vvp_company.storeservice.repository.ResourceRepository;
-import vvp_company.storeservice.repository.WareHouseRepository;
+import vvp_company.storeservice.repository.WarehouseRepository;
 import vvp_company.storeservice.repository.WeaponRepository;
 
 import java.time.LocalDateTime;
@@ -38,7 +39,7 @@ public class ItemService {
     private final EquipmentRepository equipmentRepository;
     private final WeaponRepository weaponRepository;
     private final ResourceRepository resourceRepository;
-    private final WareHouseRepository wareHouseRepository;
+    private final WarehouseRepository warehouseRepository;
     private final GlossaryServiceClient glossaryServiceClient;
     private final DeliveryPointClient deliveryPointClient;
 
@@ -98,8 +99,14 @@ public class ItemService {
         });
     }
 
-    public List<DeliveryPointResponseDTO> findItemsInDeliveryPoint(Long deliveryPointId) {
-        var items = wareHouseRepository.howMuchAtTimeInDeliveryPoint(deliveryPointId, LocalDateTime.now());
+    public List<DeliveryPointResponseDTO> findItemsInDeliveryPoint(Long deliveryPointId, List<ItemSearchDTO> items) {
+        var searchItemsByType = items.stream().collect(groupingBy(
+                ItemSearchDTO::getItemType,
+                Collectors.mapping(ItemSearchDTO::getItemName, Collectors.toList())
+        ));
+        var itemInDeliveryPoint = warehouseRepository.howMuchAtTimeInDeliveryPoint(deliveryPointId, LocalDateTime.now()).stream()
+                .filter(item -> searchItemsByType.get(item.getItemType()).contains(item.getInfoName()))
+                .toList();
 
         var deliveryPoint = deliveryPointClient.getDeliveryPointById(deliveryPointId);
 
@@ -110,7 +117,7 @@ public class ItemService {
         var resourceInfos = glossaryServiceClient.getAllResourceInfos().stream()
                 .collect(groupingBy(ResourceInfoDTO::getName));
 
-        var itemDTOs = items.stream().map(item -> {
+        var itemDTOs = itemInDeliveryPoint.stream().map(item -> {
             var weight = switch(item.getItemType()) {
                 case WEAPON -> weaponInfos.get(item.getInfoName()).getFirst().getWeight();
                 case RESOURCE -> resourceInfos.get(item.getInfoName()).getFirst().getWeightPerUnit();
