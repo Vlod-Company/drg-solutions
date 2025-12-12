@@ -1,32 +1,26 @@
 package vvp_company.glossaryservice.model;
 
-import lombok.*;
-
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "weapon_info")
+@Table(name = "biomes")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class WeaponInfo {
+public class Biome {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
-    @Column(name = "name", nullable = false, unique = true, length = 255)
+    @Column(name = "name")
     private String name;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
-
-    @Column(name = "weight", nullable = false)
-    private Double weight;
-
-    @ManyToOne
-    @JoinColumn(name = "impact_type")
-    private ImpactType impactType;
 }

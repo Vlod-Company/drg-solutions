@@ -1,0 +1,31 @@
+package vvp_company.glossaryservice.dto;
+
+import jakarta.persistence.*;
+import vvp_company.glossaryservice.enm.ArmorType;
+import vvp_company.glossaryservice.enm.MonsterType;
+import vvp_company.glossaryservice.model.Biome;
+import vvp_company.glossaryservice.model.ImpactType;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class MonsterDTO {
+
+    private String name;
+
+    private String description;
+
+    private Integer dangerLevel;
+
+    private String heritage;
+
+    private MonsterType monsterType;
+
+    private Biome biome;
+
+    private ArmorType armorType;
+
+    private Set<ImpactType> weaknesses = new HashSet<>();
+
+    private Set<ImpactType> strengths = new HashSet<>();
+}

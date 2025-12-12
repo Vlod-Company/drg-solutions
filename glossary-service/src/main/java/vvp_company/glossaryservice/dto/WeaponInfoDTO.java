@@ -1,6 +1,7 @@
 package vvp_company.glossaryservice.dto;
 
 import lombok.*;
+import vvp_company.glossaryservice.model.ImpactType;
 
 @Data
 @NoArgsConstructor
@@ -14,5 +15,5 @@ public class WeaponInfoDTO {
 
     private Double weight;
 
-    private Long impactType;
+    private ImpactType impactType;
 }
