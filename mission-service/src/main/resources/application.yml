@@ -1,0 +1,24 @@
+spring:
+  config:
+    import:
+      - "optional:file:.env[.properties]",
+      - "optional:file:services.yml"
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:${PGPORT}/db
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 5000
+        read-timeout: 10000
+        loggerLevel: full
