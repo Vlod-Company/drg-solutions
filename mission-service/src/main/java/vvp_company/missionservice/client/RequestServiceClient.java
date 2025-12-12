@@ -7,8 +7,7 @@ import vvp_company.missionservice.client.dto.CreateRequestDTO;
 import vvp_company.missionservice.client.dto.RequestDTO;
 
 @FeignClient(
-        name = "request-service",
-        url = "${services.request.base-url}"
+        name = "request-service"
 )
 public interface RequestServiceClient {
 
