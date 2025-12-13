@@ -12,7 +12,7 @@ import vvp_company.requestservice.service.RequestService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/requests")
+@RequestMapping("request")
 @RequiredArgsConstructor
 public class RequestController {
 
