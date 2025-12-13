@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import vvp_company.missionservice.client.dto.RequestDTO;
 import vvp_company.missionservice.dto.nested.RecommendedWeaponDto;
-import vvp_company.missionservice.dto.nested.SendItemDTO;
+import vvp_company.missionservice.dto.nested.sendItem.SendItemDTO;
 import vvp_company.missionservice.dto.request.CreateMissionRequest;
 import vvp_company.missionservice.dto.nested.MissionDto;
 import vvp_company.missionservice.dto.response.PagedResponse;

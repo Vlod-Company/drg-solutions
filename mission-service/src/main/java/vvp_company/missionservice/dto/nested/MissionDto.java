@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import vvp_company.missionservice.enm.MissionStatus;
-import vvp_company.missionservice.model.Team;
 
 import java.time.LocalDateTime;
 
@@ -23,7 +22,7 @@ public class MissionDto {
 
     private String description;
 
-    private Team team;
+    private Long teamId;
 
     private Integer requiredExperience = 0;
 

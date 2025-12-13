@@ -188,10 +188,10 @@ INSERT INTO monster_strengths (monster_id, impact_type_id) VALUES
 
 -- Миссии
 INSERT INTO missions (name, biome_id, description, team_id, required_experience, status, mission_start, mission_end) VALUES
-                                                                                                                         ('Deep Core Extraction',      1, 'Mine Deep Core samples in Salt Pits.',                1, 80, 'Active',   '2025-10-20 08:00:00', '2025-10-20 16:00:00'),
-                                                                                                                         ('Crystal Harvest',           2, 'Collect rare crystals in Crystalline Caves.',         1, 90, 'Planned',  '2025-10-22 07:00:00', '2025-10-22 15:00:00'),
-                                                                                                                         ('Sandstorm Recon',           3, 'Map unstable corridors in Astraeus desert.',           2, 10, 'Planned',  '2025-10-24 09:00:00', '2025-10-24 17:00:00'),
-                                                                                                                         ('Rad-Zone Cleanup',          4, 'Eliminate mutated threats in exclusion zone.',        2, 10, 'Planned',  '2025-10-26 08:30:00', '2025-10-26 16:30:00');
+                                                                                                                         ('Deep Core Extraction',      1, 'Mine Deep Core samples in Salt Pits.',                1, 80, 'IN_PROGRESS',   '2025-10-20 08:00:00', '2025-10-20 16:00:00'),
+                                                                                                                         ('Crystal Harvest',           2, 'Collect rare crystals in Crystalline Caves.',         1, 90, 'CREATED',  '2025-10-22 07:00:00', '2025-10-22 15:00:00'),
+                                                                                                                         ('Sandstorm Recon',           3, 'Map unstable corridors in Astraeus desert.',           2, 10, 'CREATED',  '2025-10-24 09:00:00', '2025-10-24 17:00:00'),
+                                                                                                                         ('Rad-Zone Cleanup',          4, 'Eliminate mutated threats in exclusion zone.',        2, 10, 'CREATED',  '2025-10-26 08:30:00', '2025-10-26 16:30:00');
 
 -- Запросы
 INSERT INTO requests (sender_department, recipient_department, request_code, description, sender_employee_id)
