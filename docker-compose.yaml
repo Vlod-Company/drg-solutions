@@ -30,6 +30,7 @@ services:
         condition: service_healthy
 
   request-service:
+    hostname: request-service
     build:
       context: .
       dockerfile: Dockerfile.request
@@ -44,6 +45,7 @@ services:
 
 
   mission-service:
+    hostname: mission-service
     build:
       context: .
       dockerfile: Dockerfile.mission
@@ -57,6 +59,7 @@ services:
         condition: service_healthy
 
   registry:
+    hostname: registry
     build:
       context: .
       dockerfile: Dockerfile.registry
