@@ -1,0 +1,12 @@
+FROM maven:3.9-eclipse-temurin-17 AS builder
+
+WORKDIR /mission-service
+
+COPY mission-service/pom.xml .
+COPY mission-service/src ./src
+
+RUN mvn clean package -DskipTests
+
+FROM tomcat:10.1-jdk17
+
+COPY --from=builder /mission-service/target/mission.war /usr/local/tomcat/webapps/mission.war

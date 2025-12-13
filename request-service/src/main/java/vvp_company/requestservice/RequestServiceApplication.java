@@ -1,4 +1,4 @@
-package vvp_company.glossaryservice;
+package vvp_company.requestservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,6 +16,6 @@ public class RequestServiceApplication extends SpringBootServletInitializer {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(GlossaryServiceApplication.class, args);
+        SpringApplication.run(RequestServiceApplication.class, args);
     }
 }

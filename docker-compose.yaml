@@ -20,9 +20,49 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.glossary
-    container_name: glossary-app
+    container_name: glossary-service
     ports:
       - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  request-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.request
+    container_name: request-service
+    ports:
+      - "8082:8082"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+
+  mission-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.mission
+    container_name: mission-service
+    ports:
+      - "8081:8081"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  registry:
+    build:
+      context: .
+      dockerfile: Dockerfile.registry
+    container_name: service-registry
+    ports:
+      - "8761:8761"
     env_file:
       - .env
     depends_on:

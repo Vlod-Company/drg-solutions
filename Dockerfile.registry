@@ -1,0 +1,14 @@
+FROM maven:3.9-eclipse-temurin-17 AS builder
+
+WORKDIR /service-registry
+
+COPY service-registry/pom.xml .
+COPY service-registry/src ./src
+
+RUN mvn clean package -DskipTests
+
+FROM tomcat:10.1-jdk17
+
+COPY --from=builder /service-registry/target/*.jar app.jar
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
