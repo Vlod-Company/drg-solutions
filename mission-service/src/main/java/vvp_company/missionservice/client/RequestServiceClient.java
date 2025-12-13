@@ -11,6 +11,6 @@ import vvp_company.missionservice.client.dto.RequestDTO;
 )
 public interface RequestServiceClient {
 
-    @PostMapping
+    @PostMapping("request")
     RequestDTO createRequest(@RequestBody CreateRequestDTO dto);
 }
