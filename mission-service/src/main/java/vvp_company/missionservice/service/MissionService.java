@@ -4,19 +4,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.ObjectMapper;
 import vvp_company.missionservice.client.RequestServiceClient;
+import vvp_company.missionservice.client.dto.CreateRequestDTO;
 import vvp_company.missionservice.client.dto.RequestDTO;
-import vvp_company.missionservice.dto.nested.SendItemDTO;
+import vvp_company.missionservice.dto.nested.sendItem.SendItemDTO;
+import vvp_company.missionservice.dto.nested.sendItem.SendItemTeam;
 import vvp_company.missionservice.dto.request.CreateMissionRequest;
 import vvp_company.missionservice.dto.nested.MissionDto;
 import vvp_company.missionservice.dto.response.PagedResponse;
 import vvp_company.missionservice.dto.nested.RecommendedWeaponDto;
 import vvp_company.missionservice.enm.MissionStatus;
+import vvp_company.missionservice.enm.SendItemType;
 import vvp_company.missionservice.mapper.MissionMapper;
-import vvp_company.missionservice.mapper.TeamMapper;
 import vvp_company.missionservice.repository.MissionRepository;
 
 import java.util.List;
@@ -70,10 +71,18 @@ public class MissionService {
             throw new ResponseStatusException(BAD_REQUEST, "Миссия не в статусе CREATED");
         }
 
-        var description = String.format("%s\n", mission.getTeamId());
+        var teamSendItem = new SendItemTeam(SendItemType.TEAM, mission.getTeamId());
+        sendItemDTOList.add(teamSendItem);
+
         var objectMapper = new ObjectMapper();
-        description = description + objectMapper.writeValueAsString(sendItemDTOList);
-        System.out.println(description);
-        return null;
+        var description = objectMapper.writeValueAsString(sendItemDTOList);
+
+        var createRequestDTO = CreateRequestDTO.builder()
+                .description(description)
+                .requestCode("101")
+                .recipientDepartment("logistics")
+                .build();
+
+        return requestServiceClient.createRequest(createRequestDTO);
     }
 }

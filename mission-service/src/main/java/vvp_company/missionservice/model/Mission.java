@@ -29,6 +29,7 @@ public class Mission {
     private Integer requiredExperience = 0;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private MissionStatus status = MissionStatus.CREATED;
 
     @Column(name = "mission_start", nullable = false)
