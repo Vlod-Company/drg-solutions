@@ -11,7 +11,7 @@
 	<groupId>vvp_company</groupId>
 	<artifactId>service-registry</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>service-registry</name>
 	<description>service-registry</description>
 	<url/>
