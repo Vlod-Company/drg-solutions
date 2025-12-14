@@ -20,19 +20,8 @@ public class DeliveryPointService {
 
     private final DeliveryPointRepository deliveryPointRepository;
 
-    @Transactional(propagation = MANDATORY)
-    public DeliveryPoint createDeliveryPoint(DeliveryPointType deliveryPointType) {
-        var deliveryPoint = DeliveryPoint.builder().deliveryType(deliveryPointType).build();
-        return deliveryPointRepository.save(deliveryPoint);
-    }
-
     public DeliveryPoint findById(Long id) {
         return deliveryPointRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    }
-
-    @Transactional(propagation = MANDATORY)
-    public void removeDeliveryPoint(Long id) {
-        deliveryPointRepository.deleteById(id);
     }
 
     public List<DeliveryPoint> findAll() {
