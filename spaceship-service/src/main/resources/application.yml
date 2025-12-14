@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: "spaceship-service"
+  config:
+    import:
+      - "optional:file:.env[.properties]"
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:${PGPORT}/db
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 5000
+        read-timeout: 10000
+        loggerLevel: full
+
+server:
+  port: 8084
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
