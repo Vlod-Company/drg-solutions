@@ -35,9 +35,13 @@ public class RequestController {
     }
 
     @GetMapping
-    public List<RequestDto> getRequestsToDepartment(
-            @NotEmpty @RequestParam(name = "senderDepartment") String department) {
-        return requestService.getBySenderDepartment(department);
+    public List<RequestDto> getRequestsToDepartment() {
+        return requestService.getBySenderDepartment();
+    }
+
+    @GetMapping
+    public List<RequestDto> getAllRequests() {
+        return requestService.getAllRequests();
     }
 
     @GetMapping("/my-sent")
