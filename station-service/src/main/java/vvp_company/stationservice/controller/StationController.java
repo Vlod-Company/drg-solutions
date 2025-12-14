@@ -29,4 +29,9 @@ public class StationController {
     public Station addStation(CreateStationDTO station){
         return stationService.addStation(station);
     }
+
+    @PostMapping("setAttacked/{id}")
+    public void setAttacked(@PathVariable("id") Long id){
+        stationService.setAttacked(id);
+    }
 }
