@@ -1,4 +1,4 @@
-package vvp_company.stationservice.client.enm;
+package vvp_company.stationservice.enm;
 
 public enum DeliveryPointType {
 

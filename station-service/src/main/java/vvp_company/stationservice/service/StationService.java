@@ -5,8 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import vvp_company.stationservice.client.DeliveryPointClient;
-import vvp_company.stationservice.client.enm.DeliveryPointType;
+import vvp_company.stationservice.enm.DeliveryPointType;
 import vvp_company.stationservice.dto.CreateStationDTO;
 import vvp_company.stationservice.mapper.StationMapper;
 import vvp_company.stationservice.model.Station;
@@ -18,37 +17,37 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StationService {
 
-    private final StationRepository repository;
-    private final StationMapper mapper;
-    private final DeliveryPointClient deliveryPointClient;
+    private final StationRepository stationRepository;
+    private final StationMapper stationMapper;
+    private final DeliveryPointService deliveryPointService;
 
     public List<Station> findAllStations() {
-        return repository.findAll();
+        return stationRepository.findAll();
     }
 
     public Station findStationById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return stationRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @Transactional
     public void deleteStation(Long id) {
-        var station = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        var station = stationRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         var deliveryPointId = station.getDeliveryPointId();
 
-        deliveryPointClient.deleteDeliveryPoint(deliveryPointId);
+        stationRepository.delete(station);
 
-        repository.delete(station);
+        deliveryPointService.removeDeliveryPointById(deliveryPointId);
     }
 
     @Transactional
     public Station addStation(CreateStationDTO createStationDTO) {
-        var deliveryPoint = deliveryPointClient.createDeliveryPoint(DeliveryPointType.STATION);
+        var deliveryPoint = deliveryPointService.createDeliveryPoint(DeliveryPointType.STATION);
 
-        var stationEntity = mapper.toEntityFromCreateRequest(createStationDTO);
+        var stationEntity = stationMapper.toEntityFromCreateRequest(createStationDTO);
 
         stationEntity.setDeliveryPointId(deliveryPoint.getId());
 
-        return repository.save(stationEntity);
+        return stationRepository.save(stationEntity);
     }
 }

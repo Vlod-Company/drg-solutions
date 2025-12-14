@@ -16,14 +16,6 @@ spring:
       hibernate:
         format_sql: true
 
-feign:
-  client:
-    config:
-      default:
-        connect-timeout: 5000
-        read-timeout: 10000
-        loggerLevel: full
-
 server:
   port: 8083
 
