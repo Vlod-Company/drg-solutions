@@ -19,4 +19,9 @@ public class LogisticController {
     public Logistic updateLogisticStatus(@PathVariable Long id, @RequestParam("newStatus") LogisticStatus newStatus, @RequestParam("newDate") LocalDateTime newDate) {
         return logisticService.updateLogistic(id, newStatus, newDate);
     }
+
+    @GetMapping("{id}")
+    public Logistic getLogistic(@PathVariable Long id) {
+        return logisticService.getLogisticById(id);
+    }
 }

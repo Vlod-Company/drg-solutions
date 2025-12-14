@@ -37,4 +37,8 @@ public class LogisticService {
         logistic.setSendTime(newDate == null ? logistic.getSendTime() : newDate);
         return repository.save(logistic);
     }
+
+    public Logistic getLogisticById(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
 }
