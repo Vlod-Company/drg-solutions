@@ -81,4 +81,68 @@ public class Routes {
                         .before(auth(authServiceClient))
                         .build());
     }
+
+    @Bean
+    public RouterFunction<ServerResponse> swaggerRouterFunctions() {
+        return route("swagger-request-service")
+                .route(path("/request-service/v3/api-docs"), http())
+                .filter(lb("request-service"))
+                .build()
+
+                .and(route("swagger-auth-service")
+                        .route(path("/auth-service/v3/api-docs"), http())
+                        .filter(lb("auth-service"))
+                        .build())
+
+                .and(route("swagger-logistic-service")
+                        .route(path("/logistic-service/v3/api-docs"), http())
+                        .filter(lb("logistic-service"))
+                        .build())
+
+                .and(route("swagger-station-service")
+                        .route(path("/station-service/v3/api-docs"), http())
+                        .filter(lb("station-service"))
+                        .build())
+
+                .and(route("swagger-store-service")
+                        .route(path("/store-service/v3/api-docs"), http())
+                        .filter(lb("store-service"))
+                        .build())
+
+                .and(route("swagger-mission-service")
+                        .route(path("/mission-service/v3/api-docs"), http())
+                        .filter(lb("mission-service"))
+                        .build())
+
+                .and(route("swagger-glossary-service")
+                        .route(path("/glossary-service/v3/api-docs"), http())
+                        .filter(lb("glossary-service"))
+                        .build())
+
+                .and(route("swagger-team-service")
+                        .route(path("/team-service/v3/api-docs"), http())
+                        .filter(lb("team-service"))
+                        .build())
+
+                .and(route("swagger-planet-service")
+                        .route(path("/planet-service/v3/api-docs"), http())
+                        .filter(lb("planet-service"))
+                        .build())
+
+                .and(route("swagger-employee-service")
+                        .route(path("/employee-service/v3/api-docs"), http())
+                        .filter(lb("employee-service"))
+                        .build())
+
+                .and(route("swagger-delivery-point-service")
+                        .route(path("/delivery-point-service/v3/api-docs"), http())
+                        .filter(lb("delivery-point-service"))
+                        .build())
+
+                .and(route("swagger-spaceship-service")
+                        .route(path("/spaceship-service/v3/api-docs"), http())
+                        .filter(lb("spaceship-service"))
+                        .build());
+    }
+
 }
