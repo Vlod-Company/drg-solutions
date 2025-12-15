@@ -7,6 +7,7 @@ import vvp_company.storeservice.dto.nested.ItemSearchDTO;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemDTO;
 import vvp_company.storeservice.dto.request.ReserveCargoRequest;
 import vvp_company.storeservice.dto.response.DeliveryPointResponseDTO;
+import vvp_company.storeservice.enm.Status;
 import vvp_company.storeservice.service.ItemService;
 
 import java.util.List;
@@ -41,5 +42,10 @@ public class ItemController {
     @PostMapping("/reserveCargo")
     public void reserveForCargo(@RequestBody ReserveCargoRequest request) {
         itemService.reserveForCargo(request);
+    }
+
+    @PutMapping("/changeStatusForCargo/{id}")
+    public void changeStatusForCargo(@PathVariable Long id, @RequestParam Status status) {
+        itemService.updateStatusForCargo(id, status);
     }
 }

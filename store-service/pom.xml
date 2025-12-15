@@ -11,7 +11,7 @@
     <groupId>vvp_company</groupId>
     <artifactId>store-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>store-service</name>
     <description>store-service</description>
     <url/>

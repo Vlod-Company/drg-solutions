@@ -202,6 +202,13 @@ public class ItemService {
         });
     }
 
+    @Transactional
+    public void updateStatusForCargo(Long cargoId, Status status) {
+        weaponRepository.updateStatusForWeaponsWithCargoId(status, cargoId);
+        equipmentRepository.updateStatusForEquipmentWithCargoId(status, cargoId);
+        resourceRepository.updateStatusForResourceWithCargoId(status, cargoId);
+    }
+
     private Map<ItemType, List<String>> itemSearchDtoToMap(List<ItemSearchDTO> items) {
         return items.stream().collect(groupingBy(
                 ItemSearchDTO::getItemType,
@@ -219,9 +226,9 @@ public class ItemService {
 
         var itemDTOs = items.stream().map(item -> {
             var weight = switch(item.getItemType()) {
-                case WEAPON -> weaponInfos.get(item.getInfoName()).getFirst().getWeight();
-                case RESOURCE -> resourceInfos.get(item.getInfoName()).getFirst().getWeightPerUnit();
-                case EQUIPMENT -> equipmentInfos.get(item.getInfoName()).getFirst().getWeight();
+                case WEAPON -> weaponInfos.get(item.getInfoName()).get(0).getWeight();
+                case RESOURCE -> resourceInfos.get(item.getInfoName()).get(0).getWeightPerUnit();
+                case EQUIPMENT -> equipmentInfos.get(item.getInfoName()).get(0).getWeight();
             };
 
             return ItemResponseDTO.builder()
