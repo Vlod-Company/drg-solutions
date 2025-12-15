@@ -1,0 +1,18 @@
+FROM maven:3.9-eclipse-temurin-17 AS builder
+
+WORKDIR /gateway-service
+
+COPY gateway-service/pom.xml .
+
+RUN mvn dependency:go-offline -B
+
+COPY gateway-service/src ./src
+
+
+RUN mvn clean package -DskipTests
+
+FROM tomcat:10.1-jdk17
+
+COPY --from=builder /gateway-service/target/*.jar app.jar
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
