@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: "gateway"
+
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 5000
+        read-timeout: 10000
+        loggerLevel: full
+
+server:
+  port: 8079
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
