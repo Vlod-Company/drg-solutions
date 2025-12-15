@@ -38,10 +38,13 @@ public class TeamService {
         teamRepository.deleteById(teamId);
     }
 
-    public void updateTeamStatus(Long teamId, TeamStatus status) {
+    public void updateTeamStatus(Long teamId, TeamStatus status, Long cargoId) {
         var team = teamRepository.findById(teamId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         team.setStatus(status);
+        if (cargoId != null) {
+            team.setCargoId(cargoId);
+        }
         teamRepository.save(team);
     }
 }

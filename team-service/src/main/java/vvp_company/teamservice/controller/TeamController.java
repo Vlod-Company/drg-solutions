@@ -37,7 +37,7 @@ public class TeamController {
     }
 
     @PutMapping("/{id}")
-    public void updateTeam(@PathVariable Long id, @NotBlank @RequestParam TeamStatus status) {
-        teamService.updateTeamStatus(id, status);
+    public void updateTeam(@PathVariable Long id, @NotBlank @RequestParam("status") TeamStatus status, @RequestParam("cargoId") Long cargoId) {
+        teamService.updateTeamStatus(id, status, cargoId);
     }
 }
