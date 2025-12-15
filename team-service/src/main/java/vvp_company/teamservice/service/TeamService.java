@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import vvp_company.teamservice.dto.TeamDto;
+import vvp_company.teamservice.enm.TeamStatus;
 import vvp_company.teamservice.mapper.TeamMapper;
 import vvp_company.teamservice.model.Team;
 import vvp_company.teamservice.repository.TeamRepository;
@@ -35,5 +36,12 @@ public class TeamService {
 
     public void deleteTeam(Long teamId) {
         teamRepository.deleteById(teamId);
+    }
+
+    public void updateTeamStatus(Long teamId, TeamStatus status) {
+        var team = teamRepository.findById(teamId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        team.setStatus(status);
+        teamRepository.save(team);
     }
 }

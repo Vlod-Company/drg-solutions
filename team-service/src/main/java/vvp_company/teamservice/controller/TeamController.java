@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import vvp_company.teamservice.dto.TeamDto;
+import vvp_company.teamservice.enm.TeamStatus;
 import vvp_company.teamservice.service.TeamService;
 
 import java.util.List;
@@ -33,5 +34,10 @@ public class TeamController {
     @DeleteMapping("/{id}")
     public void deleteTeam(@PathVariable Long id) {
         teamService.deleteTeam(id);
+    }
+
+    @PutMapping("/{id}")
+    public void updateTeam(@PathVariable Long id, @NotBlank @RequestParam TeamStatus status) {
+        teamService.updateTeamStatus(id, status);
     }
 }
