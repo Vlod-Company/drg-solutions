@@ -17,6 +17,10 @@ import static vvp_company.logisticsservice.enm.LogisticStatus.CREATED;
 @RequiredArgsConstructor
 public class LogisticService {
 
+    private final String RESOLVE_LOGISTIC = """
+            Разрулите логистику
+            """;
+
     private final LogisticRepository repository;
     private final CargoRepository cargoRepository;
 

@@ -1,5 +1,6 @@
 package vvp_company.logisticsservice.controller;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import vvp_company.logisticsservice.enm.LogisticStatus;
@@ -16,7 +17,7 @@ public class LogisticController {
     private final LogisticService logisticService;
 
     @PutMapping("{id}")
-    public Logistic updateLogisticStatus(@PathVariable Long id, @RequestParam("newStatus") LogisticStatus newStatus, @RequestParam("newDate") LocalDateTime newDate) {
+    public Logistic updateLogisticStatusAndDate(@PathVariable Long id, @NotNull @RequestParam("newStatus") LogisticStatus newStatus, @RequestParam("newDate") LocalDateTime newDate) {
         return logisticService.updateLogistic(id, newStatus, newDate);
     }
 
