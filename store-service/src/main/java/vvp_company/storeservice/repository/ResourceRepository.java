@@ -12,4 +12,6 @@ import java.util.Optional;
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
 
     Optional<Resource> findFirstByLocatedAtAndNameAndStatusOrderByDateDesc(Long locatedAt, String name, ResourceStatus status);
+
+    Optional<Resource> findFirstByNameAndLocatedAtAndStatusOrderByDateDesc(String name, Long locatedAt, ResourceStatus status);
 }

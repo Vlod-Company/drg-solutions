@@ -4,6 +4,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import vvp_company.storeservice.model.Weapon;
 
+import java.util.Optional;
+
 @Repository
 public interface WeaponRepository extends JpaRepository<Weapon, Long> {
+
+    Optional<Weapon> findByIdentificationNumber(String identificationNumber);
 }

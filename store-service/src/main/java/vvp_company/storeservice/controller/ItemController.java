@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import vvp_company.storeservice.dto.nested.ItemSearchDTO;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemDTO;
+import vvp_company.storeservice.dto.request.ReserveCargoRequest;
 import vvp_company.storeservice.dto.response.DeliveryPointResponseDTO;
 import vvp_company.storeservice.service.ItemService;
 
@@ -35,5 +36,10 @@ public class ItemController {
     public List<DeliveryPointResponseDTO> findItemsAnywhere(
             @Valid @RequestBody List<ItemSearchDTO> searchItems) {
         return itemService.findItemsInAllDeliveryPoints(searchItems);
+    }
+
+    @PostMapping("/reserveCargo")
+    public void reserveForCargo(@RequestBody ReserveCargoRequest request) {
+        itemService.reserveForCargo(request);
     }
 }

@@ -11,8 +11,8 @@ import vvp_company.storeservice.client.dto.WeaponInfoDTO;
 import java.util.List;
 
 @FeignClient(
-        url = "${services.glossary.base-url}",
-        name = "glossary-service"
+        name = "glossary-service",
+        path = "glossary"
 )
 public interface GlossaryServiceClient {
 
