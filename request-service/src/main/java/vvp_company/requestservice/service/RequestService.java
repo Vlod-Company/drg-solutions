@@ -43,9 +43,15 @@ public class RequestService {
                 .map(RequestDto::fromEntity)
                 .orElseThrow(() -> new RequestNotFoundException(id));
     }
-    //точно править/удалить как только разберёмся с sender
-    public List<RequestDto> getBySenderDepartment(String department) {
-        return requestRepository.findAllBySenderDepartment(department).stream()
+
+    public List<RequestDto> getBySenderDepartment() {
+        return requestRepository.findAllBySenderDepartment(currentUserService.getCurrentSender().department()).stream()
+                .map(RequestDto::fromEntity)
+                .toList();
+    }
+
+    public List<RequestDto> getAllRequests() {
+        return requestRepository.findAll().stream()
                 .map(RequestDto::fromEntity)
                 .toList();
     }

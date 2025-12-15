@@ -1,24 +1,27 @@
 package vvp_company.requestservice.service;
 
-import vvp_company.requestservice.model.Sender;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import vvp_company.requestservice.model.Sender;
 
-
-/// !!!!!
-/// ВНИМАНИЕ: ДАННАЯ РЕАЛИЗАЦИЯ ВРЕМЕННАЯ И ТРЕБУЕТ ПЕРЕСМОТРА
-/// !!!!!
 @Service
 public class CurrentUserService {
 
-    // Заглушка на время разработки
     public Sender getCurrentSender() {
-        return new Sender(1L, "Logistics"); // сотрудник 1 из Logistics
-    }
+        ServletRequestAttributes attributes =
+                (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
 
-    // Раскомментировать, когда появится Spring Security + JWT
-    // public Sender getCurrentSender() {
-    //     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    //     CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-    //     return new Sender(userDetails.getEmployeeId(), userDetails.getDepartment());
-    // }
+        String employeeIdHeader = request.getHeader("Employee-Id");
+        String departmentHeader = request.getHeader("Department");
+
+        if (employeeIdHeader == null || departmentHeader == null) {
+            throw new IllegalStateException("Missing required headers: Employee-Id, Department");
+        }
+
+        Long employeeId = Long.parseLong(employeeIdHeader);
+        return new Sender(employeeId, departmentHeader);
+    }
 }
