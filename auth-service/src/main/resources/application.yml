@@ -1,0 +1,33 @@
+spring:
+  config:
+    import: "optional:file:.env[.properties]"
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:${PGPORT}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
+security:
+  pepper: ${AUTH_PEPPER}
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: ${JWT_EXPIRATION_MS}
+
+server:
+  port: 8086
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true

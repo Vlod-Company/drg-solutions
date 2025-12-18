@@ -1,0 +1,37 @@
+@startuml
+class vvp_company.planetservice.controller.PlanetController {
+- PlanetService planetService
+}
+
+class vvp_company.planetservice.ServletInitializer {
+}
+class vvp_company.planetservice.dto.PlanetDto {
+- Long id
+- String name
+}
+
+interface vvp_company.planetservice.repository.PlanetRepository {
+}
+class vvp_company.planetservice.model.Planet {
+- Long id
+- String name
+}
+
+class vvp_company.planetservice.exception.PlanetNotFoundException {
+}
+class vvp_company.planetservice.PlanetServiceApplication {
+}
+class vvp_company.planetservice.service.PlanetService {
+- PlanetRepository planetRepo
+}
+
+class vvp_company.planetservice.dto.CreatePlanetRequest {
+- String name
+}
+
+
+
+org.springframework.boot.web.servlet.support.SpringBootServletInitializer <|-- vvp_company.planetservice.ServletInitializer
+org.springframework.data.jpa.repository.JpaRepository <|-- vvp_company.planetservice.repository.PlanetRepository
+vvp_company.planetservice.exception.RuntimeException <|-- vvp_company.planetservice.exception.PlanetNotFoundException
+@enduml

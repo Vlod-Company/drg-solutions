@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    container_name: "db"
+    env_file: .env
+    ports:
+      - ${PGPORT}:${PGPORT}
