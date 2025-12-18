@@ -6,61 +6,62 @@ import org.springframework.transaction.annotation.Transactional;
 import vvp_company.requestservice.dto.CreateRequestDto;
 import vvp_company.requestservice.dto.RequestDto;
 import vvp_company.requestservice.exception.RequestNotFoundException;
+import vvp_company.requestservice.mapper.RequestMapper;
+import vvp_company.requestservice.model.Employee;
 import vvp_company.requestservice.model.Request;
-import vvp_company.requestservice.model.Sender;
 import vvp_company.requestservice.repository.RequestRepository;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class RequestService {
 
     private final RequestRepository requestRepository;
     private final CurrentUserService currentUserService;
+    private final RequestMapper requestMapper;
 
     @Transactional
     public RequestDto createRequest(CreateRequestDto dto) {
-        Sender sender = currentUserService.getCurrentSender();
+        Employee employee = currentUserService.getCurrentEmployee();
 
-        Request request = Request.builder()
-                .status("Created")
-                .senderDepartment(sender.department())
-                .senderEmployeeId(sender.employeeId())
-                .recipientDepartment(dto.recipientDepartment())
-                .requestCode(dto.requestCode())
-                .description(dto.description())
-                .build();
+        var request = requestMapper.toEntityFromCreateRequest(dto, employee);
+        request.setSenderEmployeeId(employee.employeeId());
+        request.setSenderDepartment(employee.department());
 
         Request saved = requestRepository.save(request);
-        return RequestDto.fromEntity(saved);
+        return requestMapper.toDTOFromEntity(saved);
     }
 
     //опционально править, не у всех должен быть доступ ко всем
     public RequestDto getById(Long id) {
         return requestRepository.findById(id)
-                .map(RequestDto::fromEntity)
+                .map(requestMapper::toDTOFromEntity)
                 .orElseThrow(() -> new RequestNotFoundException(id));
     }
 
     public List<RequestDto> getBySenderDepartment() {
-        return requestRepository.findAllBySenderDepartment(currentUserService.getCurrentSender().department()).stream()
-                .map(RequestDto::fromEntity)
+        return requestRepository.findAllBySenderDepartment(currentUserService.getCurrentEmployee().department()).stream()
+                .map(requestMapper::toDTOFromEntity)
+                .toList();
+    }
+
+    public List<RequestDto> getByRecipientDepartment() {
+        return requestRepository.findAllByRecipientDepartment(currentUserService.getCurrentEmployee().department()).stream()
+                .map(requestMapper::toDTOFromEntity)
                 .toList();
     }
 
     public List<RequestDto> getAllRequests() {
         return requestRepository.findAll().stream()
-                .map(RequestDto::fromEntity)
+                .map(requestMapper::toDTOFromEntity)
                 .toList();
     }
 
-    // Лишнее, но полезное
     public List<RequestDto> getMySentRequests() {
-        Sender sender = currentUserService.getCurrentSender();
-        return requestRepository.findAllBySenderEmployeeId(sender.employeeId()).stream()
-                .map(RequestDto::fromEntity)
+        Employee employee = currentUserService.getCurrentEmployee();
+        return requestRepository.findAllBySenderEmployeeId(employee.employeeId()).stream()
+                .map(requestMapper::toDTOFromEntity)
                 .toList();
     }
 }

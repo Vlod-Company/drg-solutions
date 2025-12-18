@@ -34,12 +34,17 @@ public class RequestController {
         return requestService.getById(id);
     }
 
-    @GetMapping
-    public List<RequestDto> getRequestsToDepartment() {
+    @GetMapping("/from-my-department")
+    public List<RequestDto> getRequestsFromMyDepartment() {
         return requestService.getBySenderDepartment();
     }
 
-    @GetMapping
+    @GetMapping("/to-my-department")
+    public List<RequestDto> getRequestsToMyDepartment() {
+        return requestService.getByRecipientDepartment();
+    }
+
+    @GetMapping("/get-all")
     public List<RequestDto> getAllRequests() {
         return requestService.getAllRequests();
     }

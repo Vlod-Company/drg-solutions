@@ -10,6 +10,8 @@ import java.util.Optional;
 public interface RequestRepository extends JpaRepository<Request, Long> {
     Optional<Request> findByRequestCode(String requestCode);
     List<Request> findAllBySenderDepartment(String senderDepartment);
+    List<Request> findAllByRecipientDepartment(String senderDepartment);
     List<Request> findAllBySenderEmployeeId(Long senderEmployeeId);
     List<Request> findAll();
+
 }
