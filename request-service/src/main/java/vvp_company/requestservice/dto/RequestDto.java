@@ -1,8 +1,6 @@
 package vvp_company.requestservice.dto;
 
-import jakarta.persistence.Column;
 import vvp_company.requestservice.enm.RequestStatus;
-import vvp_company.requestservice.model.Request;
 
 import java.time.LocalDateTime;
 

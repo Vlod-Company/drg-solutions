@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import vvp_company.requestservice.dto.CreateRequestDto;
+import vvp_company.requestservice.dto.PagedRequestDto;
 import vvp_company.requestservice.dto.RequestDto;
+import vvp_company.requestservice.dto.RequestFilter;
 import vvp_company.requestservice.service.RequestService;
 
 import java.util.List;
@@ -21,12 +23,8 @@ public class RequestController {
     @PostMapping
     public ResponseEntity<RequestDto> createRequest(
             @Valid @RequestBody CreateRequestDto dto) {
-
         RequestDto created = requestService.createRequest(dto);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping("/{id}")
@@ -34,23 +32,33 @@ public class RequestController {
         return requestService.getById(id);
     }
 
+    @GetMapping("/filters")
+    public ResponseEntity<PagedRequestDto> getRequests(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestBody(required = false) RequestFilter filter) {
+        PagedRequestDto result = requestService.getRequests(pageNumber, pageSize, filter);
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("/from-my-department")
-    public List<RequestDto> getRequestsFromMyDepartment() {
-        return requestService.getBySenderDepartment();
+    public ResponseEntity<PagedRequestDto> getRequestsFromMyDepartment(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        return ResponseEntity.ok(requestService.getBySenderDepartment(pageNumber, pageSize));
     }
 
     @GetMapping("/to-my-department")
-    public List<RequestDto> getRequestsToMyDepartment() {
-        return requestService.getByRecipientDepartment();
-    }
-
-    @GetMapping("/get-all")
-    public List<RequestDto> getAllRequests() {
-        return requestService.getAllRequests();
+    public ResponseEntity<PagedRequestDto> getRequestsToMyDepartment(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        return ResponseEntity.ok(requestService.getByRecipientDepartment(pageNumber, pageSize));
     }
 
     @GetMapping("/my-sent")
-    public List<RequestDto> getMySentRequests() {
-        return requestService.getMySentRequests();
+    public ResponseEntity<PagedRequestDto> getMySentRequests(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        return ResponseEntity.ok(requestService.getMySentRequests(pageNumber, pageSize));
     }
 }
