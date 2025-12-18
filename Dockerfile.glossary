@@ -8,8 +8,11 @@ RUN mvn dependency:go-offline -B
 
 COPY glossary-service/src ./src
 
+
 RUN mvn clean package -DskipTests
 
 FROM tomcat:10.1-jdk17
 
-COPY --from=builder /glossary-service/target/glossary.war /usr/local/tomcat/webapps/glossary.war
+COPY --from=builder /glossary-service/target/*.jar app.jar
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

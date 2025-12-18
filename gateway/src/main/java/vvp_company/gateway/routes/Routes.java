@@ -27,7 +27,7 @@ public class Routes {
                 .before(auth(authServiceClient))
                 .build()
                 .and(route("auth-service")
-                        .route(path("/auth/login", "/auth/register"), http())
+                        .route(path("/auth-service/auth/login", "/auth-service/auth/register"), http())
                         .filter(lb("auth-service"))
                         .build())
                 .and(route("logistic-service")

@@ -34,20 +34,20 @@ INSERT INTO warehouses (name, delivery_point_id) VALUES
 
 -- Станции
 INSERT INTO stations (name, planet_id, type, status, delivery_point_id) VALUES
-                                                                            ('Deep Core Relay', 1, 'Communication', 'Active', 3),
-                                                                            ('Orbital Drop Hub', 2, 'Dropship', 'Active', 3),
-                                                                            ('Emergency Evac Station', 3, 'Evacuation', 'Standby', 3);
+                                                                            ('Deep Core Relay', 1, 'COMMUNICATION', 'ACTIVE', 3),
+                                                                            ('Orbital Drop Hub', 2, 'MINING', 'ACTIVE', 3),
+                                                                            ('Emergency Evac Station', 3, 'MILITARY', 'UNDER_CONSTRUCTION', 3);
 
 -- Сотрудники с хешированными паролями
 INSERT INTO employees (name, post, department, experience, status, hired_date) VALUES
-                                                                                   ('Rourke', 'Driller', 'Rnd',   120, 'active', '2023-01-15'),
-                                                                                   ('Maggie', 'Scout',  'Management',   95,  'active', '2023-03-22'),
-                                                                                   ('Berg', 'Gunner',  'Mission control',  110, 'active', '2022-11-10'),
-                                                                                   ('Daisy', 'Engineer',  'Logistics', 105, 'active', '2023-02-01'),
-                                                                                   ('Lars', 'Scout',   'Dwarf team',  40,  'active', '2024-01-10'),
-                                                                                   ('Gunnar', 'Driller',   'Mission control',30,  'active', '2024-02-15'),
-                                                                                   ('Sven', 'Engineer',  'Mission control',25,  'active', '2024-03-01'),
-                                                                                   ('Thor', 'Gunner',    'Mission control',50,  'active', '2023-12-05');
+                                                                                   ('Rourke', 'Driller', 'Rnd',   120, 'ACTIVE', '2023-01-15'),
+                                                                                   ('Maggie', 'Scout',  'Management',   95,  'ACTIVE', '2023-03-22'),
+                                                                                   ('Berg', 'Gunner',  'Mission control',  110, 'ACTIVE', '2022-11-10'),
+                                                                                   ('Daisy', 'Engineer',  'Logistics', 105, 'ACTIVE', '2023-02-01'),
+                                                                                   ('Lars', 'Scout',   'Dwarf team',  40,  'ACTIVE', '2024-01-10'),
+                                                                                   ('Gunnar', 'Driller',   'Mission control',30,  'ACTIVE', '2024-02-15'),
+                                                                                   ('Sven', 'Engineer',  'Mission control',25,  'ACTIVE', '2024-03-01'),
+                                                                                   ('Thor', 'Gunner',    'Mission control',50,  'ACTIVE', '2023-12-05');
 
 -- Грузы
 INSERT INTO cargos (weight, ship_to_date, ship_to_point) VALUES

@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: "glossary-service"
   config:
     import: "optional:file:.env[.properties]"
   datasource:

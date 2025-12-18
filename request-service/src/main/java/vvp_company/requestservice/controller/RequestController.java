@@ -1,7 +1,6 @@
 package vvp_company.requestservice.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +33,7 @@ public class RequestController {
         return requestService.getById(id);
     }
 
-    @GetMapping
+    @GetMapping("/department")
     public List<RequestDto> getRequestsToDepartment() {
         return requestService.getBySenderDepartment();
     }
