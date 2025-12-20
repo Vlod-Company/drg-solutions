@@ -6,9 +6,10 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import vvp_company.missionservice.config.FeignConfig;
 
 @SpringBootApplication
-@EnableFeignClients
+@EnableFeignClients(defaultConfiguration = FeignConfig.class)
 @EnableDiscoveryClient
 public class MissionServiceApplication extends SpringBootServletInitializer {
 

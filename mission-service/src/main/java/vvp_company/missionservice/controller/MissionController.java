@@ -3,6 +3,7 @@ package vvp_company.missionservice.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import vvp_company.missionservice.client.dto.RequestDTO;
 import vvp_company.missionservice.dto.nested.RecommendedWeaponDto;
@@ -21,31 +22,52 @@ public class MissionController {
 
     private final MissionService missionService;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_MISSION_CONTROL_EMPLOYEE') " +
+            "or hasRole('ROLE_MANAGEMENT_EMPLOYEE') " +
+            "or hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE')")
     @GetMapping
     public PagedResponse<MissionDto> getAllMissions(@NotNull @RequestParam Integer pageNumber, @NotNull @RequestParam Integer pageSize) {
         return missionService.findAllPaged(pageNumber, pageSize);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_MISSION_CONTROL_EMPLOYEE') " +
+            "or hasRole('ROLE_MANAGEMENT_EMPLOYEE') " +
+            "or hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE') "+
+            "or hasRole('ROLE_MINER_EMPLOYEE')")
     @GetMapping("/{id}")
     public MissionDto getMissionById(@PathVariable("id") Long id) {
         return missionService.findById(id);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_MISSION_CONTROL_EMPLOYEE') " +
+            "or hasRole('ROLE_MANAGEMENT_EMPLOYEE')")
     @PostMapping
     public MissionDto createMission(@Valid @RequestBody CreateMissionRequest createMissionRequest) {
         return missionService.createNewMission(createMissionRequest);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_MISSION_CONTROL_EMPLOYEE') " +
+            "or hasRole('ROLE_MANAGEMENT_EMPLOYEE')")
     @DeleteMapping("/{id}")
     public void deleteMissionById(@PathVariable("id") Long id) {
         missionService.delete(id);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_MANAGEMENT_EMPLOYEE')")
     @GetMapping("/{id}/getRecommendedWeapons")
     public List<RecommendedWeaponDto> getRecommendedWeaponsForMission(@PathVariable("id") Long id) {
         return missionService.getRecommendedWeaponsForMission(id);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_MISSION_CONTROL_EMPLOYEE') " +
+            "or hasRole('ROLE_MANAGEMENT_EMPLOYEE') " +
+            "or hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE')")
     @PostMapping("/send/{missionId}")
     public RequestDTO createSendMissionRequestInRequestService(@NotNull @PathVariable("missionId") Long missionId, @Valid @RequestBody List<SendItemDTO> sendItemDTOList) {
         return missionService.createSendMissionRequestInRequestService(missionId, sendItemDTOList);
