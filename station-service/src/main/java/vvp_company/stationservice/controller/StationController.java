@@ -1,6 +1,7 @@
 package vvp_company.stationservice.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import vvp_company.stationservice.dto.CreateStationDTO;
 import vvp_company.stationservice.model.Station;
@@ -20,16 +21,22 @@ public class StationController {
         return stationService.findAllStations();
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_MAINTENANCE_EMPLOYEE')")
     @DeleteMapping
     public void deleteStationById(Long id){
         stationService.deleteStation(id);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_MAINTENANCE_EMPLOYEE')")
     @PostMapping
     public Station addStation(CreateStationDTO station){
         return stationService.addStation(station);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_MAINTENANCE_EMPLOYEE')")
     @PostMapping("setAttacked/{id}")
     public void setAttacked(@PathVariable("id") Long id){
         stationService.setAttacked(id);
