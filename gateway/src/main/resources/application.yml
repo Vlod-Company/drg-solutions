@@ -10,9 +10,6 @@ feign:
         read-timeout: 10000
         loggerLevel: full
 
-server:
-  port: 8079
-
 eureka:
   client:
     service-url:

@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: "planet-service"
   config:
     import: "optional:file:.env[.properties]"
   datasource:
@@ -13,5 +15,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
-  server:
-    port: 8085
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true

@@ -24,9 +24,6 @@ feign:
         read-timeout: 10000
         loggerLevel: full
 
-server:
-  port: 8081
-
 eureka:
   client:
     service-url:

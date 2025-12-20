@@ -22,9 +22,6 @@ security:
     secret: ${JWT_SECRET}
     expiration-ms: ${JWT_EXPIRATION_MS}
 
-server:
-  port: 8086
-
 eureka:
   client:
     service-url:
