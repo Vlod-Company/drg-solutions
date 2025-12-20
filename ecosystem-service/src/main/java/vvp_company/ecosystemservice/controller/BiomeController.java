@@ -18,7 +18,9 @@ public class BiomeController {
 
     private final BiomeService biomeService;
 
-    @PreAuthorize("hasRole('ROLE_SCANCOM_EMPLOYEE') or hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_SCANCOM_EMPLOYEE') " +
+            "or hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE')")
     @PostMapping
     public ResponseEntity<BiomeDto> create(@Valid @RequestBody CreateBiomeDto dto) {
         BiomeDto created = biomeService.create(dto);
@@ -41,7 +43,9 @@ public class BiomeController {
         return biomeService.update(id, dto);
     }
 
-    @PreAuthorize("hasRole('ROLE_SCANCOM_EMPLOYEE') or hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_SCANCOM_EMPLOYEE') " +
+            "or hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE')")
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Integer id) {
