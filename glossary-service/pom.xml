@@ -11,7 +11,7 @@
     <groupId>vvp_company</groupId>
     <artifactId>glossary-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     <name>glossary-service</name>
     <description>glossary-service</description>
     <url/>

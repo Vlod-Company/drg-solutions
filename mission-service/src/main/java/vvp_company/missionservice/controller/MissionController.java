@@ -1,5 +1,6 @@
 package vvp_company.missionservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -69,7 +70,7 @@ public class MissionController {
             "or hasRole('ROLE_MANAGEMENT_EMPLOYEE') " +
             "or hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE')")
     @PostMapping("/send/{missionId}")
-    public RequestDTO createSendMissionRequestInRequestService(@NotNull @PathVariable("missionId") Long missionId, @Valid @RequestBody List<SendItemDTO> sendItemDTOList) {
+    public RequestDTO createSendMissionRequestInRequestService(@NotNull @PathVariable("missionId") Long missionId, @Valid @RequestBody List<SendItemDTO> sendItemDTOList) throws JsonProcessingException {
         return missionService.createSendMissionRequestInRequestService(missionId, sendItemDTOList);
     }
 }

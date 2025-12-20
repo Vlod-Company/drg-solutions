@@ -35,13 +35,12 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(
-                                "/public/**",
-                                "/auth/**",
-                                "/actuator/**",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**"
+                                "/auth-service/auth/**",
+                                "/auth-service/actuator/**",
+                                "/auth-service/swagger-ui/**",
+                                "/auth-service/v3/api-docs/**"
                         ).permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rolesHeaderFilter, UsernamePasswordAuthenticationFilter.class);

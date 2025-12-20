@@ -18,7 +18,6 @@ public class HeaderPropagationInterceptor implements RequestInterceptor {
             template.header("Department", principal.department);
         }
 
-        // Передаём роли
         if (auth != null) {
             String roles = auth.getAuthorities().stream()
                     .map(Object::toString)

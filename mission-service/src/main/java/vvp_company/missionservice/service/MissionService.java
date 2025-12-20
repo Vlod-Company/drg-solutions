@@ -1,11 +1,12 @@
 package vvp_company.missionservice.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import tools.jackson.databind.ObjectMapper;
 import vvp_company.missionservice.client.RequestServiceClient;
 import vvp_company.missionservice.client.dto.CreateRequestDTO;
 import vvp_company.missionservice.client.dto.RequestDTO;
@@ -64,7 +65,7 @@ public class MissionService {
         return missionRepository.getRecommendedWeapons(missionId);
     }
 
-    public RequestDTO createSendMissionRequestInRequestService(Long missionId, List<SendItemDTO> sendItemDTOList) {
+    public RequestDTO createSendMissionRequestInRequestService(Long missionId, List<SendItemDTO> sendItemDTOList) throws JsonProcessingException {
         var mission = missionRepository.findById(missionId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Не найдена миссия"));
 
         if (mission.getStatus() != MissionStatus.CREATED) {
