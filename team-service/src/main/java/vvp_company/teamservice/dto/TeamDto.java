@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vvp_company.missionservice.enm.TeamStatus;
+import vvp_company.teamservice.enm.TeamStatus;
 
 @Data
 @Builder
