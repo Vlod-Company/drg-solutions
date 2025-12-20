@@ -18,7 +18,8 @@ public class MonsterController {
 
     private final MonsterService monsterService;
 
-    @PreAuthorize("hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE')")
     @PostMapping
     public ResponseEntity<MonsterDto> create(@Valid @RequestBody CreateMonsterDto dto) {
         MonsterDto created = monsterService.create(dto);
@@ -35,13 +36,15 @@ public class MonsterController {
         return monsterService.getAll();
     }
 
-    @PreAuthorize("hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE')")
     @PutMapping("{id}")
     public MonsterDto update(@PathVariable Long id, @Valid @RequestBody CreateMonsterDto dto) {
         return monsterService.update(id, dto);
     }
 
-    @PreAuthorize("hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE')")
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {

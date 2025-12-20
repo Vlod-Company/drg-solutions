@@ -37,7 +37,9 @@ public class BiomeController {
         return biomeService.getAll();
     }
 
-    @PreAuthorize("hasRole('ROLE_SCANCOM_EMPLOYEE') or hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_SCANCOM_EMPLOYEE') " +
+            "or hasRole('ROLE_SCIENCE_DEPARTMENT_EMPLOYEE')")
     @PutMapping("{id}")
     public BiomeDto update(@PathVariable Integer id, @Valid @RequestBody CreateBiomeDto dto) {
         return biomeService.update(id, dto);
