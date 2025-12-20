@@ -21,8 +21,6 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PreAuthorize("hasRole('ROLE_ADMIN') " +
-            "or hasRole('ROLE_MANAGEMENT_EMPLOYEE')")
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegistrationRequest req) {
         var token = authService.register(req);
@@ -56,8 +54,6 @@ public class AuthController {
         throw new AuthException("Authorization token not found in header");
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN') " +
-            "or hasRole('ROLE_MANAGEMENT_EMPLOYEE')")
     @PostMapping("/users/{userId}/roles/add")
     public ResponseEntity<User> addRole(
             @PathVariable Long userId,
@@ -66,8 +62,6 @@ public class AuthController {
         return ResponseEntity.ok(user);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN') " +
-            "or hasRole('ROLE_MANAGEMENT_EMPLOYEE')")
     @PostMapping("/users/{userId}/roles/remove")
     public ResponseEntity<User> removeRole(
             @PathVariable Long userId,
@@ -76,8 +70,6 @@ public class AuthController {
         return ResponseEntity.ok(user);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN') " +
-            "or hasRole('ROLE_MANAGEMENT_EMPLOYEE')")
     @PostMapping("/users/{userId}/roles/set")
     public ResponseEntity<User> setRoles(
             @PathVariable Long userId,
