@@ -87,6 +87,7 @@
     </dependencies>
 
     <build>
+        <finalName>team-service</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
