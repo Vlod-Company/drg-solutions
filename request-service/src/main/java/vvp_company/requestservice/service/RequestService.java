@@ -1,66 +1,112 @@
 package vvp_company.requestservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vvp_company.requestservice.dto.CreateRequestDto;
+import vvp_company.requestservice.dto.PagedRequestDto;
 import vvp_company.requestservice.dto.RequestDto;
+import vvp_company.requestservice.dto.RequestFilter;
 import vvp_company.requestservice.exception.RequestNotFoundException;
+import vvp_company.requestservice.mapper.RequestMapper;
+import vvp_company.requestservice.model.Employee;
 import vvp_company.requestservice.model.Request;
-import vvp_company.requestservice.model.Sender;
 import vvp_company.requestservice.repository.RequestRepository;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class RequestService {
 
     private final RequestRepository requestRepository;
     private final CurrentUserService currentUserService;
+    private final RequestMapper requestMapper;
 
     @Transactional
     public RequestDto createRequest(CreateRequestDto dto) {
-        Sender sender = currentUserService.getCurrentSender();
+        Employee employee = currentUserService.getCurrentEmployee();
 
-        Request request = Request.builder()
-                .status("Created")
-                .senderDepartment(sender.department())
-                .senderEmployeeId(sender.employeeId())
-                .recipientDepartment(dto.recipientDepartment())
-                .requestCode(dto.requestCode())
-                .description(dto.description())
-                .build();
+        var request = requestMapper.toEntityFromCreateRequest(dto, employee);
+        request.setSenderEmployeeId(employee.employeeId());
+        request.setSenderDepartment(employee.department());
 
         Request saved = requestRepository.save(request);
-        return RequestDto.fromEntity(saved);
+        return requestMapper.toDTOFromEntity(saved);
     }
 
-    //опционально править, не у всех должен быть доступ ко всем
     public RequestDto getById(Long id) {
         return requestRepository.findById(id)
-                .map(RequestDto::fromEntity)
+                .map(requestMapper::toDTOFromEntity)
                 .orElseThrow(() -> new RequestNotFoundException(id));
     }
 
-    public List<RequestDto> getBySenderDepartment() {
-        return requestRepository.findAllBySenderDepartment(currentUserService.getCurrentSender().department()).stream()
-                .map(RequestDto::fromEntity)
-                .toList();
+    @Transactional(readOnly = true)
+    public PagedRequestDto getRequests(int pageNumber, int pageSize, RequestFilter filter) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        String code = isBlank(filter.code()) ? null : filter.code();
+        String senderDept = isBlank(filter.senderDepartment()) ? null : filter.senderDepartment();
+        String recipientDept = isBlank(filter.recipientDepartment()) ? null : filter.recipientDepartment();
+        String status = isBlank(filter.status()) ? null : filter.status();
+
+        Page<Request> requests = requestRepository.findAllByFilter(
+                filter.code(),
+                filter.senderDepartment(),
+                filter.recipientDepartment(),
+                filter.status(),
+                pageable
+        );
+        return mapToPagedRequestDto(requests);
     }
 
-    public List<RequestDto> getAllRequests() {
-        return requestRepository.findAll().stream()
-                .map(RequestDto::fromEntity)
-                .toList();
+
+    @Transactional(readOnly = true)
+    public PagedRequestDto getBySenderDepartment(int pageNumber, int pageSize) {
+        Employee current = currentUserService.getCurrentEmployee();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Request> requests = requestRepository.findBySenderDepartment(current.department(), pageable);
+        return mapToPagedRequestDto(requests);
     }
 
-    // Лишнее, но полезное
-    public List<RequestDto> getMySentRequests() {
-        Sender sender = currentUserService.getCurrentSender();
-        return requestRepository.findAllBySenderEmployeeId(sender.employeeId()).stream()
-                .map(RequestDto::fromEntity)
+    @Transactional(readOnly = true)
+    public PagedRequestDto getByRecipientDepartment(int pageNumber, int pageSize) {
+        Employee current = currentUserService.getCurrentEmployee();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Request> requests = requestRepository.findByRecipientDepartment(current.department(), pageable);
+        return mapToPagedRequestDto(requests);
+    }
+
+    @Transactional(readOnly = true)
+    public PagedRequestDto getAllRequests(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Request> requests = requestRepository.findAll(pageable);
+        return mapToPagedRequestDto(requests);
+    }
+
+    @Transactional(readOnly = true)
+    public PagedRequestDto getMySentRequests(int pageNumber, int pageSize) {
+        Employee current = currentUserService.getCurrentEmployee();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Request> requests = requestRepository.findBySenderEmployeeId(current.employeeId(), pageable);
+        return mapToPagedRequestDto(requests);
+    }
+
+    private PagedRequestDto mapToPagedRequestDto(Page<Request> page) {
+        List<RequestDto> dtos = page.getContent().stream()
+                .map(requestMapper::toDTOFromEntity)
                 .toList();
+        return new PagedRequestDto(
+                dtos,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalPages(),
+                page.getTotalElements()
+        );
+    }
+    private boolean isBlank(String str) {
+        return str == null || str.trim().isEmpty();
     }
 }

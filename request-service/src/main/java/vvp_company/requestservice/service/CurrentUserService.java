@@ -4,12 +4,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import vvp_company.requestservice.model.Sender;
+import vvp_company.requestservice.model.Employee;
 
 @Service
 public class CurrentUserService {
 
-    public Sender getCurrentSender() {
+    public Employee getCurrentEmployee() {
         ServletRequestAttributes attributes =
                 (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
@@ -22,6 +22,6 @@ public class CurrentUserService {
         }
 
         Long employeeId = Long.parseLong(employeeIdHeader);
-        return new Sender(employeeId, departmentHeader);
+        return new Employee(employeeId, departmentHeader);
     }
 }
