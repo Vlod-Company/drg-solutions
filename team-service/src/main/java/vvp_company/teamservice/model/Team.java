@@ -9,7 +9,7 @@ import vvp_company.teamservice.enm.TeamStatus;
 
 @Entity
 @Data
-@Table("teams")
+@Table(name = "teams")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
