@@ -11,7 +11,7 @@
     <groupId>vvp_company</groupId>
     <artifactId>deliver-point-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     <name>deliver-point-service</name>
     <description>deliver-point-service</description>
     <url/>
