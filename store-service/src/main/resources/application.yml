@@ -1,4 +1,6 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   config:
     import:
       - "optional:file:.env[.properties]"
