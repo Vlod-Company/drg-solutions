@@ -4,13 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import vvp_company.requestservice.dto.CreateRequestDto;
-import vvp_company.requestservice.dto.PagedRequestDto;
-import vvp_company.requestservice.dto.RequestDto;
-import vvp_company.requestservice.dto.RequestFilter;
+import vvp_company.requestservice.dto.*;
 import vvp_company.requestservice.service.RequestService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("request")
@@ -38,6 +33,11 @@ public class RequestController {
             @RequestBody(required = false) RequestFilter filter) {
         PagedRequestDto result = requestService.getRequests(pageNumber, pageSize, filter);
         return ResponseEntity.ok(result);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RequestDto> updateRequest(@PathVariable Long id, @RequestBody UpdateRequestDTO dto) {
+        return ResponseEntity.ok(requestService.updateRequest(id, dto));
     }
 
     @GetMapping("/from-my-department")

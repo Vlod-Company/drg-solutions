@@ -6,10 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vvp_company.requestservice.dto.CreateRequestDto;
-import vvp_company.requestservice.dto.PagedRequestDto;
-import vvp_company.requestservice.dto.RequestDto;
-import vvp_company.requestservice.dto.RequestFilter;
+import vvp_company.requestservice.dto.*;
 import vvp_company.requestservice.exception.RequestNotFoundException;
 import vvp_company.requestservice.mapper.RequestMapper;
 import vvp_company.requestservice.model.Employee;
@@ -92,6 +89,23 @@ public class RequestService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Request> requests = requestRepository.findBySenderEmployeeId(current.employeeId(), pageable);
         return mapToPagedRequestDto(requests);
+    }
+
+    @Transactional
+    public RequestDto updateRequest(Long id, UpdateRequestDTO dto) {
+        var requestEntity = requestRepository.findById(id).orElseThrow(() -> new RequestNotFoundException(id));
+
+        var updatedResponse = dto.response() == null ? requestEntity.getResponse() : dto.response();
+        var updatedRecipientEmployeeId = dto.recipientEmployeeId() == null ? requestEntity.getRecipientEmployeeId() : dto.recipientEmployeeId();
+        var updatedStatus = dto.status() == null ? requestEntity.getStatus() : dto.status();
+        var updatedClosedAt = dto.closedAt() == null ? requestEntity.getClosedAt() : dto.closedAt();
+        requestEntity.setResponse(updatedResponse);
+        requestEntity.setRecipientEmployeeId(updatedRecipientEmployeeId);
+        requestEntity.setStatus(updatedStatus);
+        requestEntity.setClosedAt(updatedClosedAt);
+
+        var updatedRequestEntity = requestRepository.save(requestEntity);
+        return requestMapper.toDTOFromEntity(updatedRequestEntity);
     }
 
     private PagedRequestDto mapToPagedRequestDto(Page<Request> page) {
