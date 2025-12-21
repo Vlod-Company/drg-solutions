@@ -8,7 +8,7 @@ import vvp_company.stationservice.client.dto.RequestDTO;
 
 @FeignClient(
         name = "request-service",
-        path = "request"
+        path = "request-service/request"
 )
 public interface RequestServiceClient {
 

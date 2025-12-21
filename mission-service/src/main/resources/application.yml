@@ -18,6 +18,8 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
+        bytecode:
+          provider: none
         format_sql: true
 
 feign:

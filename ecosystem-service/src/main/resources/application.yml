@@ -18,6 +18,8 @@ spring:
       show-sql: true
     properties:
       hibernate:
+        bytecode:
+          provider: none
         format_sql: true
 
 eureka:

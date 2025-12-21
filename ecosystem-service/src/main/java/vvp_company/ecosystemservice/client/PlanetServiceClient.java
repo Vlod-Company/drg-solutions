@@ -9,7 +9,7 @@ import java.util.List;
 
 @FeignClient(
         name = "planet-service",
-        path = "planet"
+        path = "planet-service/planet"
 )
 public interface PlanetServiceClient {
 

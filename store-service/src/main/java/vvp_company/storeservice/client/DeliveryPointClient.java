@@ -9,7 +9,7 @@ import java.util.List;
 
 @FeignClient(
         name = "delivery-point-service",
-        path = "deliveryPoint"
+        path = "delivery-point-service/deliveryPoint"
 )
 public interface DeliveryPointClient {
 

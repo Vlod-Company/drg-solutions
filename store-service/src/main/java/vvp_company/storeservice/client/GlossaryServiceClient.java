@@ -12,7 +12,7 @@ import java.util.List;
 
 @FeignClient(
         name = "glossary-service",
-        path = "glossary"
+        path = "glossary-service/glossary"
 )
 public interface GlossaryServiceClient {
 

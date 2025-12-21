@@ -1,3 +1,4 @@
+
 spring:
   application:
     name: "auth-service"
@@ -18,6 +19,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        bytecode:
+          provider: none
     show-sql: true
 
 security:

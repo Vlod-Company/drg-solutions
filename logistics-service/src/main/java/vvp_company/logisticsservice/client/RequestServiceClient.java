@@ -7,7 +7,8 @@ import vvp_company.logisticsservice.client.dto.CreateRequestDTO;
 import vvp_company.logisticsservice.client.dto.RequestDTO;
 
 @FeignClient(
-        name = "request-service"
+        name = "request-service",
+        path = "request-service"
 )
 public interface RequestServiceClient {
 

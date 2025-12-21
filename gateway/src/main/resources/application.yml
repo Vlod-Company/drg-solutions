@@ -17,35 +17,6 @@ eureka:
   instance:
     prefer-ip-address: true
 
-
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-    urls:
-      - name: request-service
-        url: /request-service/v3/api-docs
-      - name: auth-service
-        url: /auth-service/v3/api-docs
-      - name: logistic-service
-        url: /logistic-service/v3/api-docs
-      - name: station-service
-        url: /station-service/v3/api-docs
-      - name: store-service
-        url: /store-service/v3/api-docs
-      - name: mission-service
-        url: /mission-service/v3/api-docs
-      - name: glossary-service
-        url: /glossary-service/v3/api-docs
-      - name: team-service
-        url: /team-service/v3/api-docs
-      - name: planet-service
-        url: /planet-service/v3/api-docs
-      - name: employee-service
-        url: /employee-service/v3/api-docs
-      - name: delivery-point-service
-        url: /delivery-point-service/v3/api-docs
-      - name: spaceship-service
-        url: /spaceship-service/v3/api-docs
 server:
   port: 8234
 
