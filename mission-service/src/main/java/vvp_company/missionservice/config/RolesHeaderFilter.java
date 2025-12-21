@@ -11,9 +11,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.nonNull;
 
 @Component
 public class RolesHeaderFilter extends OncePerRequestFilter {
@@ -22,14 +23,14 @@ public class RolesHeaderFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String rolesHeader = request.getHeader("Roles");
+        List<String> rolesHeader = Collections.list(request.getHeaders("Roles"));
         String employeeIdHeader = request.getHeader("Employee-Id");
         String departmentHeader = request.getHeader("Department");
 
-        if (rolesHeader != null && employeeIdHeader != null) {
+        if (nonNull(employeeIdHeader)) {
             CustomPrincipal principal = new CustomPrincipal(employeeIdHeader, departmentHeader);
 
-            List<SimpleGrantedAuthority> authorities = Arrays.stream(rolesHeader.split(","))
+            List<SimpleGrantedAuthority> authorities = rolesHeader.stream()
                     .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
 

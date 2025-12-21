@@ -17,6 +17,7 @@ eureka:
   instance:
     prefer-ip-address: true
 
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
@@ -45,3 +46,11 @@ springdoc:
         url: /delivery-point-service/v3/api-docs
       - name: spaceship-service
         url: /spaceship-service/v3/api-docs
+server:
+  port: 8234
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG

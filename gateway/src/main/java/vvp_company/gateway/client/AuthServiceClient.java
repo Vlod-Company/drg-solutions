@@ -8,7 +8,7 @@ import vvp_company.gateway.client.dto.ValidatieTokenRequest;
 
 @FeignClient(
         name = "auth-service",
-        path = "/auth"
+        path = "/auth-service/auth"
 )
 public interface AuthServiceClient {
 

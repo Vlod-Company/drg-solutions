@@ -5,9 +5,9 @@ services:
       dockerfile: Dockerfile.postgres
     container_name: db
     environment:
-      POSTGRES_DB: ${db}
-      POSTGRES_USER: ${user}
-      POSTGRES_PASSWORD: ${pass}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "${PGPORT}:5432"
 
