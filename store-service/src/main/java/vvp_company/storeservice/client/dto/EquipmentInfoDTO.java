@@ -12,5 +12,5 @@ public class EquipmentInfoDTO {
 
     private String description;
 
-    private Integer weight;
+    private Double weight;
 }

@@ -13,6 +13,6 @@ import vvp_company.storeservice.enm.ItemType;
 public class ItemResponseDTO {
     private ItemType itemType;
     private String itemName;
-    private Integer itemWeight;
+    private Double itemWeight;
     private Long itemQuantity;
 }

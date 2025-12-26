@@ -14,5 +14,5 @@ public class WeaponInfoDTO {
 
     private Integer weight;
 
-    private Long impactType;
+    private ImpactType impactType;
 }

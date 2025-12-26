@@ -15,5 +15,5 @@ public class ResourceInfoDTO {
 
     private String description;
 
-    private Integer weightPerUnit;
+    private Double weightPerUnit;
 }

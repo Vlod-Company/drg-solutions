@@ -26,13 +26,11 @@ import vvp_company.storeservice.model.Weapon;
 import vvp_company.storeservice.repository.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
+import static vvp_company.storeservice.enm.ItemType.valueOf;
 import static vvp_company.storeservice.enm.ResourceStatus.RESERVED;
 import static vvp_company.storeservice.enm.ResourceStatus.STORED;
 
@@ -124,7 +122,9 @@ public class ItemService {
 
         return deliveryPoints.stream().map(deliveryPoint -> {
             var itemInDeliveryPoint = warehouseRepository.howMuchAtTimeInDeliveryPoint(deliveryPoint.getId(), LocalDateTime.now()).stream()
-                    .filter(item -> searchItemsByType.get(item.getItemType()).contains(item.getInfoName()))
+                    .filter(item -> Optional.ofNullable(searchItemsByType.get(valueOf(item.getItemType().toUpperCase())))
+                            .map((l) -> l.contains(item.getInfoName()))
+                            .orElse(false))
                     .toList();
 
             return howMuchAtTimeItemsToDeliveryPointResponse(itemInDeliveryPoint, deliveryPoint);
@@ -232,16 +232,16 @@ public class ItemService {
                 .collect(groupingBy(ResourceInfoDTO::getName));
 
         var itemDTOs = items.stream().map(item -> {
-            var weight = switch(item.getItemType()) {
-                case WEAPON -> weaponInfos.get(item.getInfoName()).get(0).getWeight();
-                case RESOURCE -> resourceInfos.get(item.getInfoName()).get(0).getWeightPerUnit();
-                case EQUIPMENT -> equipmentInfos.get(item.getInfoName()).get(0).getWeight();
-                default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            var weight = switch(item.getItemType().toUpperCase()) {
+                case "WEAPON" -> weaponInfos.get(item.getInfoName()).get(0).getWeight();
+                case "RESOURCE" -> resourceInfos.get(item.getInfoName()).get(0).getWeightPerUnit();
+                case "EQUIPMENT" -> equipmentInfos.get(item.getInfoName()).get(0).getWeight();
+                default -> throw new IllegalStateException("Unexpected value: " + item.getItemType());
             };
 
             return ItemResponseDTO.builder()
                     .itemQuantity(item.getTotalCount())
-                    .itemType(item.getItemType())
+                    .itemType(valueOf(item.getItemType().toUpperCase()))
                     .itemName(item.getInfoName())
                     .itemWeight(weight)
                     .build();
