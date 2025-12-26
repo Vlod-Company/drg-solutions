@@ -4,5 +4,6 @@ public enum ItemType {
 
     EQUIPMENT,
     WEAPON,
-    RESOURCE
+    RESOURCE,
+    TEAM
 }

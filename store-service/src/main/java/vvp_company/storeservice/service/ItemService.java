@@ -14,21 +14,16 @@ import vvp_company.storeservice.client.dto.WeaponInfoDTO;
 import vvp_company.storeservice.dto.nested.HowMuchAtTimeItem;
 import vvp_company.storeservice.dto.nested.ItemResponseDTO;
 import vvp_company.storeservice.dto.nested.ItemSearchDTO;
-import vvp_company.storeservice.dto.nested.sendItem.SendItemDTO;
-import vvp_company.storeservice.dto.nested.sendItem.SendItemEquipment;
-import vvp_company.storeservice.dto.nested.sendItem.SendItemResource;
-import vvp_company.storeservice.dto.nested.sendItem.SendItemWeapon;
+import vvp_company.storeservice.dto.nested.sendItem.*;
 import vvp_company.storeservice.dto.request.ReserveCargoRequest;
 import vvp_company.storeservice.dto.response.DeliveryPointResponseDTO;
 import vvp_company.storeservice.enm.ItemType;
 import vvp_company.storeservice.enm.Status;
 import vvp_company.storeservice.model.Equipment;
 import vvp_company.storeservice.model.Resource;
+import vvp_company.storeservice.model.Team;
 import vvp_company.storeservice.model.Weapon;
-import vvp_company.storeservice.repository.EquipmentRepository;
-import vvp_company.storeservice.repository.ResourceRepository;
-import vvp_company.storeservice.repository.WarehouseRepository;
-import vvp_company.storeservice.repository.WeaponRepository;
+import vvp_company.storeservice.repository.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -45,12 +40,15 @@ import static vvp_company.storeservice.enm.ResourceStatus.STORED;
 @RequiredArgsConstructor
 public class ItemService {
 
+    private final Integer ONE_PERSON_WEIGHT = 50;
+
     private final EquipmentRepository equipmentRepository;
     private final WeaponRepository weaponRepository;
     private final ResourceRepository resourceRepository;
     private final WarehouseRepository warehouseRepository;
     private final GlossaryServiceClient glossaryServiceClient;
     private final DeliveryPointClient deliveryPointClient;
+    private final TeamRepository teamRepository;
 
     @Transactional
     public void addItemsToDeliveryPoint(Long deliveryPointId, List<SendItemDTO> items) {
@@ -198,6 +196,15 @@ public class ItemService {
                         resourceRepository.save(entity);
                     }
                 }
+                case "TEAM" -> {
+                    var teamItem = (SendItemTeam) item;
+
+                    var storedTeam = Team.builder()
+                            .cargoId(cargoId)
+                            .id(teamItem.teamId())
+                            .build();
+                    teamRepository.save(storedTeam);
+                }
             }
         });
     }
@@ -229,6 +236,7 @@ public class ItemService {
                 case WEAPON -> weaponInfos.get(item.getInfoName()).get(0).getWeight();
                 case RESOURCE -> resourceInfos.get(item.getInfoName()).get(0).getWeightPerUnit();
                 case EQUIPMENT -> equipmentInfos.get(item.getInfoName()).get(0).getWeight();
+                default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
             };
 
             return ItemResponseDTO.builder()
