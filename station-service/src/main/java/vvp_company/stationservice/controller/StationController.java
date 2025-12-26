@@ -5,6 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import vvp_company.stationservice.client.dto.RequestDTO;
 import vvp_company.stationservice.dto.AttackedDTO;
+import vvp_company.stationservice.dto.ChangeStatusDTO;
 import vvp_company.stationservice.dto.CreateStationDTO;
 import vvp_company.stationservice.model.Station;
 import vvp_company.stationservice.service.StationService;
@@ -39,8 +40,14 @@ public class StationController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN') " +
             "or hasRole('ROLE_MAINTENANCE_EMPLOYEE')")
-    @PostMapping("setAttacked/{id}")
+    @PostMapping("setAttacked")
     public RequestDTO setAttacked(AttackedDTO attacked){
         return stationService.setAttacked(attacked);
     }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_MAINTENANCE_EMPLOYEE') "+
+            "or hasRole('ROLE_MANAGEMENT_EMPLOYEE')")
+    @PostMapping("changeStatus")
+    public void changeStatus(ChangeStatusDTO changeStatusDTO) {stationService.changeStatus(changeStatusDTO);}
 }

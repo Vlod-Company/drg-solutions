@@ -9,6 +9,7 @@ import vvp_company.stationservice.client.RequestServiceClient;
 import vvp_company.stationservice.client.dto.CreateRequestDTO;
 import vvp_company.stationservice.client.dto.RequestDTO;
 import vvp_company.stationservice.dto.AttackedDTO;
+import vvp_company.stationservice.dto.ChangeStatusDTO;
 import vvp_company.stationservice.enm.DeliveryPointType;
 import vvp_company.stationservice.dto.CreateStationDTO;
 import vvp_company.stationservice.enm.StationStatus;
@@ -78,5 +79,13 @@ public class StationService {
                 .build();
 
         return requestServiceClient.createRequest(createRequestDTO);
+    }
+
+    @Transactional
+    public void changeStatus(ChangeStatusDTO changeStatusDTO) {
+        var station = stationRepository.findById(changeStatusDTO.id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        station.setStatus(changeStatusDTO.status());
+        stationRepository.save(station);
     }
 }
