@@ -59,7 +59,8 @@ public class MissionController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') " +
-            "or hasRole('ROLE_MANAGEMENT_EMPLOYEE')")
+            "or hasRole('ROLE_MANAGEMENT_EMPLOYEE') "+
+            "or hasRole('ROLE_MISSION_CONTROL_EMPLOYEE')")
     @GetMapping("/{id}/getRecommendedWeapons")
     public List<RecommendedWeaponDto> getRecommendedWeaponsForMission(@PathVariable("id") Long id) {
         return missionService.getRecommendedWeaponsForMission(id);
