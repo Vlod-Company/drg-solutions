@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import vvp_company.logisticsservice.dto.UpdateLogisticRequest;
 import vvp_company.logisticsservice.enm.LogisticStatus;
 import vvp_company.logisticsservice.model.Logistic;
 import vvp_company.logisticsservice.repository.CargoRepository;
@@ -33,12 +34,12 @@ public class LogisticService {
         return repository.save(logistic);
     }
 
-    public Logistic updateLogistic(Long id, LogisticStatus newStatus, LocalDateTime newDate) {
+    public Logistic updateLogistic(Long id, UpdateLogisticRequest request) {
         var logistic = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         cargoRepository.recalculateCargo(logistic.getCargoId());
-        logistic.setStatus(newStatus);
-        logistic.setSendTime(newDate == null ? logistic.getSendTime() : newDate);
+        logistic.setStatus(request.getNewStatus());
+        logistic.setSendTime(request.getNewDate() == null ? logistic.getSendTime() : request.getNewDate());
         return repository.save(logistic);
     }
 

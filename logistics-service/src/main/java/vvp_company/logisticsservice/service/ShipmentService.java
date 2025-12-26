@@ -14,6 +14,7 @@ import vvp_company.logisticsservice.dto.sendItem.SendItemDTO;
 import vvp_company.logisticsservice.dto.sendItem.SendItemTeam;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static java.lang.String.format;
 
@@ -21,6 +22,7 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 public class ShipmentService {
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final String ADD_TO_CARGO_MESSAGE = """
             Добавьте в cargo id = %d
             %s
@@ -29,39 +31,24 @@ public class ShipmentService {
     private final LogisticService logisticService;
     private final CargoService cargoService;
     private final RequestServiceClient requestServiceClient;
-    private final TeamToCargoService teamToCargoService;
 
     @Transactional
     public void createShipment(CreateShipmentRequest createShipmentRequest) {
-        var teams = new ArrayList<SendItemTeam>();
-        var notTeams = new ArrayList<SendItemDTO>();
-
-        createShipmentRequest.getData().forEach(shipment -> {
-            if (shipment.getTypeName().equals("TEAM")) {
-                teams.add((SendItemTeam) shipment);
-            } else {
-                notTeams.add(shipment);
-            }
-        });
-
         var shipToPoint = createShipmentRequest.getShipToPoint();
         var shipToDate = createShipmentRequest.getShipToDate();
         var cargo = cargoService.createCargo(0, shipToDate, shipToPoint);
         logisticService.createLogistic(cargo.getId(), createShipmentRequest.getSpaceShipId());
-
-        var objectMapper = new ObjectMapper();
+        
         objectMapper.findAndRegisterModules();
 
         String stringData;
         try {
-            stringData = objectMapper.writeValueAsString(notTeams);
+            stringData = objectMapper.writeValueAsString(createShipmentRequest.getData());
         } catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        teams.forEach(team -> {
-            teamToCargoService.assignCargoToTeam(team.teamId(), cargo.getId());
-        });
+        stringData = Objects.equals(stringData, "[]") ? "" : stringData;
 
         var createCargoRequest = CreateRequestDTO.builder()
                 .recipientDepartment("store")

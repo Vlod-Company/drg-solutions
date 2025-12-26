@@ -11,7 +11,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = SendItemEquipment.class, name = "EQUIPMENT"),
         @JsonSubTypes.Type(value = SendItemWeapon.class, name = "WEAPON"),
-        @JsonSubTypes.Type(value = SendItemTeam.class, name = "TEAM")
+        @JsonSubTypes.Type(value = SendItemTeam.class, name = "TEAM"),
+        @JsonSubTypes.Type(value = SendItemResource.class, name = "RESOURCE")
 })
 public interface SendItemDTO {
 

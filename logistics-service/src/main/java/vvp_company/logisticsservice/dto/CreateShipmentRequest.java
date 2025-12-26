@@ -20,7 +20,5 @@ public class CreateShipmentRequest {
     @NotNull
     private Long shipToPoint;
 
-    @NotNull
-    @NotEmpty
     private List<SendItemDTO> data;
 }
