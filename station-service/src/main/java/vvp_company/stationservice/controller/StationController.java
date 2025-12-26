@@ -3,6 +3,8 @@ package vvp_company.stationservice.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import vvp_company.stationservice.client.dto.RequestDTO;
+import vvp_company.stationservice.dto.AttackedDTO;
 import vvp_company.stationservice.dto.CreateStationDTO;
 import vvp_company.stationservice.model.Station;
 import vvp_company.stationservice.service.StationService;
@@ -38,7 +40,7 @@ public class StationController {
     @PreAuthorize("hasRole('ROLE_ADMIN') " +
             "or hasRole('ROLE_MAINTENANCE_EMPLOYEE')")
     @PostMapping("setAttacked/{id}")
-    public void setAttacked(@PathVariable("id") Long id){
-        stationService.setAttacked(id);
+    public RequestDTO setAttacked(AttackedDTO attacked){
+        return stationService.setAttacked(attacked);
     }
 }

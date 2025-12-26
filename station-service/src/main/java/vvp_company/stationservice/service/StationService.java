@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import vvp_company.stationservice.client.RequestServiceClient;
 import vvp_company.stationservice.client.dto.CreateRequestDTO;
+import vvp_company.stationservice.client.dto.RequestDTO;
+import vvp_company.stationservice.dto.AttackedDTO;
 import vvp_company.stationservice.enm.DeliveryPointType;
 import vvp_company.stationservice.dto.CreateStationDTO;
 import vvp_company.stationservice.enm.StationStatus;
@@ -23,7 +25,7 @@ import static vvp_company.stationservice.enm.StationStatus.UNDER_ATTACK;
 @RequiredArgsConstructor
 public class StationService {
 
-    private final String UNDER_ATTACK_MESSAGE = "Станция №%d под атакой\nСделай-те что-нибудь\nПожалуйста :)";
+    private final String UNDER_ATTACK_MESSAGE = "Станция №%d под атакой\nНазвание станции: %s\nТип станции: %s\nОписание: %s";
 
     private final StationRepository stationRepository;
     private final StationMapper stationMapper;
@@ -61,18 +63,20 @@ public class StationService {
     }
 
     @Transactional
-    public void setAttacked(Long id) {
-        var station = stationRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public RequestDTO setAttacked(AttackedDTO attacked) {
+        var station = stationRepository.findById(attacked.id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         station.setStatus(UNDER_ATTACK);
         var newStation = stationRepository.save(station);
 
+        String desc = attacked.description().orElse("Станция под атакой");
+
         var createRequestDTO = CreateRequestDTO.builder()
                 .recipientDepartment("Maintenance")
-                .requestCode("XOA-RSF-761-RRR")
-                .description(format(UNDER_ATTACK_MESSAGE, newStation.getId()))
+                .requestCode("REQ-SA")
+                .description(format(UNDER_ATTACK_MESSAGE, newStation.getId(), newStation.getName(), newStation.getType(), desc))
                 .build();
 
-        requestServiceClient.createRequest(createRequestDTO);
+        return requestServiceClient.createRequest(createRequestDTO);
     }
 }
