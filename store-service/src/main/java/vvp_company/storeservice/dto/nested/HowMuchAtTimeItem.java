@@ -2,15 +2,13 @@ package vvp_company.storeservice.dto.nested;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import vvp_company.storeservice.enm.ItemType;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@AllArgsConstructor
 public class HowMuchAtTimeItem {
 
     @JsonProperty("item_type")
@@ -20,5 +18,11 @@ public class HowMuchAtTimeItem {
     private String infoName;
 
     @JsonProperty("total_count")
-    private Integer totalCount;
+    private Long totalCount;
+
+    public HowMuchAtTimeItem(String itemType, String infoName, Long totalCount) {
+        this.itemType = ItemType.valueOf(itemType.toUpperCase());
+        this.infoName = infoName;
+        this.totalCount = totalCount;
+    }
 }

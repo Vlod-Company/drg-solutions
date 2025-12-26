@@ -14,5 +14,5 @@ public class ItemResponseDTO {
     private ItemType itemType;
     private String itemName;
     private Integer itemWeight;
-    private Integer itemQuantity;
+    private Long itemQuantity;
 }
