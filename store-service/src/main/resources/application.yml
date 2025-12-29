@@ -38,6 +38,8 @@ eureka:
   instance:
     prefer-ip-address: true
 
+server:
+  port: 9095
 logging:
   level:
     org:

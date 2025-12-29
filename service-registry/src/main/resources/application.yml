@@ -7,3 +7,13 @@ eureka:
     fetch-registry: false
   server:
     enable-self-preservation: false
+
+logging:
+  level:
+    com:
+      netflix:
+        eureka: WARN
+        discovery: WARN
+    org:
+      springframework:
+        cloud: WARN

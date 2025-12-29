@@ -19,7 +19,6 @@ spring:
         bytecode:
           provider: none
         format_sql: true
-
 eureka:
   client:
     service-url:
@@ -27,6 +26,8 @@ eureka:
   instance:
     prefer-ip-address: true
 
+server:
+  port: 9095
 logging:
   level:
     org:

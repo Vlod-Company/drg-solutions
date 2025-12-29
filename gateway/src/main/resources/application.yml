@@ -18,8 +18,7 @@ eureka:
     prefer-ip-address: true
 
 server:
-  port: 8234
-
+  port: 9095
 logging:
   level:
     org:
