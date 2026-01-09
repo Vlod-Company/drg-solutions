@@ -1,28 +1,25 @@
-package vvp_company.storeservice.model;
+package vvp_company.ecosystemservice.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vvp_company.storeservice.enm.TeamStatus;
+import vvp_company.ecosystemservice.enm.DeliveryPointType;
 
 @Entity
+@Table(name = "delivery_point")
 @Data
-@Table(name = "teams")
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class Team {
+public class DeliveryPoint {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "cargo_id")
-    private Long cargoId;
-
-    @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private TeamStatus status;
+    @Column(name = "delivery_type")
+    private DeliveryPointType deliveryType;
 }

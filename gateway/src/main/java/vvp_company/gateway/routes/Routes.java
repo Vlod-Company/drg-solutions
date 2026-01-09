@@ -79,6 +79,11 @@ public class Routes {
                         .route(path("/spaceship-service/**"), http())
                         .filter(lb("spaceship-service"))
                         .before(auth(authServiceClient))
+                        .build())
+                .and(route("ecosystem-service")
+                        .route(path("/ecosystem-service/**"), http())
+                        .filter(lb("ecosystem-service"))
+                        .before(auth(authServiceClient))
                         .build());
     }
 }

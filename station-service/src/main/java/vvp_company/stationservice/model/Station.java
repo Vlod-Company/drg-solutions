@@ -26,7 +26,7 @@ public class Station {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private StationStatus status = StationStatus.UNDER_CONSTRUCTION;
+    private StationStatus status = StationStatus.DESIGNED;
 
     @Column(name = "delivery_point_id")
     private Long deliveryPointId;

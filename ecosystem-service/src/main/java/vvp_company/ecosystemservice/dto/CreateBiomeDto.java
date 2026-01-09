@@ -6,6 +6,5 @@ import jakarta.validation.constraints.NotNull;
 public record CreateBiomeDto(
         @NotBlank String name,
         @NotBlank String description,
-        @NotNull Integer planetId,
-        Long deliveryPointId
+        @NotNull Integer planetId
 ) {}

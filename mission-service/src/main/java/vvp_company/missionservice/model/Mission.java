@@ -35,6 +35,6 @@ public class Mission {
     @Column(name = "mission_start", nullable = false)
     private LocalDateTime missionStart;
 
-    @Column(name = "mission_end", nullable = false)
+    @Column(name = "mission_end")
     private LocalDateTime missionEnd;
 }

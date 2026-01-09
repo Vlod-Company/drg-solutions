@@ -5,6 +5,7 @@ public enum ResourceStatus {
     STORED,
     RESERVED,
     ON_THE_WAY,
+    DELIVERED,
     LOST,
     MINED
 }

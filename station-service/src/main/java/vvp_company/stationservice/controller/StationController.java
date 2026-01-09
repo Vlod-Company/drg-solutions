@@ -1,5 +1,7 @@
 package vvp_company.stationservice.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -41,13 +43,15 @@ public class StationController {
     @PreAuthorize("hasRole('ROLE_ADMIN') " +
             "or hasRole('ROLE_MAINTENANCE_EMPLOYEE')")
     @PostMapping("{id}/setAttacked")
-    public RequestDTO setAttacked(@PathVariable Long id, AttackedDTO dto){
+    public RequestDTO setAttacked(@PathVariable Long id, @RequestBody AttackedDTO dto){
         return stationService.setAttacked(id, dto);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') " +
             "or hasRole('ROLE_MAINTENANCE_EMPLOYEE') "+
             "or hasRole('ROLE_MANAGEMENT_EMPLOYEE')")
-    @PostMapping("changeStatus")
-    public void changeStatus(ChangeStatusDTO changeStatusDTO) {stationService.changeStatus(changeStatusDTO);}
+    @PutMapping("{id}/changeStatus")
+    public Station changeStatus(@PathVariable Long id, @Valid @RequestBody ChangeStatusDTO dto) {
+        return stationService.changeStatus(id, dto);
+    }
 }

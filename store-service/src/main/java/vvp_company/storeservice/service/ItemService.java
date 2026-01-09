@@ -19,6 +19,7 @@ import vvp_company.storeservice.dto.request.ReserveCargoRequest;
 import vvp_company.storeservice.dto.response.DeliveryPointResponseDTO;
 import vvp_company.storeservice.enm.ItemType;
 import vvp_company.storeservice.enm.Status;
+import vvp_company.storeservice.enm.TeamStatus;
 import vvp_company.storeservice.model.Equipment;
 import vvp_company.storeservice.model.Resource;
 import vvp_company.storeservice.model.Team;
@@ -224,6 +225,16 @@ public class ItemService {
         weaponRepository.updateStatusForWeaponsWithCargoId(status, cargoId);
         equipmentRepository.updateStatusForEquipmentWithCargoId(status, cargoId);
         resourceRepository.updateStatusForResourceWithCargoId(status, cargoId);
+        TeamStatus teamStatus;
+        switch (status) {
+            case STORED -> teamStatus = TeamStatus.CREATED;
+            case RESERVED -> teamStatus = TeamStatus.ASSIGNED;
+            case LOST -> teamStatus = TeamStatus.KILLED;
+            case DELIVERED -> teamStatus = TeamStatus.DELIVERED;
+            case ON_THE_WAY -> teamStatus = TeamStatus.ON_THE_WAY;
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        teamRepository.updateStatusForTeamWithCargoId(teamStatus, cargoId);
     }
 
     private Map<ItemType, List<String>> itemSearchDtoToMap(List<ItemSearchDTO> items) {

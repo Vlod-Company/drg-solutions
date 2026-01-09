@@ -37,6 +37,7 @@ eureka:
   instance:
     prefer-ip-address: true
 
+
 logging:
   level:
     com:
@@ -46,3 +47,5 @@ logging:
     org:
       springframework:
         web: DEBUG
+server:
+  port: 9095

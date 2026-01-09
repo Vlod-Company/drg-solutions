@@ -2,13 +2,13 @@ package vvp_company.missionservice.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vvp_company.missionservice.enm.MissionStatus;
+
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -30,4 +30,7 @@ public class CreateMissionRequest {
 
     @Min(value=0)
     private Integer requiredExperience = 0;
+
+    @NotNull
+    private LocalDateTime missionStart;
 }

@@ -27,7 +27,7 @@ public class Team {
     @Column(name = "located_at")
     private Long locatedAtId;
 
-    @Column(nullable = false, length = 50)
+    @Column(name = "status", nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
     private TeamStatus status = TeamStatus.CREATED;
 }

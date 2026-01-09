@@ -5,5 +5,6 @@ public enum Status {
     STORED,
     RESERVED,
     ON_THE_WAY,
+    DELIVERED,
     LOST
 }

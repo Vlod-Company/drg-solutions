@@ -11,6 +11,7 @@ import vvp_company.missionservice.dto.nested.RecommendedWeaponDto;
 import vvp_company.missionservice.dto.nested.sendItem.SendItemDTO;
 import vvp_company.missionservice.dto.request.CreateMissionRequest;
 import vvp_company.missionservice.dto.nested.MissionDto;
+import vvp_company.missionservice.dto.request.UpdateMissionRequest;
 import vvp_company.missionservice.dto.response.PagedResponse;
 import vvp_company.missionservice.service.MissionService;
 
@@ -73,5 +74,13 @@ public class MissionController {
     @PostMapping("/send/{missionId}")
     public RequestDTO createSendMissionRequestInRequestService(@NotNull @PathVariable("missionId") Long missionId, @Valid @RequestBody List<SendItemDTO> sendItemDTOList) throws JsonProcessingException {
         return missionService.createSendMissionRequestInRequestService(missionId, sendItemDTOList);
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_MANAGEMENT_EMPLOYEE') "+
+            "or hasRole('ROLE_MISSION_CONTROL_EMPLOYEE')")
+    @PutMapping("{id}")
+    public MissionDto updateMission(@PathVariable("id") Long id, @NotNull @RequestBody UpdateMissionRequest dto) {
+        return missionService.updateMission(id, dto);
     }
 }

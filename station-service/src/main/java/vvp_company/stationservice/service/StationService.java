@@ -82,10 +82,10 @@ public class StationService {
     }
 
     @Transactional
-    public void changeStatus(ChangeStatusDTO changeStatusDTO) {
-        var station = stationRepository.findById(changeStatusDTO.id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public Station changeStatus(Long id, ChangeStatusDTO dto) {
+        var station = stationRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        station.setStatus(changeStatusDTO.status());
-        stationRepository.save(station);
+        station.setStatus(dto.status());
+        return stationRepository.save(station);
     }
 }
