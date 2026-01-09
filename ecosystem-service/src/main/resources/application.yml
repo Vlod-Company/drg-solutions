@@ -33,6 +33,10 @@ server:
   port: ${SERVER_PORT}
 logging:
   level:
+    com:
+      netflix:
+        eureka: ERROR
+        discovery: ERROR
     org:
       springframework:
         web: DEBUG
