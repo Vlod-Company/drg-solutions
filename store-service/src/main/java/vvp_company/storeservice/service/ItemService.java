@@ -29,7 +29,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.groupingBy;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static vvp_company.storeservice.enm.ItemType.valueOf;
 import static vvp_company.storeservice.enm.ResourceStatus.RESERVED;
 import static vvp_company.storeservice.enm.ResourceStatus.STORED;
@@ -112,7 +114,11 @@ public class ItemService {
 
         var deliveryPoint = deliveryPointClient.getDeliveryPointById(deliveryPointId);
 
-        return List.of(howMuchAtTimeItemsToDeliveryPointResponse(itemInDeliveryPoint, deliveryPoint));
+        var howMuchAtTimeItemsToDeliveryPointResponse = howMuchAtTimeItemsToDeliveryPointResponse(itemInDeliveryPoint, deliveryPoint);
+        if (isNull(howMuchAtTimeItemsToDeliveryPointResponse)) {
+            throw new ResponseStatusException(NOT_FOUND);
+        }
+        return List.of(howMuchAtTimeItemsToDeliveryPointResponse);
     }
 
     public List<DeliveryPointResponseDTO> findItemsInAllDeliveryPoints(List<ItemSearchDTO> items) {
@@ -120,7 +126,7 @@ public class ItemService {
 
         var deliveryPoints = deliveryPointClient.getDeliveryPoints();
 
-        return deliveryPoints.stream().map(deliveryPoint -> {
+        var list = deliveryPoints.stream().map(deliveryPoint -> {
             var itemInDeliveryPoint = warehouseRepository.howMuchAtTimeInDeliveryPoint(deliveryPoint.getId(), LocalDateTime.now()).stream()
                     .filter(item -> Optional.ofNullable(searchItemsByType.get(valueOf(item.getItemType().toUpperCase())))
                             .map((l) -> l.contains(item.getInfoName()))
@@ -128,7 +134,11 @@ public class ItemService {
                     .toList();
 
             return howMuchAtTimeItemsToDeliveryPointResponse(itemInDeliveryPoint, deliveryPoint);
-        }).toList();
+        }).filter(Objects::nonNull).toList();
+        if (list.isEmpty()) {
+            throw new ResponseStatusException(NOT_FOUND);
+        }
+        return list;
     }
 
     @Transactional
@@ -247,10 +257,10 @@ public class ItemService {
                     .build();
         }).toList();
 
-        return DeliveryPointResponseDTO.builder()
+        return !itemDTOs.isEmpty() ? DeliveryPointResponseDTO.builder()
                 .deliveryPointType(deliveryPoint.getDeliveryType())
                 .deliveryPointId(deliveryPoint.getId())
                 .data(itemDTOs)
-                .build();
+                .build() : null;
     }
 }

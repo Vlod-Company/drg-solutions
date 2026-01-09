@@ -30,7 +30,4 @@ public class CreateMissionRequest {
 
     @Min(value=0)
     private Integer requiredExperience = 0;
-
-    @Null
-    private MissionStatus status = MissionStatus.CREATED;
 }

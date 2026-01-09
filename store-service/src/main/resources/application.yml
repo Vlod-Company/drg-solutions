@@ -39,7 +39,7 @@ eureka:
     prefer-ip-address: true
 
 server:
-  port: 9095
+  port: ${SERVER_PORT}
 logging:
   level:
     org:

@@ -22,13 +22,13 @@ public class Mission {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "teamId")
+    @Column(name = "team_id")
     private Long teamId;
 
     @Column(name = "required_experience", nullable = false)
     private Integer requiredExperience = 0;
 
-    @Column(nullable = false)
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private MissionStatus status = MissionStatus.CREATED;
 

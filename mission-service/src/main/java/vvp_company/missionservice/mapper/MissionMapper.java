@@ -13,5 +13,6 @@ public interface MissionMapper {
 
     MissionDto toMissionDto(Mission m);
     Mission toMission(MissionDto m);
+
     Mission fromCreateMissionRequest(CreateMissionRequest createMissionRequest);
 }
