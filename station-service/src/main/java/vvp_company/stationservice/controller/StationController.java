@@ -40,9 +40,9 @@ public class StationController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN') " +
             "or hasRole('ROLE_MAINTENANCE_EMPLOYEE')")
-    @PostMapping("setAttacked")
-    public RequestDTO setAttacked(AttackedDTO attacked){
-        return stationService.setAttacked(attacked);
+    @PostMapping("{id}/setAttacked")
+    public RequestDTO setAttacked(@PathVariable Long id, AttackedDTO dto){
+        return stationService.setAttacked(id, dto);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') " +

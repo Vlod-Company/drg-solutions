@@ -64,13 +64,13 @@ public class StationService {
     }
 
     @Transactional
-    public RequestDTO setAttacked(AttackedDTO attacked) {
-        var station = stationRepository.findById(attacked.id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public RequestDTO setAttacked(Long id, AttackedDTO dto) {
+        var station = stationRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         station.setStatus(UNDER_ATTACK);
         var newStation = stationRepository.save(station);
 
-        String desc = attacked.description().orElse("Станция под атакой");
+        var desc = dto.description().orElse("Станция под атакой");
 
         var createRequestDTO = CreateRequestDTO.builder()
                 .recipientDepartment("Maintenance")
