@@ -36,7 +36,7 @@ public class StationController {
     @PreAuthorize("hasRole('ROLE_ADMIN') " +
             "or hasRole('ROLE_MAINTENANCE_EMPLOYEE')")
     @PostMapping
-    public Station addStation(CreateStationDTO station){
+    public Station addStation(@RequestBody CreateStationDTO station){
         return stationService.addStation(station);
     }
 

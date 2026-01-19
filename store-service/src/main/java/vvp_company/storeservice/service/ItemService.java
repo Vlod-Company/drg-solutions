@@ -18,6 +18,7 @@ import vvp_company.storeservice.dto.nested.sendItem.*;
 import vvp_company.storeservice.dto.request.ReserveCargoRequest;
 import vvp_company.storeservice.dto.response.DeliveryPointResponseDTO;
 import vvp_company.storeservice.enm.ItemType;
+import vvp_company.storeservice.enm.ResourceStatus;
 import vvp_company.storeservice.enm.Status;
 import vvp_company.storeservice.enm.TeamStatus;
 import vvp_company.storeservice.model.Equipment;
@@ -224,7 +225,8 @@ public class ItemService {
     public void updateStatusForCargo(Long cargoId, Status status) {
         weaponRepository.updateStatusForWeaponsWithCargoId(status, cargoId);
         equipmentRepository.updateStatusForEquipmentWithCargoId(status, cargoId);
-        resourceRepository.updateStatusForResourceWithCargoId(status, cargoId);
+        var resourceStatus = ResourceStatus.valueOf(status.name());
+        resourceRepository.updateStatusForResourceWithCargoId(resourceStatus, cargoId);
         TeamStatus teamStatus;
         switch (status) {
             case STORED -> teamStatus = TeamStatus.CREATED;

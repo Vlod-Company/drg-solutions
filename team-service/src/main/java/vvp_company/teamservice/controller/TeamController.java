@@ -1,6 +1,7 @@
 package vvp_company.teamservice.controller;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -47,7 +48,7 @@ public class TeamController {
             "or hasRole('ROLE_LAUNCH_CONTROL_EMPLOYEE') "+
             "or hasRole('ROLE_MISSION_CONTROL_EMPLOYEE')")
     @PutMapping("/{id}")
-    public void updateTeam(@PathVariable Long id, @NotBlank @RequestParam("status") TeamStatus status, @RequestParam("cargoId") Long cargoId) {
+    public void updateTeam(@PathVariable Long id, @NotNull @RequestParam("status") TeamStatus status, @RequestParam("cargoId") Long cargoId) {
         teamService.updateTeamStatus(id, status, cargoId);
     }
 }

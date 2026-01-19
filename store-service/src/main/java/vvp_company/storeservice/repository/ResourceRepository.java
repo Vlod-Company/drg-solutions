@@ -21,5 +21,5 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
 
     @Modifying
     @Query("update Resource r set r.status = :status where r.cargoId = :cargo_id")
-    void updateStatusForResourceWithCargoId(@Param("status") Status status, @Param("cargo_id") Long cargo_id);
+    void updateStatusForResourceWithCargoId(@Param("status") ResourceStatus status, @Param("cargo_id") Long cargo_id);
 }
