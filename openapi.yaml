@@ -1,0 +1,1544 @@
+openapi: 3.0.0
+info:
+  title: DRG Solutions API
+  description: Aggregated API documentation for all services
+  version: 1.0.0
+servers:
+  - url: http://localhost:6789
+    description: API Gateway
+
+tags:
+  - name: Auth Service
+  - name: Delivery Point Service
+  - name: Employee Service
+  - name: Ecosystem Service
+  - name: Glossary Service
+  - name: Logistics Service
+  - name: Mission Service
+  - name: Planet Service
+  - name: Request Service
+  - name: Spaceship Service
+  - name: Station Service
+  - name: Store Service
+  - name: Team Service
+
+paths:
+  # Auth Service
+  /auth-service/auth/register:
+    post:
+      tags: [Auth Service]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrationRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+  /auth-service/auth/login:
+    post:
+      tags: [Auth Service]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+  /auth-service/auth/validate:
+    post:
+      tags: [Auth Service]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidateTokenRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenInfo"
+  /auth-service/auth/me:
+    get:
+      tags: [Auth Service]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenInfo"
+  /auth-service/auth/users/{userId}:
+    get:
+      tags: [Auth Service]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+  /auth-service/auth/users/{userId}/roles/add:
+    post:
+      tags: [Auth Service]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+  /auth-service/auth/users/{userId}/roles/remove:
+    post:
+      tags: [Auth Service]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+  /auth-service/auth/users/{userId}/roles/set:
+    post:
+      tags: [Auth Service]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetRolesRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+
+  # Delivery Point Service
+  /delivery-point-service/deliveryPoint:
+    get:
+      tags: [Delivery Point Service]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DeliveryPoint"
+  /delivery-point-service/deliveryPoint/{id}:
+    get:
+      tags: [Delivery Point Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeliveryPoint"
+
+  # Employee Service
+  /employee-service/employees:
+    get:
+      tags: [Employee Service]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EmployeeResponseDto"
+    post:
+      tags: [Employee Service]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeRequestDto"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeResponseDto"
+  /employee-service/employees/{id}:
+    get:
+      tags: [Employee Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeResponseDto"
+    put:
+      tags: [Employee Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeRequestDto"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeResponseDto"
+    delete:
+      tags: [Employee Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: No Content
+
+  # Ecosystem Service
+  /ecosystem-service/biome:
+    get:
+      tags: [Ecosystem Service]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BiomeDto"
+    post:
+      tags: [Ecosystem Service]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBiomeDto"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BiomeDto"
+  /ecosystem-service/biome/{id}:
+    get:
+      tags: [Ecosystem Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BiomeDto"
+    put:
+      tags: [Ecosystem Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBiomeDto"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BiomeDto"
+    delete:
+      tags: [Ecosystem Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: No Content
+  /ecosystem-service/monster:
+    get:
+      tags: [Ecosystem Service]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MonsterDto"
+    post:
+      tags: [Ecosystem Service]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMonsterDto"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonsterDto"
+  /ecosystem-service/impact-type:
+    get:
+      tags: [Ecosystem Service]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ImpactTypeDto"
+
+  # Glossary Service
+  /glossary-service/biome/all:
+    get:
+      tags: [Glossary Service]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GlossaryBiome"
+  /glossary-service/equipmentInfo/all:
+    get:
+      tags: [Glossary Service]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EquipmentInfoDTO"
+  /glossary-service/resourceInfo/all:
+    get:
+      tags: [Glossary Service]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResourceInfoDTO"
+
+  # Logistics Service
+  /logistics-service/logistics/{id}:
+    get:
+      tags: [Logistics Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Logistic"
+    put:
+      tags: [Logistics Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLogisticRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Logistic"
+  /logistics-service/shipment:
+    post:
+      tags: [Logistics Service]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateShipmentRequest"
+      responses:
+        "200":
+          description: OK
+
+  # Mission Service
+  /mission-service/mission:
+    get:
+      tags: [Mission Service]
+      parameters:
+        - name: pageNumber
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedResponseMissionDto"
+    post:
+      tags: [Mission Service]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMissionRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MissionDto"
+  /mission-service/mission/{id}:
+    get:
+      tags: [Mission Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MissionDto"
+    put:
+      tags: [Mission Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMissionRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MissionDto"
+    delete:
+      tags: [Mission Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+  /mission-service/mission/{id}/getRecommendedWeapons:
+    get:
+      tags: [Mission Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecommendedWeaponDto"
+  /mission-service/mission/send/{missionId}:
+    post:
+      tags: [Mission Service]
+      parameters:
+        - name: missionId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/SendItemDTO"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestDto"
+
+  # Planet Service
+  /planet-service/api/planets:
+    get:
+      tags: [Planet Service]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlanetDto"
+    post:
+      tags: [Planet Service]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePlanetRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanetDto"
+  /planet-service/api/planets/{id}:
+    get:
+      tags: [Planet Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanetDto"
+    put:
+      tags: [Planet Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePlanetRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanetDto"
+    delete:
+      tags: [Planet Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: No Content
+
+  # Request Service
+  /request-service/request:
+    post:
+      tags: [Request Service]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRequestDto"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestDto"
+  /request-service/request/{id}:
+    get:
+      tags: [Request Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestDto"
+
+  # Spaceship Service
+  /spaceship-service/spaceship:
+    get:
+      tags: [Spaceship Service]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SpaceShip"
+    post:
+      tags: [Spaceship Service]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSpaceShipDTO"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpaceShip"
+  /spaceship-service/spaceship/{id}:
+    get:
+      tags: [Spaceship Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpaceShip"
+
+  # Station Service
+  /station-service/station:
+    get:
+      tags: [Station Service]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Station"
+    post:
+      tags: [Station Service]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStationDTO"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Station"
+    delete:
+      tags: [Station Service]
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+  /station-service/station/{id}/setAttacked:
+    post:
+      tags: [Station Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AttackedDTO"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestDto"
+  /station-service/station/{id}/changeStatus:
+    put:
+      tags: [Station Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeStatusDTO"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Station"
+
+  # Store Service
+  /store-service/items:
+    post:
+      tags: [Store Service]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/ItemSearchDTO"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DeliveryPointResponseDTO"
+  /store-service/items/add/{deliveryPointId}:
+    post:
+      tags: [Store Service]
+      parameters:
+        - name: deliveryPointId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/SendItemDTO"
+      responses:
+        "200":
+          description: OK
+  /store-service/items/reserveCargo:
+    post:
+      tags: [Store Service]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReserveCargoRequest"
+      responses:
+        "200":
+          description: OK
+  /store-service/items/changeStatusForCargo/{id}:
+    put:
+      tags: [Store Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+
+  # Team Service
+  /team-service/team:
+    get:
+      tags: [Team Service]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TeamDto"
+    post:
+      tags: [Team Service]
+      parameters:
+        - name: teamName
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamDto"
+  /team-service/team/{id}:
+    get:
+      tags: [Team Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamDto"
+    put:
+      tags: [Team Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: cargoId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+    delete:
+      tags: [Team Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+
+components:
+  schemas:
+    RegistrationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        password:
+          type: string
+        employee_id:
+          type: integer
+          format: int64
+    LoginRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        password:
+          type: string
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        tokenType:
+          type: string
+    ValidateTokenRequest:
+      type: object
+      properties:
+        token:
+          type: string
+    TokenInfo:
+      type: object
+      properties:
+        username:
+          type: string
+        user_id:
+          type: integer
+          format: int64
+        employee_id:
+          type: integer
+          format: int64
+        post:
+          type: string
+        department:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        employeeId:
+          type: integer
+          format: int64
+        username:
+          type: string
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        roles:
+          type: array
+          items:
+            type: string
+
+    DeliveryPoint:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        type:
+          type: string
+    EmployeeResponseDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        post:
+          type: string
+        department:
+          type: string
+        experience:
+          type: integer
+        status:
+          type: string
+        hiredDate:
+          type: string
+          format: date
+        firedDate:
+          type: string
+          format: date
+    EmployeeRequestDto:
+      type: object
+      properties:
+        name:
+          type: string
+        post:
+          type: string
+        department:
+          type: string
+        experience:
+          type: integer
+        status:
+          type: string
+          enum: [WORKING, FIRED, ON_LEAVE]
+        hiredDate:
+          type: string
+          format: date
+    BiomeDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        planetId:
+          type: integer
+        deliveryPointId:
+          type: integer
+          format: int64
+    CreateBiomeDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        planetId:
+          type: integer
+    MonsterDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        dangerLevel:
+          type: integer
+        heritage:
+          type: string
+        monsterType:
+          type: string
+        biomeId:
+          type: integer
+        armorType:
+          type: string
+        weaknesses:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImpactTypeShortDto"
+        strengths:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImpactTypeShortDto"
+    CreateMonsterDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        dangerLevel:
+          type: integer
+        heritage:
+          type: string
+        monsterType:
+          type: string
+        biomeId:
+          type: integer
+        armorType:
+          type: string
+        weaknessIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+        strengthIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+    ImpactTypeDto:
+      type: object
+    ImpactTypeShortDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+    GlossaryBiome:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: "Dense Biozone"
+        description:
+          type: string
+          example: "A dark and mysterious cave system teeming with plant/animal hybrids."
+    EquipmentInfoDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Flashlight"
+        description:
+          type: string
+          example: "Standard issue flashlight for dark caves."
+        weight:
+          type: number
+          format: double
+          example: 0.5
+    ResourceInfoDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Nitra"
+        description:
+          type: string
+          example: "Red crystalline mineral used for resupplies."
+        weightPerUnit:
+          type: number
+          format: double
+          example: 0.1
+    Logistic:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        sendTime:
+          type: string
+          format: date-time
+          example: "2026-01-20T10:00:00"
+        cargoId:
+          type: integer
+          format: int64
+          example: 123
+        spaceShipId:
+          type: integer
+          format: int64
+          example: 456
+        status:
+          type: string
+          example: "IN_TRANSIT"
+    UpdateLogisticRequest:
+      type: object
+      properties:
+        newStatus:
+          type: string
+          example: "DELIVERED"
+        newDate:
+          type: string
+          format: date-time
+          example: "2026-01-21T15:30:00"
+    CreateShipmentRequest:
+      type: object
+      properties:
+        spaceShipId:
+          type: integer
+          format: int64
+          example: 456
+        shipToDate:
+          type: string
+          format: date
+          example: "2026-02-01"
+        shipToPoint:
+          type: integer
+          format: int64
+          example: 789
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SendItemDTO"
+    MissionDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        biomeId:
+          type: integer
+          format: int64
+        description:
+          type: string
+        teamId:
+          type: integer
+          format: int64
+        requiredExperience:
+          type: integer
+        status:
+          type: string
+        missionStart:
+          type: string
+          format: date-time
+        missionEnd:
+          type: string
+          format: date-time
+    CreateMissionRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        biomeId:
+          type: integer
+          format: int64
+        description:
+          type: string
+        teamId:
+          type: integer
+          format: int64
+        requiredExperience:
+          type: integer
+        missionStart:
+          type: string
+          format: date-time
+    PagedResponseMissionDto:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/MissionDto"
+        total:
+          type: integer
+          example: 50
+        pageNumber:
+          type: integer
+          example: 0
+        pageSize:
+          type: integer
+          example: 10
+    PlanetDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+    CreatePlanetRequest:
+      type: object
+      properties:
+        name:
+          type: string
+    RequestDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        status:
+          type: string
+        senderDepartment:
+          type: string
+        recipientDepartment:
+          type: string
+        requestCode:
+          type: string
+        description:
+          type: string
+        response:
+          type: string
+        senderEmployeeId:
+          type: integer
+          format: int64
+        recipientEmployeeId:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        closedAt:
+          type: string
+          format: date-time
+    CreateRequestDto:
+      type: object
+      properties:
+        recipientDepartment:
+          type: string
+        requestCode:
+          type: string
+        description:
+          type: string
+    SpaceShip:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        liftingCapacity:
+          type: integer
+    CreateSpaceShipDTO:
+      type: object
+      properties:
+        name:
+          type: string
+        liftingCapacity:
+          type: integer
+    Station:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        planetId:
+          type: integer
+          format: int64
+        type:
+          type: string
+        status:
+          type: string
+        deliveryPointId:
+          type: integer
+          format: int64
+    CreateStationDTO:
+      type: object
+      properties:
+        name:
+          type: string
+        planetId:
+          type: integer
+          format: int64
+        type:
+          type: string
+    AttackedDTO:
+      type: object
+      properties:
+        description:
+          type: string
+    ChangeStatusDTO:
+      type: object
+      properties:
+        status:
+          type: string
+
+    ItemSearchDTO:
+      type: object
+      properties:
+        itemId:
+          type: integer
+          format: int64
+    DeliveryPointResponseDTO:
+      type: object
+    ReserveCargoRequest:
+      type: object
+      properties:
+        cargoId:
+          type: integer
+          format: int64
+        locatedAt:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SendItemDTO"
+
+    SendItemDTO:
+      type: object
+      discriminator:
+        propertyName: itemType
+      properties:
+        itemType:
+          type: string
+          example: "EQUIPMENT"
+        name:
+          type: string
+          example: "Drill"
+    RoleRequest:
+      type: object
+      properties:
+        roleName:
+          type: string
+    SetRolesRequest:
+      type: object
+      properties:
+        roleNames:
+          type: array
+          items:
+            type: string
+    UpdateMissionRequest:
+      type: object
+      properties:
+        newStatus:
+          type: string
+        newMissionEnd:
+          type: string
+          format: date-time
+    RecommendedWeaponDto:
+      type: object
+      properties:
+        weaponId:
+          type: integer
+          format: int64
+        weaponName:
+          type: string
+        impactTypeName:
+          type: string
+
+    TeamDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        cargoId:
+          type: integer
+          format: int64
+        locatedAtId:
+          type: integer
+          format: int64
+        status:
+          type: string

@@ -1,7 +1,5 @@
 package vvp_company.authservice.controller;
 
-
-
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,12 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vvp_company.authservice.exception.AuthException;
 
-
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
-
 
     private final AuthService authService;
 
@@ -26,7 +22,6 @@ public class AuthController {
         var token = authService.register(req);
         return ResponseEntity.ok(new AuthResponse(token, "Bearer"));
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest req) {
@@ -55,32 +50,45 @@ public class AuthController {
     }
 
     @PostMapping("/users/{userId}/roles/add")
-    public ResponseEntity<User> addRole(
+    public ResponseEntity<UserDto> addRole(
             @PathVariable Long userId,
             @RequestBody RoleRequest request) {
         User user = authService.addRoleToUser(userId, request.roleName());
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(mapToDto(user));
     }
 
     @PostMapping("/users/{userId}/roles/remove")
-    public ResponseEntity<User> removeRole(
+    public ResponseEntity<UserDto> removeRole(
             @PathVariable Long userId,
             @RequestBody RoleRequest request) {
         User user = authService.removeRoleFromUser(userId, request.roleName());
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(mapToDto(user));
     }
 
     @PostMapping("/users/{userId}/roles/set")
-    public ResponseEntity<User> setRoles(
+    public ResponseEntity<UserDto> setRoles(
             @PathVariable Long userId,
             @RequestBody SetRolesRequest request) {
         User user = authService.setUserRoles(userId, request.roleNames());
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(mapToDto(user));
     }
 
     @GetMapping("/users/{userId}")
-    public ResponseEntity<User> getUser(@PathVariable Long userId) {
+    public ResponseEntity<UserDto> getUser(@PathVariable Long userId) {
         User user = authService.getUserById(userId);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(mapToDto(user));
+    }
+
+    private UserDto mapToDto(User user) {
+        return UserDto.builder()
+                .id(user.getId())
+                .employeeId(user.getEmployeeId())
+                .username(user.getUsername())
+                .active(user.getActive())
+                .createdAt(user.getCreatedAt())
+                .roles(user.getRoles().stream()
+                        .map(role -> role.getName())
+                        .collect(java.util.stream.Collectors.toSet()))
+                .build();
     }
 }
