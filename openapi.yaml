@@ -384,6 +384,20 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ImpactTypeDto"
+    post:
+      tags: [Ecosystem Service]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateImpactTypeDto"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImpactTypeDto"
 
   # Glossary Service
   /glossary-service/biome/all:
@@ -1196,6 +1210,21 @@ components:
             format: int64
     ImpactTypeDto:
       type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+    CreateImpactTypeDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
     ImpactTypeShortDto:
       type: object
       properties:
@@ -1465,11 +1494,36 @@ components:
     ItemSearchDTO:
       type: object
       properties:
-        itemId:
+        itemName:
+          type: string
+        itemType:
+          type: string
+          example: "EQUIPMENT"
+    ItemResponseDTO:
+      type: object
+      properties:
+        itemType:
+          type: string
+        itemName:
+          type: string
+        itemWeight:
+          type: number
+          format: double
+        itemQuantity:
           type: integer
           format: int64
     DeliveryPointResponseDTO:
       type: object
+      properties:
+        deliveryPointType:
+          type: string
+        deliveryPointId:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ItemResponseDTO"
     ReserveCargoRequest:
       type: object
       properties:
