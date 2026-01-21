@@ -6,15 +6,21 @@ import org.springframework.web.servlet.function.ServerRequest;
 import vvp_company.gateway.client.AuthServiceClient;
 import vvp_company.gateway.client.dto.ValidatieTokenRequest;
 
-import java.util.Arrays;
 import java.util.function.Function;
 
-public class AuthHeaderGatewayFilter{
+public class AuthHeaderGatewayFilter {
 
     public static Function<ServerRequest, ServerRequest> auth(AuthServiceClient authServiceClient) {
         return request -> {
+            if (request.method().equals(org.springframework.http.HttpMethod.OPTIONS)) {
+                return request;
+            }
             try {
-                var authToken = request.headers().header("Authorization").get(0);
+                var authHeader = request.headers().header("Authorization");
+                if (authHeader.isEmpty()) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+                }
+                var authToken = authHeader.get(0);
                 var token = authToken.substring("Bearer ".length());
                 var response = authServiceClient.validate(new ValidatieTokenRequest(token));
                 request = ServerRequest.from(request)
