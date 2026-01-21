@@ -43,7 +43,7 @@ public class SecurityConfig {
                                                                 "/error")
                                                 .permitAll()
                                                 .anyRequest().authenticated())
-                                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                                .addFilterBefore(jwtFilter, Us  ernamePasswordAuthenticationFilter.class)
                                 .addFilterBefore(rolesHeaderFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();

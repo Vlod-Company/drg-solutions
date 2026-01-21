@@ -3,6 +3,10 @@ import React from "react";
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string;
     error?: string;
+    // Add explicitly if needed but normally extension handles it.
+    // Given the lint errors, we'll make it explicit.
+    name?: string;
+    type?: string;
 }
 
 export function Input({ label, error, className = "", ...props }: InputProps) {
@@ -25,6 +29,7 @@ export function Input({ label, error, className = "", ...props }: InputProps) {
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
     label?: string;
     error?: string;
+    name?: string;
 }
 
 export function Textarea({
@@ -52,7 +57,8 @@ export function Textarea({
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
     label?: string;
     error?: string;
-    options: { value: string; label: string }[];
+    options: { value: string | number; label: string }[];
+    name?: string;
 }
 
 export function Select({

@@ -53,19 +53,26 @@ export function MissionsPage() {
     useEffect(() => {
         fetchMissions();
         
-        const fetchAuxData = async () => {
+        const fetchBiomes = async () => {
              try {
-                const [biomesData, teamsData] = await Promise.all([
-                    EcosystemService.getAllBiomes(),
-                    TeamService.getAll()
-                ]);
+                const biomesData = await EcosystemService.getAllBiomes();
                 setBiomes(biomesData);
-                setTeams(teamsData);
              } catch (e) {
-                 console.error("Failed to fetch aux data", e);
+                 console.error("Failed to fetch biomes", e);
              }
         };
-        fetchAuxData();
+
+        const fetchTeams = async () => {
+             try {
+                const teamsData = await TeamService.getAll();
+                setTeams(teamsData);
+             } catch (e) {
+                 console.error("Failed to fetch teams", e);
+             }
+        };
+
+        fetchBiomes();
+        fetchTeams();
     }, []);
 
     const handleCreateMission = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -90,12 +97,14 @@ export function MissionsPage() {
         }
     };
 
-    const filteredMissions = missions.filter(
-        (m) =>
-            filter === "ALL" ||
-            m.status === filter ||
-            (filter === "PLANNED" && m.status === "CREATED") // Map CREATED to PLANNED if needed
-    );
+    const filteredMissions = missions.filter((m) => {
+        if (filter === "ALL") return true;
+        const s = m.status?.toUpperCase().trim();
+        if (filter === "PLANNED") return s === "PLANNED" || s === "CREATED" || s === "NEW";
+        if (filter === "ACTIVE") return s === "ACTIVE" || s === "IN_PROGRESS" || s === "STARTED";
+        if (filter === "COMPLETED") return s === "COMPLETED" || s === "FINISHED" || s === "SUCCESS";
+        return s === filter;
+    });
 
     const getDangerStars = (xp: number) => {
         // Map required XP to danger stars (dummy logic)
@@ -167,9 +176,9 @@ export function MissionsPage() {
                                         </div>
                                         <Badge
                                             variant={
-                                                mission.status === "ACTIVE"
+                                                ["ACTIVE", "IN_PROGRESS", "STARTED"].includes(mission.status?.toUpperCase() || "")
                                                     ? "warning"
-                                                    : mission.status === "COMPLETED"
+                                                    : ["COMPLETED", "FINISHED", "SUCCESS"].includes(mission.status?.toUpperCase() || "")
                                                       ? "success"
                                                       : "info"
                                             }
@@ -366,10 +375,9 @@ export function MissionsPage() {
                                     </div>
                                     <Badge
                                         variant={
-                                            selectedMission.status === "ACTIVE"
+                                            ["ACTIVE", "IN_PROGRESS", "STARTED"].includes(selectedMission.status?.toUpperCase() || "")
                                                 ? "warning"
-                                                : selectedMission.status ===
-                                                    "COMPLETED"
+                                                : ["COMPLETED", "FINISHED", "SUCCESS"].includes(selectedMission.status?.toUpperCase() || "")
                                                   ? "success"
                                                   : "info"
                                         }
@@ -429,10 +437,25 @@ export function MissionsPage() {
                                 </div>
                             )}
 
-                            {/* Actions - disabled for now as logic is complex */}
+                            {/* Actions */}
                             <div className="flex flex-wrap gap-2">
-                                {/* Placeholders for actions */}
-                                <Button variant="ghost" disabled>Действия (WIP)</Button>
+                                <Button
+                                    variant="danger"
+                                    onClick={async () => {
+                                        if (confirm("Вы уверены, что хотите удалить миссию?")) {
+                                            try {
+                                                await MissionService.delete(selectedMission.id as number);
+                                                toast.success("Миссия удалена");
+                                                setSelectedMission(null);
+                                                fetchMissions();
+                                            } catch (e) {
+                                                toast.error("Ошибка при удалении миссии");
+                                            }
+                                        }
+                                    }}
+                                >
+                                    Удалить миссию
+                                </Button>
                             </div>
                         </div>
                     </Modal>

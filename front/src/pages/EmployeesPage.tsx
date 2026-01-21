@@ -38,10 +38,25 @@ export function EmployeesPage() {
         fetchEmployees();
     }, []);
 
-    const handleCreateEmployee = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleCreateEmployee = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        toast.info("Создание сотрудника пока не поддерживается API");
-        setShowCreateModal(false);
+        const formData = new FormData(e.currentTarget);
+        try {
+            await EmployeeService.create({
+                name: formData.get("name") as string,
+                post: formData.get("post") as string,
+                department: formData.get("department") as string,
+                experience: Number(formData.get("experience") || 0),
+                status: "WORKING",
+                hiredDate: new Date().toISOString().split("T")[0],
+            });
+            toast.success("Сотрудник зарегистрирован");
+            setShowCreateModal(false);
+            fetchEmployees();
+        } catch (error) {
+            console.error(error);
+            toast.error("Ошибка при регистрации сотрудника");
+        }
     };
 
     // Helper to map API status to UI colors/labels
@@ -236,8 +251,30 @@ export function EmployeesPage() {
                             placeholder="Иванов Иван Иванович"
                             required
                         />
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                            <Input
+                                name="post"
+                                label="Должность"
+                                placeholder="Инженер"
+                                required
+                            />
+                            <Input
+                                name="department"
+                                label="Отдел"
+                                placeholder="Технический"
+                                required
+                            />
+                        </div>
+                        
+                        <Input
+                            name="experience"
+                            label="Опыт (лет)"
+                            type="number"
+                            placeholder="5"
+                            required
+                        />
 
-                        {/* Simplified Creation Form since logic is mocked */}
                         <div className="flex gap-2 justify-end mt-4">
                             <Button
                                 type="button"
@@ -326,6 +363,27 @@ export function EmployeesPage() {
                                         ).toLocaleDateString("ru-RU")}
                                     </div>
                                 </div>
+                            </div>
+                            
+                            {/* Actions */}
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="danger"
+                                    onClick={async () => {
+                                        if (confirm("Вы уверены, что хотите удалить сотрудника?")) {
+                                            try {
+                                                await EmployeeService.delete(selectedEmployee.id as number);
+                                                toast.success("Сотрудник удален");
+                                                setSelectedEmployee(null);
+                                                fetchEmployees();
+                                            } catch (e) {
+                                                toast.error("Ошибка при удалении сотрудника");
+                                            }
+                                        }
+                                    }}
+                                >
+                                    Удалить сотрудника
+                                </Button>
                             </div>
                         </div>
                     </Modal>

@@ -24,7 +24,6 @@ interface LayoutProps {
 export function Layout({ children, currentPage }: LayoutProps) {
     const { user, logout } = useAuth();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [showNotifications, setShowNotifications] = useState(false);
 
     const getNavigationItems = () => {
         const allItems = [
@@ -81,30 +80,13 @@ export function Layout({ children, currentPage }: LayoutProps) {
         ];
 
         return allItems.filter(
-            (item) => !item.roles || item.roles.includes(user?.role || ""),
+            (item) =>
+                !item.roles ||
+                item.roles.some((role) => user?.roles.includes(role as any)),
         );
     };
 
-    const mockNotifications = [
-        {
-            id: "1",
-            text: "Новый запрос от станции Alpha",
-            type: "warning",
-            time: "2 мин назад",
-        },
-        {
-            id: "2",
-            text: "Миссия MINING-0043 завершена",
-            type: "success",
-            time: "15 мин назад",
-        },
-        {
-            id: "3",
-            text: "Станция Beta под атакой!",
-            type: "danger",
-            time: "1 час назад",
-        },
-    ];
+
 
     return (
         <div className="min-h-screen bg-[#0D1117]">
@@ -144,61 +126,6 @@ export function Layout({ children, currentPage }: LayoutProps) {
 
                     {/* Right side */}
                     <div className="flex items-center gap-3">
-                        {/* Notifications */}
-                        <div className="relative">
-                            <button
-                                onClick={() =>
-                                    setShowNotifications(!showNotifications)
-                                }
-                                className="relative text-[#8B949E] hover:text-[#C9D1D9] transition-colors"
-                            >
-                                <Bell size={20} />
-                                <span className="absolute -top-1 -right-1 bg-[#D32F2F] text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
-                                    3
-                                </span>
-                            </button>
-
-                            {showNotifications && (
-                                <div className="absolute right-0 mt-2 w-80 bg-[#161B22] border border-[#30363D] rounded-lg shadow-xl">
-                                    <div className="p-3 border-b border-[#30363D]">
-                                        <h3 className="text-[#C9D1D9]">
-                                            Уведомления
-                                        </h3>
-                                    </div>
-                                    <div className="max-h-96 overflow-y-auto">
-                                        {mockNotifications.map((notif) => (
-                                            <div
-                                                key={notif.id}
-                                                className="p-3 border-b border-[#30363D] hover:bg-[#0D1117] cursor-pointer"
-                                            >
-                                                <div className="flex items-start gap-2">
-                                                    <div
-                                                        className={`w-2 h-2 rounded-full mt-1.5 ${
-                                                            notif.type ===
-                                                            "danger"
-                                                                ? "bg-[#D32F2F]"
-                                                                : notif.type ===
-                                                                    "warning"
-                                                                  ? "bg-[#FF6B35]"
-                                                                  : "bg-[#56C271]"
-                                                        }`}
-                                                    />
-                                                    <div className="flex-1">
-                                                        <p className="text-[#C9D1D9] text-sm">
-                                                            {notif.text}
-                                                        </p>
-                                                        <p className="text-[#8B949E] text-xs mt-1">
-                                                            {notif.time}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
                         {/* User menu */}
                         <div className="flex items-center gap-2">
                             <div className="hidden sm:block text-right">

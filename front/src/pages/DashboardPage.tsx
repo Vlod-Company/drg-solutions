@@ -39,29 +39,48 @@ export function DashboardPage() {
         const fetchData = async () => {
             try {
                 // Fetch Requests (My Department)
-                const requests = await RequestService.getMyDepartmentRequests();
+                const requestsData = await RequestService.getMyDepartmentRequests();
+                const requests = Array.isArray(requestsData) ? requestsData : [];
+                
                 const activeRequestsCount = requests.filter(
-                    (r) => r.status === "IN_PROGRESS" || r.status === "NEW"
+                    (r) => {
+                        const s = r.status?.toUpperCase();
+                        return s === "IN_PROGRESS" || s === "NEW";
+                    }
                 ).length;
                 
                 // My tasks (assigned to me or my department pending)
-                setTasks(requests.filter((r) => r.status !== "COMPLETED"));
+                setTasks(requests.filter((r) => r.status?.toUpperCase() !== "COMPLETED"));
                 setRecentRequests(requests.slice(0, 3));
 
                 // Fetch Missions
-                const missionsData = await MissionService.getAll(0, 100); // Fetch first 100
+                const missionsData = await MissionService.getAll(0, 100);
                 const activeMissionsCount = missionsData.data?.filter(
-                    (m) => m.status === "ACTIVE" || m.status === "PLANNED"
+                    (m) => {
+                        const s = m.status?.toUpperCase().trim();
+                        return (
+                            s === "ACTIVE" ||
+                            s === "IN_PROGRESS" ||
+                            s === "STARTED" ||
+                            s === "PLANNED" ||
+                            s === "CREATED" ||
+                            s === "NEW"
+                        );
+                    }
                 ).length || 0;
 
                 // Fetch Stations
-                const stations = await StationService.getAll();
+                const stationsData = await StationService.getAll();
+                const stations = Array.isArray(stationsData) ? stationsData : [];
                 const operationalStationsCount = stations.filter(
-                    (s) => s.status === "OPERATIONAL"
+                    (s) => {
+                        const st = s.status?.toUpperCase().trim();
+                        return st === "OPERATIONAL" || st === "ACTIVE" || st === "ONLINE";
+                    }
                 ).length;
                 
                 // Critical alerts equivalent
-                const criticalCount = requests.filter(r => r.status === 'NEW').length;
+                const criticalCount = requests.filter(r => r.status?.toUpperCase() === 'NEW').length;
 
                 setStats({
                     activeRequests: activeRequestsCount,

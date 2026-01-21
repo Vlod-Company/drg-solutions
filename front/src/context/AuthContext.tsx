@@ -29,8 +29,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const mappedUser: User = {
                 id: tokenInfo.user_id?.toString() || "0",
                 username: tokenInfo.username || "",
-                name: tokenInfo.username || "Unknown", // API doesn't return full name in TokenInfo, could fetch employee if needed
-                role: (tokenInfo.roles?.[0] as Role) || "ROLE_MINER_EMPLOYEE",
+                name: tokenInfo.username || "Unknown", 
+                roles: (tokenInfo.roles as Role[]) || ["ROLE_USER"],
                 department: tokenInfo.department || "Unknown",
             };
             setUser(mappedUser);

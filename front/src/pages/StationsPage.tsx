@@ -92,7 +92,7 @@ export function StationsPage() {
     const handleEmergencyResponse = async (stationId: number, action: string) => {
         try {
             if (action === "Активация защиты") {
-                await StationService.setAttacked(stationId, { isAttacked: true });
+                await StationService.setAttacked(stationId, { description: "Активация экстренных протоколов защиты" });
                 toast.success(`Статус атаки обновлен для станции ${stationId}`);
                 fetchStations();
             } else {
@@ -138,40 +138,40 @@ export function StationsPage() {
                             {
                                 status: "OPERATIONAL",
                                 label: "Рабочие",
-                                count: stations.filter(
-                                    (s) => s.status === "OPERATIONAL",
+                                count: (stations || []).filter(
+                                    (s) => s.status?.toUpperCase() === "OPERATIONAL",
                                 ).length,
                                 color: "bg-[#56C271]",
                             },
                             {
                                 status: "UNDER_ATTACK",
                                 label: "Под атакой",
-                                count: stations.filter(
-                                    (s) => s.status === "UNDER_ATTACK",
+                                count: (stations || []).filter(
+                                    (s) => s.status?.toUpperCase() === "UNDER_ATTACK",
                                 ).length,
                                 color: "bg-[#D32F2F]",
                             },
                             {
                                 status: "UNDER_CONSTRUCTION",
                                 label: "Строятся",
-                                count: stations.filter(
-                                    (s) => s.status === "UNDER_CONSTRUCTION",
+                                count: (stations || []).filter(
+                                    (s) => s.status?.toUpperCase() === "UNDER_CONSTRUCTION",
                                 ).length,
                                 color: "bg-[#FF6B35]",
                             },
                             {
                                 status: "PLANNED",
                                 label: "Запланированы",
-                                count: stations.filter(
-                                    (s) => s.status === "PLANNED",
+                                count: (stations || []).filter(
+                                    (s) => s.status?.toUpperCase() === "PLANNED",
                                 ).length,
                                 color: "bg-[#4FC3F7]",
                             },
                             {
                                 status: "DECOMMISSIONED",
                                 label: "Выведены",
-                                count: stations.filter(
-                                    (s) => s.status === "DECOMMISSIONED",
+                                count: (stations || []).filter(
+                                    (s) => s.status?.toUpperCase() === "DECOMMISSIONED",
                                 ).length,
                                 color: "bg-[#8B949E]",
                             },

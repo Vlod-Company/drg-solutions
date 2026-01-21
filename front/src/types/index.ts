@@ -7,13 +7,14 @@ export type Role =
     | "ROLE_SCIENCE_DEPARTMENT_EMPLOYEE"
     | "ROLE_LAUNCH_CONTROL_EMPLOYEE"
     | "ROLE_MAINTENANCE_EMPLOYEE"
-    | "ROLE_MINER_EMPLOYEE";
+    | "ROLE_MINER_EMPLOYEE"
+    | "ROLE_USER";
 
 export interface User {
     id: string;
     username: string;
     name: string;
-    role: Role;
+    roles: Role[];
     department: string;
     avatar?: string;
 }

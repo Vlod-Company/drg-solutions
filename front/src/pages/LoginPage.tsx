@@ -80,19 +80,6 @@ export function LoginPage() {
                         </Button>
                     </form>
 
-                    {/* Demo credentials */}
-                    <div className="mt-6 p-4 bg-[#0D1117] border border-[#30363D] rounded">
-                        <p className="text-[#8B949E] text-xs mb-2">
-                            Демо-аккаунты:
-                        </p>
-                        <div className="text-[#8B949E] text-xs space-y-1">
-                            <div>admin / admin123 (Администратор)</div>
-                            <div>management / mgmt123 (Менеджмент)</div>
-                            <div>mission / mission123 (Центр миссий)</div>
-                            <div>maintenance / maint123 (Обслуживание)</div>
-                            <div>miner / miner123 (Шахтер)</div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

@@ -31,14 +31,21 @@ export function RequestsPage() {
     const [selectedRequest, setSelectedRequest] = useState<RequestDto | null>(
         null
     );
+    const [requestMode, setRequestMode] = useState<"TO_ME" | "FROM_ME">(
+        "TO_ME"
+    );
 
     const fetchRequests = async () => {
+        setLoading(true);
         try {
-            const data = await RequestService.getMyDepartmentRequests();
+            const data =
+                requestMode === "TO_ME"
+                    ? await RequestService.getMyDepartmentRequests()
+                    : await RequestService.getFromMyDepartmentRequests();
             setRequests(data);
         } catch (error) {
             console.error("Failed to fetch requests", error);
-            // toast.error("Не удалось загрузить запросы");
+            toast.error("Не удалось загрузить запросы");
         } finally {
             setLoading(false);
         }
@@ -46,11 +53,18 @@ export function RequestsPage() {
 
     useEffect(() => {
         fetchRequests();
-    }, []);
+    }, [requestMode]);
 
-    const filteredRequests = requests.filter(
-        (r) => filter === "ALL" || r.status === filter
-    );
+    const filteredRequests = Array.isArray(requests)
+        ? requests.filter((r) => {
+            if (filter === "ALL") return true;
+            const s = r.status?.toUpperCase().trim();
+            if (filter === "NEW") return s === "NEW" || s === "CREATED" || s === "OPEN";
+            if (filter === "IN_PROGRESS") return s === "IN_PROGRESS" || s === "PENDING" || s === "ACTIVE";
+            if (filter === "COMPLETED") return s === "COMPLETED" || s === "CLOSED" || s === "DONE" || s === "RESOLVED";
+            return s === filter;
+        })
+        : [];
 
     const handleCreateRequest = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -91,10 +105,34 @@ export function RequestsPage() {
                             Управление запросами между отделами
                         </p>
                     </div>
-                    <Button onClick={() => setShowCreateModal(true)}>
-                        <Plus size={18} className="mr-2" />
-                        Создать запрос
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <div className="bg-[#161B22] p-1 rounded-lg flex gap-1 mr-4">
+                            <button
+                                onClick={() => setRequestMode("TO_ME")}
+                                className={`px-4 py-2 rounded-md text-sm transition-colors ${
+                                    requestMode === "TO_ME"
+                                        ? "bg-[#FF6B35] text-white"
+                                        : "text-[#8B949E] hover:text-[#C9D1D9]"
+                                }`}
+                            >
+                                Входящие
+                            </button>
+                            <button
+                                onClick={() => setRequestMode("FROM_ME")}
+                                className={`px-4 py-2 rounded-md text-sm transition-colors ${
+                                    requestMode === "FROM_ME"
+                                        ? "bg-[#FF6B35] text-white"
+                                        : "text-[#8B949E] hover:text-[#C9D1D9]"
+                                }`}
+                            >
+                                Исходящие
+                            </button>
+                        </div>
+                        <Button onClick={() => setShowCreateModal(true)}>
+                            <Plus size={18} className="mr-2" />
+                            Создать запрос
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Filters */}
@@ -141,13 +179,13 @@ export function RequestsPage() {
                                         </div>
                                         <Badge
                                             variant={
-                                                request.status === "NEW"
+                                                ["NEW", "CREATED", "OPEN"].includes(request.status?.toUpperCase() || "")
                                                     ? "info"
-                                                    : request.status === "IN_PROGRESS"
+                                                    : ["IN_PROGRESS", "PENDING", "ACTIVE"].includes(request.status?.toUpperCase() || "")
                                                       ? "warning"
-                                                      : request.status === "COMPLETED"
+                                                      : ["COMPLETED", "CLOSED", "DONE", "RESOLVED"].includes(request.status?.toUpperCase() || "")
                                                         ? "success"
-                                                        : "default"
+                                                        : "info"
                                             }
                                         >
                                             {request.status}

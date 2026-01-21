@@ -729,6 +729,45 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RequestDto"
+    put:
+      tags: [Request Service]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                recipientEmployeeId:
+                  type: integer
+                  format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestDto"
+  /request-service/request/to-my-department:
+    get:
+      tags: [Request Service]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RequestDto"
 
   # Spaceship Service
   /spaceship-service/spaceship:
