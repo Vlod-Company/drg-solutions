@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Layout } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -12,120 +12,82 @@ import {
     AlertTriangle,
     Target,
     Building2,
-    Users,
-    TrendingUp,
     Clock,
     CheckCircle2,
+    Users,
 } from "lucide-react";
-import { mockRequests, mockMissions, mockStations } from "../data/mockData";
+import {
+    MissionService,
+    RequestService,
+    StationService,
+} from "../api/services";
+import { RequestDto } from "../types/api";
 
 export function DashboardPage() {
     const { user } = useAuth();
+    const [stats, setStats] = useState({
+        activeRequests: 0,
+        activeMissions: 0,
+        operationalStations: 0,
+        criticalAlerts: 0,
+    });
+    const [tasks, setTasks] = useState<RequestDto[]>([]);
+    const [recentRequests, setRecentRequests] = useState<RequestDto[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    // Статистика по роли
-    const getStats = () => {
-        const activeRequests = mockRequests.filter(
-            (r) => r.status === "IN_PROGRESS" || r.status === "NEW",
-        ).length;
-        const activeMissions = mockMissions.filter(
-            (m) => m.status === "ACTIVE",
-        ).length;
-        const operationalStations = mockStations.filter(
-            (s) => s.status === "OPERATIONAL",
-        ).length;
-        const criticalAlerts = mockRequests.filter(
-            (r) => r.priority === "CRITICAL",
-        ).length;
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch Requests (My Department)
+                const requests = await RequestService.getMyDepartmentRequests();
+                const activeRequestsCount = requests.filter(
+                    (r) => r.status === "IN_PROGRESS" || r.status === "NEW"
+                ).length;
+                
+                // My tasks (assigned to me or my department pending)
+                setTasks(requests.filter((r) => r.status !== "COMPLETED"));
+                setRecentRequests(requests.slice(0, 3));
 
-        return {
-            activeRequests,
-            activeMissions,
-            operationalStations,
-            criticalAlerts,
+                // Fetch Missions
+                const missionsData = await MissionService.getAll(0, 100); // Fetch first 100
+                const activeMissionsCount = missionsData.data?.filter(
+                    (m) => m.status === "ACTIVE" || m.status === "PLANNED"
+                ).length || 0;
+
+                // Fetch Stations
+                const stations = await StationService.getAll();
+                const operationalStationsCount = stations.filter(
+                    (s) => s.status === "OPERATIONAL"
+                ).length;
+                
+                // Critical alerts equivalent
+                const criticalCount = requests.filter(r => r.status === 'NEW').length;
+
+                setStats({
+                    activeRequests: activeRequestsCount,
+                    activeMissions: activeMissionsCount,
+                    operationalStations: operationalStationsCount,
+                    criticalAlerts: criticalCount,
+                });
+            } catch (error) {
+                console.error("Error fetching dashboard data:", error);
+            } finally {
+                setLoading(false);
+            }
         };
-    };
 
-    const stats = getStats();
+        fetchData();
+    }, [user]);
 
-    // Задачи для пользователя
-    const getUserTasks = () => {
-        const role = user?.role;
-
-        if (role === "ROLE_MAINTENANCE_EMPLOYEE") {
-            return [
-                {
-                    id: "1",
-                    text: "Оценить угрозу на станции Alpha",
-                    priority: "CRITICAL",
-                    icon: AlertTriangle,
-                },
-                {
-                    id: "2",
-                    text: "Провести плановую инспекцию станции Gamma",
-                    priority: "MEDIUM",
-                    icon: Building2,
-                },
-            ];
-        }
-
-        if (role === "ROLE_MISSION_CONTROL_EMPLOYEE") {
-            return [
-                {
-                    id: "1",
-                    text: "Назначить команду на миссию RESCUE-0067",
-                    priority: "HIGH",
-                    icon: Target,
-                },
-                {
-                    id: "2",
-                    text: "Проверить статус миссии MINING-0043",
-                    priority: "MEDIUM",
-                    icon: CheckCircle2,
-                },
-            ];
-        }
-
-        if (role === "ROLE_MANAGEMENT_EMPLOYEE") {
-            return [
-                {
-                    id: "1",
-                    text: "Согласовать проект новой станции Delta",
-                    priority: "HIGH",
-                    icon: Building2,
-                },
-                {
-                    id: "2",
-                    text: "Рассмотреть заявку на найм новых сотрудников",
-                    priority: "MEDIUM",
-                    icon: Users,
-                },
-            ];
-        }
-
-        return [
-            {
-                id: "1",
-                text: "Ознакомиться с текущими миссиями",
-                priority: "LOW",
-                icon: Target,
-            },
-            {
-                id: "2",
-                text: "Обновить личный профиль",
-                priority: "LOW",
-                icon: Users,
-            },
-        ];
-    };
-
-    const tasks = getUserTasks();
-
-    // Недавние запросы для роли
-    const getRelevantRequests = () => {
-        return mockRequests.slice(0, 3);
-    };
-
-    const recentRequests = getRelevantRequests();
+    if (loading) {
+        return (
+            <Layout currentPage="/dashboard">
+                <div className="flex justify-center items-center h-64 text-[#C9D1D9]">
+                    Загрузка данных...
+                </div>
+            </Layout>
+        );
+    }
 
     return (
         <Layout currentPage="/dashboard">
@@ -202,7 +164,7 @@ export function DashboardPage() {
                         <CardContent className="flex items-center justify-between">
                             <div>
                                 <div className="text-[#8B949E] text-sm mb-1">
-                                    Критические алерты
+                                    Новые запросы
                                 </div>
                                 <div className="text-[#C9D1D9] text-2xl font-bold">
                                     {stats.criticalAlerts}
@@ -219,7 +181,7 @@ export function DashboardPage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Tasks */}
+                    {/* Tasks (Requests for Dept) */}
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -227,39 +189,37 @@ export function DashboardPage() {
                                     size={20}
                                     className="text-[#FF6B35]"
                                 />
-                                Ваши задачи
+                                Задачи отдела
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-3">
+                                {tasks.length === 0 && (
+                                    <div className="text-[#8B949E] text-sm">Нет активных задач</div>
+                                )}
                                 {tasks.map((task) => (
                                     <div
                                         key={task.id}
                                         className="flex items-start gap-3 p-3 bg-[#0D1117] rounded border border-[#30363D] hover:border-[#FF6B35] transition-colors cursor-pointer"
+                                        onClick={() => window.location.href = `/requests`}
                                     >
-                                        <task.icon
+                                        <AlertTriangle
                                             size={18}
                                             className="text-[#8B949E] mt-0.5"
                                         />
                                         <div className="flex-1">
                                             <p className="text-[#C9D1D9] text-sm">
-                                                {task.text}
+                                                {task.description || "Без описания"}
                                             </p>
                                             <Badge
                                                 variant={
-                                                    task.priority === "CRITICAL"
-                                                        ? "danger"
-                                                        : task.priority ===
-                                                            "HIGH"
-                                                          ? "warning"
-                                                          : task.priority ===
-                                                              "MEDIUM"
-                                                            ? "info"
-                                                            : "default"
+                                                    task.status === "NEW"
+                                                        ? "info"
+                                                        : "warning"
                                                 }
                                                 className="mt-2"
                                             >
-                                                {task.priority}
+                                                {task.status}
                                             </Badge>
                                         </div>
                                     </div>
@@ -281,56 +241,43 @@ export function DashboardPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-3">
+                                {recentRequests.length === 0 && (
+                                    <div className="text-[#8B949E] text-sm">Нет запросов</div>
+                                )}
                                 {recentRequests.map((request) => (
                                     <div
                                         key={request.id}
                                         className="p-3 bg-[#0D1117] rounded border border-[#30363D] hover:border-[#FF6B35] transition-colors cursor-pointer"
                                         onClick={() =>
-                                            (window.location.href = `/requests/${request.id}`)
+                                            (window.location.href = `/requests`)
                                         }
                                     >
                                         <div className="flex items-start justify-between mb-2">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-[#C9D1D9] font-mono text-sm">
-                                                    {request.id}
+                                                    {request.requestCode}
                                                 </span>
                                                 <Badge
                                                     variant={
                                                         request.status === "NEW"
                                                             ? "info"
                                                             : request.status ===
-                                                                "IN_PROGRESS"
-                                                              ? "warning"
-                                                              : request.status ===
-                                                                  "COMPLETED"
-                                                                ? "success"
-                                                                : "default"
+                                                              "IN_PROGRESS"
+                                                            ? "warning"
+                                                            : "success"
                                                     }
                                                 >
                                                     {request.status}
                                                 </Badge>
                                             </div>
-                                            <Badge
-                                                variant={
-                                                    request.priority ===
-                                                    "CRITICAL"
-                                                        ? "danger"
-                                                        : request.priority ===
-                                                            "HIGH"
-                                                          ? "warning"
-                                                          : "default"
-                                                }
-                                            >
-                                                {request.priority}
-                                            </Badge>
                                         </div>
                                         <p className="text-[#C9D1D9] text-sm mb-1">
-                                            {request.title}
+                                            {request.description}
                                         </p>
                                         <div className="flex items-center gap-2 text-[#8B949E] text-xs">
-                                            <span>От: {request.from}</span>
+                                            <span>От: {request.senderDepartment}</span>
                                             <span>→</span>
-                                            <span>Кому: {request.to}</span>
+                                            <span>Кому: {request.recipientDepartment}</span>
                                         </div>
                                     </div>
                                 ))}

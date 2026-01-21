@@ -89,7 +89,7 @@ function Router() {
 export default function App() {
     return (
         <AuthProvider>
-            <Router />
+            <AppContent />
             <Toaster
                 position="top-right"
                 toastOptions={{
@@ -103,4 +103,18 @@ export default function App() {
             />
         </AuthProvider>
     );
+}
+
+function AppContent() {
+    const { isLoading } = useAuth();
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-[#0D1117] flex items-center justify-center text-[#C9D1D9]">
+                Загрузка...
+            </div>
+        );
+    }
+
+    return <Router />;
 }

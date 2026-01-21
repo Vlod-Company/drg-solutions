@@ -1,0 +1,931 @@
+{
+  "info": {
+    "_postman_id": "ef949f00-6d97-43a8-98af-8f5923e28785",
+    "name": "Is",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "41812131",
+    "_collection_link": "https://go.postman.co/collection/47671829-ef949f00-6d97-43a8-98af-8f5923e28785?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Login",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Vlod\",\r\n    \"password\": 333\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/auth-service/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "auth-service",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Саботаж со стороны конкурентов",
+      "item": [
+        {
+          "name": "Запрос, станция под атакой",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"requestCode\": \"REQ-SA\",\r\n    \"recipientDepartment\": \"Maintenence\",\r\n    \"description\": \"АААААААААААААА СТАНЦИЯ ПОД АТАКОЙ\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/request-service/request",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "request-service",
+                "request"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получить запросы от моего отдела",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:6789/request-service/request/to-my-department",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "request-service",
+                "request",
+                "to-my-department"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Назначить запрос на меня",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"status\": \"IN_PROGRESS\",\r\n    \"recipientEmployeeId\": 2\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/request-service/request/7",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "request-service",
+                "request",
+                "7"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Установить, что станция под атакой",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:6789/station-service/station/1/setAttacked",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "station-service",
+                "station",
+                "1",
+                "setAttacked"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Вывести из эксплуатации",
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {}
+          },
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"status\": \"DECOMMISSIONED\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/station-service/station/1/changeStatus",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "station-service",
+                "station",
+                "1",
+                "changeStatus"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzYW55YSIsInVzZXJfaWQiOjEsImVtcGxveWVlX2lkIjoyLCJwb3N0IjoiR3VubmVyIiwiZGVwYXJ0bWVudCI6Ik1pbmVyIFRlYW0iLCJyb2xlcyI6WyJST0xFX1VTRVIiLCJST0xFX0FETUlOIl0sImlhdCI6MTc2ODgzMjMwOCwiZXhwIjoxNzY4ODM1OTA4fQ.AOXvP-MLsSISi_c5B-NMkQMsl3Rqg0SapyXY8s5Mo2I",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Исследовательская миссия",
+      "item": [
+        {
+          "name": "Новый биом, запрос",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"recipientDepartment\": \"Science Department\",\r\n    \"requestCode\": \"REQ-IB\",\r\n    \"description\": \"По координатам 14.88 1.337 22.8 найдено новый пещер\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/request-service/request",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "request-service",
+                "request"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Создаём биом",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Новый биом\",\r\n    \"description\": \"Новый биом\",\r\n    \"planetId\": 3\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/ecosystem-service/biome",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "ecosystem-service",
+                "biome"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Запрос на исследовательскую миссию",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"recipientDepartment\": \"Mission Control\",\r\n    \"requestCode\": \"REQ-MS\",\r\n    \"description\": \"Ребята, надо исследовать срочно. Биом номер 4\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/request-service/request",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "request-service",
+                "request"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Создание миссии",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Экспидиция 32\",\r\n    \"biomeId\": 6,\r\n    \"description\": \"Ну поиследуйте, не знаю\",\r\n    \"teamId\": 2,\r\n    \"requiredExperience\": 33,\r\n    \"missionStart\": \"2026-01-28T00:00:00\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/mission-service/mission",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "mission-service",
+                "mission"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Рекомендуемое оружие для миссии",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:6789/mission-service/mission/10/getRecommendedWeapons",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "mission-service",
+                "mission",
+                "10",
+                "getRecommendedWeapons"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Запрос на установку cargo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/mission-service/mission/send/10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "mission-service",
+                "mission",
+                "send",
+                "10"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Создание отправления",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"spaceShipId\": 1,\r\n    \"shipToDate\": \"2026-01-26T00:00:00\",\r\n    \"shipToPoint\": \"6\",\r\n    \"data\": [\r\n        {\r\n            \"itemType\": \"TEAM\",\r\n            \"teamId\": 2\r\n        }\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/logistics-service/shipment/",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "logistics-service",
+                "shipment",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Поместить в карго",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"cargoId\":5,\r\n    \"locatedAt\": 1,\r\n    \"data\" : [\r\n        {\r\n            \"itemType\": \"TEAM\",\r\n            \"teamId\": 3\r\n        },\r\n        {\r\n            \"itemType\": \"WEAPON\",\r\n            \"itemName\": \"Drillsword\",\r\n            \"identificationNumber\": \"DS-001\"\r\n        }\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6345/store-service/items/reserveCargo",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6345",
+              "path": [
+                "store-service",
+                "items",
+                "reserveCargo"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Обновить миссию",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"newStatus\": \"CREATED\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/mission-service/mission/10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "mission-service",
+                "mission",
+                "10"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Обновить статус у cargo",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:6789/store-service/changeStatusForCargo/{id}?status=ON_THE_WAY",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "store-service",
+                "changeStatusForCargo",
+                "{id}"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ON_THE_WAY"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Обновить статус у logistics",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"newStatus\": \"SHIPPING\",\r\n    \"newDate\": \"2026-01-26T00:00:00\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/logistics-service/logistics/6",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "logistics-service",
+                "logistics",
+                "6"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Добавить ресурсы добытые на миссии",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[\r\n    {\r\n        \"itemType\": \"RESOURCE\",\r\n        \"itemName\": \"Gold\",\r\n        \"quantity\": 100\r\n    }\r\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/store-service/items/add/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "store-service",
+                "items",
+                "add",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Расформировать команду",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:6789/team-service/team/{id}?status=DEFORMED&cargoId=1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "team-service",
+                "team",
+                "{id}"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "DEFORMED"
+                },
+                {
+                  "key": "cargoId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzYW55YSIsInVzZXJfaWQiOjEsImVtcGxveWVlX2lkIjoyLCJwb3N0IjoiR3VubmVyIiwiZGVwYXJ0bWVudCI6Ik1pbmVyIFRlYW0iLCJyb2xlcyI6WyJST0xFX1VTRVIiLCJST0xFX0FETUlOIl0sImlhdCI6MTc2ODgzMjMwOCwiZXhwIjoxNzY4ODM1OTA4fQ.AOXvP-MLsSISi_c5B-NMkQMsl3Rqg0SapyXY8s5Mo2I",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Строительство",
+      "item": [
+        {
+          "name": "Запрос в мэнэджмент",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"recipientDepartment\":\"Management\",\r\n    \"requestCode\":\"REQ-SC\",\r\n    \"description\":\"там жилка прикольная на планете 1, постройте станцию для бурения\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/request-service/request",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "request-service",
+                "request"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Запрос в обслуживание",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"recipientDepartment\":\"Maintenance\",\r\n    \"requestCode\":\"REQ-BS\",\r\n    \"description\":\"постройте станцию над планетой 1, тип MINING\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/request-service/request",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "request-service",
+                "request"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Создание дизайна",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\":\"Бурительная бурилка\",\r\n    \"planetId\":1,\r\n    \"type\": \"MINING\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:6789/station-service/station",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "station-service",
+                "station"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Обновление статуса станции",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"status\": \"UNDER_CONSTRUCTION\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:6789/station-service/station/{id}/changeStatus",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "station-service",
+                "station",
+                "{id}",
+                "changeStatus"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzYW55YSIsInVzZXJfaWQiOjIsImVtcGxveWVlX2lkIjoyLCJwb3N0IjoiR3VubmVyIiwiZGVwYXJ0bWVudCI6Ik1pbmVyIFRlYW0iLCJyb2xlcyI6WyJST0xFX1VTRVIiLCJST0xFX0FETUlOIl0sImlhdCI6MTc2ODgyNDI2NiwiZXhwIjoxNzY4ODI3ODY2fQ.l7JUrJ33-TkDNmrImJcTKYa9TCi6RIaocziT7CCJZtE",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Регистарция пользователя",
+      "item": [
+        {
+          "name": "Создать нового сотрудника",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\":\"Sashka BV\",\r\n    \"post\":\"Scientist\",\r\n    \"department\":\"Science Department\",\r\n    \"experience\":10\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:6789/employee-service/employees",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "employee-service",
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Создание аккаунта",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\":\"Sashka BV\",\r\n    \"password\":\"1234567890\",\r\n    \"employee_id\":1234567890\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:6789/auth-service/auth/register",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "auth-service",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Уведомить отдел о найме",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"recipientDepartment\":\"Science Department\",\r\n    \"requestCode\":\"REQ-HR\",\r\n    \"description\":\"наняли Сашку БВ\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:6789/request-service/request",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "6789",
+              "path": [
+                "request-service",
+                "request"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzYW55YSIsInVzZXJfaWQiOjIsImVtcGxveWVlX2lkIjoyLCJwb3N0IjoiR3VubmVyIiwiZGVwYXJ0bWVudCI6Ik1pbmVyIFRlYW0iLCJyb2xlcyI6WyJST0xFX1VTRVIiLCJST0xFX0FETUlOIl0sImlhdCI6MTc2ODgyNDI2NiwiZXhwIjoxNzY4ODI3ODY2fQ.l7JUrJ33-TkDNmrImJcTKYa9TCi6RIaocziT7CCJZtE",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

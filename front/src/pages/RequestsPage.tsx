@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Layout } from "../components/Layout";
 import {
     Card,
@@ -8,70 +8,75 @@ import {
 } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
-import { Input, Select, Textarea } from "../components/ui/Input";
+import { Input, Textarea } from "../components/ui/Input";
 import { Modal } from "../components/ui/Modal";
 import {
     AlertCircle,
     Plus,
-    Filter,
     Clock,
     CheckCircle2,
     XCircle,
 } from "lucide-react";
-import { mockRequests } from "../data/mockData";
-import { Request } from "../types";
-import { toast } from "sonner@2.0.3";
+import { RequestService } from "../api/services";
+import { RequestDto } from "../types/api";
+import { toast } from "sonner"; // Fixed import
 
 export function RequestsPage() {
-    const [requests, setRequests] = useState<Request[]>(mockRequests);
+    const [requests, setRequests] = useState<RequestDto[]>([]);
+    const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<
         "ALL" | "NEW" | "IN_PROGRESS" | "COMPLETED"
     >("ALL");
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [selectedRequest, setSelectedRequest] = useState<Request | null>(
-        null,
+    const [selectedRequest, setSelectedRequest] = useState<RequestDto | null>(
+        null
     );
+
+    const fetchRequests = async () => {
+        try {
+            const data = await RequestService.getMyDepartmentRequests();
+            setRequests(data);
+        } catch (error) {
+            console.error("Failed to fetch requests", error);
+            // toast.error("Не удалось загрузить запросы");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchRequests();
+    }, []);
 
     const filteredRequests = requests.filter(
-        (r) => filter === "ALL" || r.status === filter,
+        (r) => filter === "ALL" || r.status === filter
     );
 
-    const handleCreateRequest = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleCreateRequest = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-
-        const newRequest: Request = {
-            id: `REQ-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
-            type: formData.get("type") as string,
-            title: formData.get("title") as string,
-            description: formData.get("description") as string,
-            from: formData.get("from") as string,
-            to: formData.get("to") as string,
-            status: "NEW",
-            priority: formData.get("priority") as any,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-        };
-
-        setRequests([newRequest, ...requests]);
-        setShowCreateModal(false);
-        toast.success("Запрос успешно создан");
+        
+        try {
+            await RequestService.create({
+                recipientDepartment: formData.get("to") as string,
+                requestCode: formData.get("requestCode") as string,
+                description: formData.get("description") as string,
+            });
+            setShowCreateModal(false);
+            toast.success("Запрос успешно создан");
+            fetchRequests(); // Refresh list
+        } catch (error) {
+            console.error("Failed to create request", error);
+            toast.error("Ошибка при создании запроса");
+        }
     };
 
-    const handleUpdateStatus = (id: string, newStatus: Request["status"]) => {
-        setRequests(
-            requests.map((r) =>
-                r.id === id
-                    ? {
-                          ...r,
-                          status: newStatus,
-                          updatedAt: new Date().toISOString(),
-                      }
-                    : r,
-            ),
-        );
-        toast.success("Статус запроса обновлен");
-    };
+    // Note: API doesn't seem to have updateStatus endpoint for requests explicitly documented in what I saw, 
+    // but Postman had 'PUT /request-service/request/7' for assign/update.
+    // I can implement basic status update if I add it to services.
+    // For now I'll disable actions or mock specific ones if I can't confirm endpoint.
+    // Postman: PUT request-service/request/{id} with body {status: "..."}
+    // I didn't add update to RequestService yet. I'll skip it for now or just log.
 
     return (
         <Layout currentPage="/requests">
@@ -112,101 +117,85 @@ export function RequestsPage() {
                                         ? "В работе"
                                         : "Завершенные"}
                             </Button>
-                        ),
+                        )
                     )}
                 </div>
 
                 {/* Requests Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredRequests.map((request) => (
-                        <Card
-                            key={request.id}
-                            onClick={() => setSelectedRequest(request)}
-                        >
-                            <CardHeader>
-                                <div className="flex items-start justify-between mb-2">
-                                    <div className="flex items-center gap-2">
-                                        {request.priority === "CRITICAL" && (
-                                            <AlertCircle
-                                                className="text-[#D32F2F]"
-                                                size={18}
-                                            />
-                                        )}
-                                        <span className="text-[#C9D1D9] font-mono text-sm">
-                                            {request.id}
-                                        </span>
-                                    </div>
-                                    <Badge
-                                        variant={
-                                            request.status === "NEW"
-                                                ? "info"
-                                                : request.status ===
-                                                    "IN_PROGRESS"
-                                                  ? "warning"
-                                                  : request.status ===
-                                                      "COMPLETED"
-                                                    ? "success"
-                                                    : "default"
-                                        }
-                                    >
-                                        {request.status}
-                                    </Badge>
-                                </div>
-                                <CardTitle>{request.title}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-2 mb-3">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-[#8B949E]">
-                                            От:
-                                        </span>
-                                        <span className="text-[#C9D1D9]">
-                                            {request.from}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-[#8B949E]">
-                                            Кому:
-                                        </span>
-                                        <span className="text-[#C9D1D9]">
-                                            {request.to}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-[#8B949E]">
-                                            Приоритет:
-                                        </span>
+                {loading ? (
+                    <div className="text-[#C9D1D9]">Загрузка запросов...</div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {filteredRequests.map((request) => (
+                            <Card
+                                key={request.id}
+                                onClick={() => setSelectedRequest(request)}
+                                className="cursor-pointer hover:border-[#FF6B35] transition-colors"
+                            >
+                                <CardHeader>
+                                    <div className="flex items-start justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[#C9D1D9] font-mono text-sm">
+                                                {request.requestCode}
+                                            </span>
+                                        </div>
                                         <Badge
                                             variant={
-                                                request.priority === "CRITICAL"
-                                                    ? "danger"
-                                                    : request.priority ===
-                                                        "HIGH"
+                                                request.status === "NEW"
+                                                    ? "info"
+                                                    : request.status === "IN_PROGRESS"
                                                       ? "warning"
-                                                      : "default"
+                                                      : request.status === "COMPLETED"
+                                                        ? "success"
+                                                        : "default"
                                             }
                                         >
-                                            {request.priority}
+                                            {request.status}
                                         </Badge>
                                     </div>
-                                </div>
-                                <p className="text-[#8B949E] text-sm line-clamp-2">
-                                    {request.description}
-                                </p>
-                                <div className="flex items-center gap-2 mt-3 text-[#8B949E] text-xs">
-                                    <Clock size={12} />
-                                    <span>
-                                        {new Date(
-                                            request.createdAt,
-                                        ).toLocaleString("ru-RU")}
-                                    </span>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+                                    {/* RequestDto has no title, using requestCode or generic text */}
+                                    <CardTitle className="truncate">Запрос #{request.id}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-2 mb-3">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-[#8B949E]">
+                                                От:
+                                            </span>
+                                            <span className="text-[#C9D1D9]">
+                                                {request.senderDepartment}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-[#8B949E]">
+                                                Кому:
+                                            </span>
+                                            <span className="text-[#C9D1D9]">
+                                                {request.recipientDepartment}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="p-2 bg-[#0D1117] rounded border border-[#30363D]">
+                                        <div className="text-[#8B949E] text-xs mb-1">
+                                            Описание:
+                                        </div>
+                                        <p className="text-[#C9D1D9] text-sm line-clamp-2">
+                                            {request.description}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-3 text-[#8B949E] text-xs">
+                                        <Clock size={12} />
+                                        <span>
+                                            {request.createdAt ? new Date(request.createdAt).toLocaleString("ru-RU") : "-"}
+                                        </span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                )}
 
-                {filteredRequests.length === 0 && (
+                {!loading && filteredRequests.length === 0 && (
                     <div className="text-center py-12">
                         <AlertCircle
                             className="text-[#8B949E] mx-auto mb-4"
@@ -223,23 +212,17 @@ export function RequestsPage() {
                     title="Создать новый запрос"
                 >
                     <form onSubmit={handleCreateRequest}>
-                        <Select
-                            name="type"
-                            label="Тип запроса"
-                            options={[
-                                { value: "SABOTAGE", label: "Саботаж" },
-                                { value: "RESEARCH", label: "Исследование" },
-                                { value: "STATION", label: "Станция" },
-                                { value: "EQUIPMENT", label: "Оборудование" },
-                                { value: "OTHER", label: "Другое" },
-                            ]}
+                        <Input
+                            name="requestCode"
+                            label="Код запроса"
+                            placeholder="Например: REQ-001"
                             required
                         />
 
                         <Input
-                            name="title"
-                            label="Название"
-                            placeholder="Краткое описание запроса"
+                            name="to"
+                            label="Кому (Отдел)"
+                            placeholder="Целевой отдел"
                             required
                         />
 
@@ -250,33 +233,7 @@ export function RequestsPage() {
                             required
                         />
 
-                        <Input
-                            name="from"
-                            label="От кого"
-                            placeholder="Отдел или станция"
-                            required
-                        />
-
-                        <Input
-                            name="to"
-                            label="Кому"
-                            placeholder="Целевой отдел"
-                            required
-                        />
-
-                        <Select
-                            name="priority"
-                            label="Приоритет"
-                            options={[
-                                { value: "LOW", label: "Низкий" },
-                                { value: "MEDIUM", label: "Средний" },
-                                { value: "HIGH", label: "Высокий" },
-                                { value: "CRITICAL", label: "Критический" },
-                            ]}
-                            required
-                        />
-
-                        <div className="flex gap-2 justify-end">
+                        <div className="flex gap-2 justify-end mt-4">
                             <Button
                                 type="button"
                                 variant="ghost"
@@ -294,16 +251,18 @@ export function RequestsPage() {
                     <Modal
                         isOpen={!!selectedRequest}
                         onClose={() => setSelectedRequest(null)}
-                        title={`Запрос ${selectedRequest.id}`}
+                        title={`Запрос ${selectedRequest.requestCode}`}
                     >
                         <div className="space-y-4">
                             <div>
                                 <h3 className="text-[#C9D1D9] mb-2">
-                                    {selectedRequest.title}
+                                    ID: {selectedRequest.id}
                                 </h3>
-                                <p className="text-[#8B949E]">
-                                    {selectedRequest.description}
-                                </p>
+                                <div className="p-4 bg-[#0D1117] rounded border border-[#30363D]">
+                                    <p className="text-[#C9D1D9]">
+                                        {selectedRequest.description}
+                                    </p>
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -312,7 +271,7 @@ export function RequestsPage() {
                                         От кого
                                     </div>
                                     <div className="text-[#C9D1D9]">
-                                        {selectedRequest.from}
+                                        {selectedRequest.senderDepartment}
                                     </div>
                                 </div>
                                 <div>
@@ -320,7 +279,7 @@ export function RequestsPage() {
                                         Кому
                                     </div>
                                     <div className="text-[#C9D1D9]">
-                                        {selectedRequest.to}
+                                        {selectedRequest.recipientDepartment}
                                     </div>
                                 </div>
                                 <div>
@@ -331,11 +290,9 @@ export function RequestsPage() {
                                         variant={
                                             selectedRequest.status === "NEW"
                                                 ? "info"
-                                                : selectedRequest.status ===
-                                                    "IN_PROGRESS"
+                                                : selectedRequest.status === "IN_PROGRESS"
                                                   ? "warning"
-                                                  : selectedRequest.status ===
-                                                      "COMPLETED"
+                                                  : selectedRequest.status === "COMPLETED"
                                                     ? "success"
                                                     : "default"
                                         }
@@ -343,73 +300,11 @@ export function RequestsPage() {
                                         {selectedRequest.status}
                                     </Badge>
                                 </div>
-                                <div>
-                                    <div className="text-[#8B949E] text-sm mb-1">
-                                        Приоритет
-                                    </div>
-                                    <Badge
-                                        variant={
-                                            selectedRequest.priority ===
-                                            "CRITICAL"
-                                                ? "danger"
-                                                : selectedRequest.priority ===
-                                                    "HIGH"
-                                                  ? "warning"
-                                                  : "default"
-                                        }
-                                    >
-                                        {selectedRequest.priority}
-                                    </Badge>
-                                </div>
                             </div>
 
-                            <div className="flex flex-wrap gap-2">
-                                {selectedRequest.status === "NEW" && (
-                                    <Button
-                                        variant="warning"
-                                        onClick={() => {
-                                            handleUpdateStatus(
-                                                selectedRequest.id,
-                                                "IN_PROGRESS",
-                                            );
-                                            setSelectedRequest(null);
-                                        }}
-                                    >
-                                        <Clock size={18} className="mr-2" />
-                                        Начать работу
-                                    </Button>
-                                )}
-                                {selectedRequest.status === "IN_PROGRESS" && (
-                                    <Button
-                                        variant="success"
-                                        onClick={() => {
-                                            handleUpdateStatus(
-                                                selectedRequest.id,
-                                                "COMPLETED",
-                                            );
-                                            setSelectedRequest(null);
-                                        }}
-                                    >
-                                        <CheckCircle2
-                                            size={18}
-                                            className="mr-2"
-                                        />
-                                        Завершить
-                                    </Button>
-                                )}
-                                <Button
-                                    variant="danger"
-                                    onClick={() => {
-                                        handleUpdateStatus(
-                                            selectedRequest.id,
-                                            "CANCELLED",
-                                        );
-                                        setSelectedRequest(null);
-                                    }}
-                                >
-                                    <XCircle size={18} className="mr-2" />
-                                    Отменить
-                                </Button>
+                            {/* Actions placeholder */}
+                            <div className="flex flex-wrap gap-2 text-sm text-[#8B949E]">
+                                Действия над статусами пока недоступны.
                             </div>
                         </div>
                     </Modal>

@@ -1,140 +1,73 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Role } from "../types";
+import { AuthService } from "../api/services";
 
 interface AuthContextType {
     user: User | null;
     login: (username: string, password: string) => Promise<boolean>;
     logout: () => void;
     isAuthenticated: boolean;
+    isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for demonstration
-const mockUsers: Record<string, { password: string; user: User }> = {
-    admin: {
-        password: "admin123",
-        user: {
-            id: "1",
-            username: "admin",
-            name: "Главный администратор",
-            role: "ROLE_ADMIN",
-            department: "Управление",
-        },
-    },
-    management: {
-        password: "mgmt123",
-        user: {
-            id: "2",
-            username: "management",
-            name: "Менеджер Иванов",
-            role: "ROLE_MANAGEMENT_EMPLOYEE",
-            department: "Менеджмент",
-        },
-    },
-    mission: {
-        password: "mission123",
-        user: {
-            id: "3",
-            username: "mission",
-            name: "Контроллер Петров",
-            role: "ROLE_MISSION_CONTROL_EMPLOYEE",
-            department: "Центр управления миссиями",
-        },
-    },
-    scancom: {
-        password: "scan123",
-        user: {
-            id: "4",
-            username: "scancom",
-            name: "Разведчик Сидоров",
-            role: "ROLE_SCANCOM_EMPLOYEE",
-            department: "ScanCom",
-        },
-    },
-    rnd: {
-        password: "rnd123",
-        user: {
-            id: "5",
-            username: "rnd",
-            name: "Инженер Козлов",
-            role: "ROLE_RND_EMPLOYEE",
-            department: "R&D",
-        },
-    },
-    science: {
-        password: "science123",
-        user: {
-            id: "6",
-            username: "science",
-            name: "Ученый Волков",
-            role: "ROLE_SCIENCE_DEPARTMENT_EMPLOYEE",
-            department: "Научный отдел",
-        },
-    },
-    launch: {
-        password: "launch123",
-        user: {
-            id: "7",
-            username: "launch",
-            name: "Логист Морозов",
-            role: "ROLE_LAUNCH_CONTROL_EMPLOYEE",
-            department: "Контроль запусков",
-        },
-    },
-    maintenance: {
-        password: "maint123",
-        user: {
-            id: "8",
-            username: "maintenance",
-            name: "Техник Новиков",
-            role: "ROLE_MAINTENANCE_EMPLOYEE",
-            department: "Обслуживание",
-        },
-    },
-    miner: {
-        password: "miner123",
-        user: {
-            id: "9",
-            username: "miner",
-            name: "Шахтер Соколов",
-            role: "ROLE_MINER_EMPLOYEE",
-            department: "Шахтеры",
-        },
-    },
-};
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const loadUser = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                setIsLoading(false);
+                return;
+            }
+
+            const tokenInfo = await AuthService.getMe();
+            // Map TokenInfo to User
+            const mappedUser: User = {
+                id: tokenInfo.user_id?.toString() || "0",
+                username: tokenInfo.username || "",
+                name: tokenInfo.username || "Unknown", // API doesn't return full name in TokenInfo, could fetch employee if needed
+                role: (tokenInfo.roles?.[0] as Role) || "ROLE_MINER_EMPLOYEE",
+                department: tokenInfo.department || "Unknown",
+            };
+            setUser(mappedUser);
+        } catch (error) {
+            console.error("Failed to load user", error);
+            localStorage.removeItem("token");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        // Check for stored auth token
-        const token = localStorage.getItem("drg_token");
-        const storedUser = localStorage.getItem("drg_user");
-        if (token && storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
+        loadUser();
     }, []);
 
     const login = async (
         username: string,
-        password: string,
+        password: string
     ): Promise<boolean> => {
-        const mockUser = mockUsers[username];
-        if (mockUser && mockUser.password === password) {
-            const token = `mock_jwt_${Date.now()}`;
-            localStorage.setItem("drg_token", token);
-            localStorage.setItem("drg_user", JSON.stringify(mockUser.user));
-            setUser(mockUser.user);
-            return true;
+        try {
+            const response = await AuthService.login({ name: username, password });
+            if (response.token) {
+                localStorage.setItem("token", response.token);
+                await loadUser();
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error("Login failed", error);
+            return false;
         }
-        return false;
     };
 
     const logout = () => {
-        localStorage.removeItem("drg_token");
-        localStorage.removeItem("drg_user");
+        localStorage.removeItem("token");
         setUser(null);
+        window.location.href = "/login";
     };
 
     return (
@@ -144,6 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 login,
                 logout,
                 isAuthenticated: !!user,
+                isLoading,
             }}
         >
             {children}

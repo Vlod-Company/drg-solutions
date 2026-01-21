@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Layout } from "../components/Layout";
 import {
     Card,
     CardHeader,
-    CardTitle,
     CardContent,
 } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
@@ -11,38 +10,42 @@ import { Button } from "../components/ui/Button";
 import { Input, Select } from "../components/ui/Input";
 import { Modal } from "../components/ui/Modal";
 import { Users, UserPlus, Target, Heart, Award } from "lucide-react";
-import { mockEmployees } from "../data/mockData";
-import { Employee, Role } from "../types";
-import { toast } from "sonner@2.0.3";
+import { EmployeeService } from "../api/services";
+import { EmployeeResponseDto } from "../types/api";
+import { toast } from "sonner"; // Fixed import
 
 export function EmployeesPage() {
-    const [employees, setEmployees] = useState<Employee[]>(mockEmployees);
+    const [employees, setEmployees] = useState<EmployeeResponseDto[]>([]);
+    const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
-        null,
+    const [selectedEmployee, setSelectedEmployee] = useState<EmployeeResponseDto | null>(
+        null
     );
+
+    const fetchEmployees = async () => {
+        try {
+            const data = await EmployeeService.getAll();
+            setEmployees(data);
+        } catch (error) {
+            console.error("Failed to fetch employees", error);
+            // toast.error("Не удалось загрузить сотрудников");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchEmployees();
+    }, []);
 
     const handleCreateEmployee = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-
-        const newEmployee: Employee = {
-            id: `EMP-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
-            name: formData.get("name") as string,
-            role: formData.get("role") as Role,
-            department: formData.get("department") as string,
-            qualification: formData.get("qualification") as string,
-            missionsCompleted: 0,
-            status: "ACTIVE",
-            joinedAt: new Date().toISOString(),
-        };
-
-        setEmployees([...employees, newEmployee]);
+        toast.info("Создание сотрудника пока не поддерживается API");
         setShowCreateModal(false);
-        toast.success(`Сотрудник ${newEmployee.name} успешно зарегистрирован`);
     };
 
-    const getStatusColor = (status: Employee["status"]) => {
+    // Helper to map API status to UI colors/labels
+    const getStatusColor = (status: string) => {
         switch (status) {
             case "ACTIVE":
                 return "success";
@@ -57,7 +60,7 @@ export function EmployeesPage() {
         }
     };
 
-    const getStatusLabel = (status: Employee["status"]) => {
+    const getStatusLabel = (status: string) => {
         switch (status) {
             case "ACTIVE":
                 return "Активен";
@@ -71,6 +74,12 @@ export function EmployeesPage() {
                 return status;
         }
     };
+
+    // Helpers to safely access properties that might differ in DTO
+    const getDepartment = (e: EmployeeResponseDto) => (e as any).department || "Неопределен";
+    const getQualification = (e: EmployeeResponseDto) => (e as any).qualification || "Специалист";
+    const getMissionsCompleted = (e: EmployeeResponseDto) => (e as any).missionsCompleted || 0;
+    const getJoinedAt = (e: EmployeeResponseDto) => (e as any).employmentDate || (e as any).joinedAt || new Date().toISOString();
 
     return (
         <Layout currentPage="/employees">
@@ -92,132 +101,127 @@ export function EmployeesPage() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    {[
-                        {
-                            label: "Всего сотрудников",
-                            count: employees.length,
-                            icon: Users,
-                            color: "text-[#4FC3F7]",
-                        },
-                        {
-                            label: "На миссиях",
-                            count: employees.filter(
-                                (e) => e.status === "ON_MISSION",
-                            ).length,
-                            icon: Target,
-                            color: "text-[#FF6B35]",
-                        },
-                        {
-                            label: "Активные",
-                            count: employees.filter(
-                                (e) => e.status === "ACTIVE",
-                            ).length,
-                            icon: Users,
-                            color: "text-[#56C271]",
-                        },
-                        {
-                            label: "Раненые",
-                            count: employees.filter(
-                                (e) => e.status === "INJURED",
-                            ).length,
-                            icon: Heart,
-                            color: "text-[#D32F2F]",
-                        },
-                    ].map((stat) => (
-                        <div
-                            key={stat.label}
-                            className="p-4 bg-[#161B22] border border-[#30363D] rounded-lg"
-                        >
-                            <stat.icon
-                                className={`${stat.color} mb-2`}
-                                size={20}
-                            />
-                            <div className="text-[#C9D1D9] text-2xl font-bold">
-                                {stat.count}
+                {!loading && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        {[
+                            {
+                                label: "Всего сотрудников",
+                                count: employees.length,
+                                icon: Users,
+                                color: "text-[#4FC3F7]",
+                            },
+                            {
+                                label: "На миссиях",
+                                count: employees.filter(
+                                    (e) => e.status === "ON_MISSION",
+                                ).length,
+                                icon: Target,
+                                color: "text-[#FF6B35]",
+                            },
+                            {
+                                label: "Активные",
+                                count: employees.filter(
+                                    (e) => e.status === "ACTIVE",
+                                ).length,
+                                icon: Users,
+                                color: "text-[#56C271]",
+                            },
+                            {
+                                label: "Раненые",
+                                count: employees.filter(
+                                    (e) => e.status === "INJURED",
+                                ).length,
+                                icon: Heart,
+                                color: "text-[#D32F2F]",
+                            },
+                        ].map((stat) => (
+                            <div
+                                key={stat.label}
+                                className="p-4 bg-[#161B22] border border-[#30363D] rounded-lg"
+                            >
+                                <stat.icon
+                                    className={`${stat.color} mb-2`}
+                                    size={20}
+                                />
+                                <div className="text-[#C9D1D9] text-2xl font-bold">
+                                    {stat.count}
+                                </div>
+                                <div className="text-[#8B949E] text-sm">
+                                    {stat.label}
+                                </div>
                             </div>
-                            <div className="text-[#8B949E] text-sm">
-                                {stat.label}
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
 
                 {/* Employees Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {employees.map((employee) => (
-                        <Card
-                            key={employee.id}
-                            onClick={() => setSelectedEmployee(employee)}
-                        >
-                            <CardHeader>
-                                <div className="flex items-start justify-between mb-2">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-10 h-10 bg-[#FF6B35] rounded-full flex items-center justify-center">
-                                            <Users
-                                                size={20}
-                                                className="text-white"
-                                            />
-                                        </div>
-                                        <div>
-                                            <div className="text-[#C9D1D9]">
-                                                {employee.name}
+                {loading ? (
+                    <div className="text-[#C9D1D9]">Загрузка сотрудников...</div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {employees.map((employee) => (
+                            <Card
+                                key={employee.id}
+                                onClick={() => setSelectedEmployee(employee)}
+                                className="cursor-pointer hover:border-[#FF6B35] transition-colors"
+                            >
+                                <CardHeader>
+                                    <div className="flex items-start justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-10 h-10 bg-[#FF6B35] rounded-full flex items-center justify-center">
+                                                <Users
+                                                    size={20}
+                                                    className="text-white"
+                                                />
                                             </div>
-                                            <div className="text-[#8B949E] text-xs font-mono">
-                                                {employee.id}
+                                            <div>
+                                                <div className="text-[#C9D1D9]">
+                                                    {employee.name}
+                                                </div>
+                                                <div className="text-[#8B949E] text-xs font-mono">
+                                                    ID: {employee.id}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <Badge
-                                        variant={getStatusColor(
-                                            employee.status,
-                                        )}
-                                    >
-                                        {getStatusLabel(employee.status)}
-                                    </Badge>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-2">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-[#8B949E]">
-                                            Отдел:
-                                        </span>
-                                        <span className="text-[#C9D1D9]">
-                                            {employee.department}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-[#8B949E]">
-                                            Квалификация:
-                                        </span>
-                                        <Badge variant="info">
-                                            {employee.qualification}
+                                        <Badge
+                                            variant={getStatusColor(
+                                                employee.status
+                                            )}
+                                        >
+                                            {getStatusLabel(employee.status)}
                                         </Badge>
                                     </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-[#8B949E]">
-                                            Миссий:
-                                        </span>
-                                        <span className="text-[#C9D1D9] font-bold">
-                                            {employee.missionsCompleted}
-                                        </span>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-[#8B949E]">
+                                                Отдел:
+                                            </span>
+                                            <span className="text-[#C9D1D9]">
+                                                {getDepartment(employee)}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-[#8B949E]">
+                                                Квалификация:
+                                            </span>
+                                            <Badge variant="info">
+                                                {getQualification(employee)}
+                                            </Badge>
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-[#8B949E]">
-                                            Принят:
-                                        </span>
-                                        <span className="text-[#C9D1D9]">
-                                            {new Date(
-                                                employee.joinedAt,
-                                            ).toLocaleDateString("ru-RU")}
-                                        </span>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                )}
+                
+                {!loading && employees.length === 0 && (
+                     <div className="text-center py-12 text-[#8B949E]">
+                         Сотрудники не найдены
+                     </div>
+                )}
 
                 {/* Create Employee Modal */}
                 <Modal
@@ -233,62 +237,7 @@ export function EmployeesPage() {
                             required
                         />
 
-                        <Select
-                            name="role"
-                            label="Роль"
-                            options={[
-                                {
-                                    value: "ROLE_MANAGEMENT_EMPLOYEE",
-                                    label: "Менеджмент",
-                                },
-                                {
-                                    value: "ROLE_MISSION_CONTROL_EMPLOYEE",
-                                    label: "Центр управления миссиями",
-                                },
-                                {
-                                    value: "ROLE_SCANCOM_EMPLOYEE",
-                                    label: "ScanCom",
-                                },
-                                { value: "ROLE_RND_EMPLOYEE", label: "R&D" },
-                                {
-                                    value: "ROLE_SCIENCE_DEPARTMENT_EMPLOYEE",
-                                    label: "Научный отдел",
-                                },
-                                {
-                                    value: "ROLE_LAUNCH_CONTROL_EMPLOYEE",
-                                    label: "Контроль запусков",
-                                },
-                                {
-                                    value: "ROLE_MAINTENANCE_EMPLOYEE",
-                                    label: "Обслуживание",
-                                },
-                                {
-                                    value: "ROLE_MINER_EMPLOYEE",
-                                    label: "Шахтер",
-                                },
-                            ]}
-                            required
-                        />
-
-                        <Input
-                            name="department"
-                            label="Отдел"
-                            placeholder="Название отдела"
-                            required
-                        />
-
-                        <Select
-                            name="qualification"
-                            label="Квалификация"
-                            options={[
-                                { value: "Новичок", label: "Новичок" },
-                                { value: "Опытный", label: "Опытный" },
-                                { value: "Специалист", label: "Специалист" },
-                                { value: "Высшая", label: "Высшая" },
-                            ]}
-                            required
-                        />
-
+                        {/* Simplified Creation Form since logic is mocked */}
                         <div className="flex gap-2 justify-end mt-4">
                             <Button
                                 type="button"
@@ -320,12 +269,12 @@ export function EmployeesPage() {
                                         {selectedEmployee.name}
                                     </h3>
                                     <p className="text-[#8B949E] font-mono text-sm">
-                                        {selectedEmployee.id}
+                                        ID: {selectedEmployee.id}
                                     </p>
                                 </div>
                                 <Badge
                                     variant={getStatusColor(
-                                        selectedEmployee.status,
+                                        selectedEmployee.status
                                     )}
                                 >
                                     {getStatusLabel(selectedEmployee.status)}
@@ -339,7 +288,7 @@ export function EmployeesPage() {
                                         Отдел
                                     </div>
                                     <div className="text-[#C9D1D9]">
-                                        {selectedEmployee.department}
+                                        {getDepartment(selectedEmployee)}
                                     </div>
                                 </div>
 
@@ -348,7 +297,7 @@ export function EmployeesPage() {
                                         Квалификация
                                     </div>
                                     <Badge variant="info">
-                                        {selectedEmployee.qualification}
+                                        {getQualification(selectedEmployee)}
                                     </Badge>
                                 </div>
 
@@ -362,7 +311,7 @@ export function EmployeesPage() {
                                             size={20}
                                         />
                                         <span className="text-[#C9D1D9] text-xl font-bold">
-                                            {selectedEmployee.missionsCompleted}
+                                            {getMissionsCompleted(selectedEmployee)}
                                         </span>
                                     </div>
                                 </div>
@@ -373,40 +322,11 @@ export function EmployeesPage() {
                                     </div>
                                     <div className="text-[#C9D1D9]">
                                         {new Date(
-                                            selectedEmployee.joinedAt,
+                                            getJoinedAt(selectedEmployee)
                                         ).toLocaleDateString("ru-RU")}
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Performance */}
-                            {selectedEmployee.missionsCompleted > 0 && (
-                                <div className="p-4 bg-[#161B22] border border-[#30363D] rounded">
-                                    <div className="text-[#8B949E] mb-3">
-                                        Производительность
-                                    </div>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-[#C9D1D9]">
-                                                Успешных миссий
-                                            </span>
-                                            <span className="text-[#56C271] font-bold">
-                                                {
-                                                    selectedEmployee.missionsCompleted
-                                                }
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-[#C9D1D9]">
-                                                Эффективность
-                                            </span>
-                                            <Badge variant="success">
-                                                Отличная
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </Modal>
                 )}

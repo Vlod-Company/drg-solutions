@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Layout } from "../components/Layout";
 import {
     Card,
@@ -16,51 +16,108 @@ import {
     MapPin,
     Calendar,
     Rocket,
+    Plus,
 } from "lucide-react";
-import { mockMissions } from "../data/mockData";
-import { Mission } from "../types";
+import { MissionService, EcosystemService, TeamService } from "../api/services";
+import { MissionDto, BiomeDto, TeamDto } from "../types/api";
+import { Input, Select, Textarea } from "../components/ui/Input";
+import { toast } from "sonner";
 
 export function MissionsPage() {
-    const [missions] = useState<Mission[]>(mockMissions);
-    const [selectedMission, setSelectedMission] = useState<Mission | null>(
-        null,
+    const [missions, setMissions] = useState<MissionDto[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedMission, setSelectedMission] = useState<MissionDto | null>(
+        null
     );
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [biomes, setBiomes] = useState<BiomeDto[]>([]);
+    const [teams, setTeams] = useState<TeamDto[]>([]);
     const [filter, setFilter] = useState<
         "ALL" | "PLANNED" | "ACTIVE" | "COMPLETED"
     >("ALL");
 
-    const filteredMissions = missions.filter(
-        (m) => filter === "ALL" || m.status === filter,
-    );
-
-    const getDangerStars = (level: number) => {
-        return "⚠️".repeat(level);
+    const fetchMissions = async () => {
+        try {
+            const response = await MissionService.getAll(0, 50);
+            if (response.data) {
+                setMissions(response.data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch missions:", error);
+            // toast.error("Не удалось загрузить миссии");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const getMissionIcon = (type: Mission["type"]) => {
-        switch (type) {
-            case "MINING":
-                return "⛏️";
-            case "RESEARCH":
-                return "🔬";
-            case "RESCUE":
-                return "🚑";
-            case "DEFENSE":
-                return "🛡️";
-            default:
-                return "🎯";
+    useEffect(() => {
+        fetchMissions();
+        
+        const fetchAuxData = async () => {
+             try {
+                const [biomesData, teamsData] = await Promise.all([
+                    EcosystemService.getAllBiomes(),
+                    TeamService.getAll()
+                ]);
+                setBiomes(biomesData);
+                setTeams(teamsData);
+             } catch (e) {
+                 console.error("Failed to fetch aux data", e);
+             }
+        };
+        fetchAuxData();
+    }, []);
+
+    const handleCreateMission = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        
+        try {
+            await MissionService.create({
+                name: formData.get("name") as string,
+                description: formData.get("description") as string,
+                biomeId: Number(formData.get("biomeId")),
+                teamId: Number(formData.get("teamId")),
+                requiredExperience: Number(formData.get("requiredExperience")),
+                missionStart: formData.get("missionStart") ? new Date(formData.get("missionStart") as string).toISOString() : undefined,
+            });
+            toast.success("Миссия создана");
+            setShowCreateModal(false);
+            fetchMissions();
+        } catch (error) {
+            console.error(error);
+            toast.error("Ошибка при создании миссии");
         }
+    };
+
+    const filteredMissions = missions.filter(
+        (m) =>
+            filter === "ALL" ||
+            m.status === filter ||
+            (filter === "PLANNED" && m.status === "CREATED") // Map CREATED to PLANNED if needed
+    );
+
+    const getDangerStars = (xp: number) => {
+        // Map required XP to danger stars (dummy logic)
+        const level = Math.min(5, Math.ceil((xp || 0) / 10));
+        return "⚠️".repeat(level || 1);
     };
 
     return (
         <Layout currentPage="/missions">
             <div className="max-w-7xl">
                 {/* Header */}
-                <div className="mb-6">
-                    <h1 className="text-[#C9D1D9] mb-2">Управление миссиями</h1>
-                    <p className="text-[#8B949E]">
-                        Планирование и мониторинг операций на Hoxxes IV
-                    </p>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h1 className="text-[#C9D1D9] mb-2">Управление миссиями</h1>
+                        <p className="text-[#8B949E]">
+                            Планирование и мониторинг операций на Hoxxes IV
+                        </p>
+                    </div>
+                    <Button onClick={() => setShowCreateModal(true)}>
+                        <Plus size={18} className="mr-2" />
+                        Создать миссию
+                    </Button>
                 </div>
 
                 {/* Filters */}
@@ -83,87 +140,152 @@ export function MissionsPage() {
                                         ? "Активные"
                                         : "Завершенные"}
                             </Button>
-                        ),
+                        )
                     )}
                 </div>
 
                 {/* Missions Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredMissions.map((mission) => (
-                        <Card
-                            key={mission.id}
-                            onClick={() => setSelectedMission(mission)}
-                        >
-                            <CardHeader>
-                                <div className="flex items-start justify-between mb-2">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-2xl">
-                                            {getMissionIcon(mission.type)}
-                                        </span>
-                                        <span className="text-[#C9D1D9] font-mono text-sm">
-                                            {mission.id}
-                                        </span>
+                {loading ? (
+                    <div className="text-[#C9D1D9]">Загрузка миссий...</div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {filteredMissions.map((mission) => (
+                            <Card
+                                key={mission.id}
+                                onClick={() => setSelectedMission(mission)}
+                                className="cursor-pointer hover:border-[#FF6B35] transition-colors"
+                            >
+                                <CardHeader>
+                                    <div className="flex items-start justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-2xl">
+                                                🎯
+                                            </span>
+                                            <span className="text-[#C9D1D9] font-mono text-sm">
+                                                ID: {mission.id}
+                                            </span>
+                                        </div>
+                                        <Badge
+                                            variant={
+                                                mission.status === "ACTIVE"
+                                                    ? "warning"
+                                                    : mission.status === "COMPLETED"
+                                                      ? "success"
+                                                      : "info"
+                                            }
+                                        >
+                                            {mission.status}
+                                        </Badge>
                                     </div>
-                                    <Badge
-                                        variant={
-                                            mission.status === "ACTIVE"
-                                                ? "warning"
-                                                : mission.status === "COMPLETED"
-                                                  ? "success"
-                                                  : "info"
-                                        }
-                                    >
-                                        {mission.status}
-                                    </Badge>
-                                </div>
-                                <CardTitle>{mission.name}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-2 mb-3">
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <MapPin
-                                            size={14}
-                                            className="text-[#8B949E]"
-                                        />
-                                        <span className="text-[#C9D1D9]">
-                                            {mission.biome}
-                                        </span>
+                                    <CardTitle className="truncate">{mission.name}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-2 mb-3">
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <MapPin
+                                                size={14}
+                                                className="text-[#8B949E]"
+                                            />
+                                            <span className="text-[#C9D1D9]">
+                                                Биом ID: {mission.biomeId}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Users
+                                                size={14}
+                                                className="text-[#8B949E]"
+                                            />
+                                            <span className="text-[#C9D1D9]">
+                                                Команда ID: {mission.teamId}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <AlertTriangle
+                                                size={14}
+                                                className="text-[#8B949E]"
+                                            />
+                                            <span className="text-[#C9D1D9]">
+                                                Опыт:{" "}
+                                                {mission.requiredExperience}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <Users
-                                            size={14}
-                                            className="text-[#8B949E]"
-                                        />
-                                        <span className="text-[#C9D1D9]">
-                                            Команда: {mission.teamSize}/
-                                            {mission.maxTeamSize}
-                                        </span>
+                                    <div className="p-2 bg-[#0D1117] rounded border border-[#30363D]">
+                                        <div className="text-[#8B949E] text-xs mb-1">
+                                            Описание:
+                                        </div>
+                                        <div className="text-[#C9D1D9] text-sm line-clamp-2">
+                                            {mission.description}
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <AlertTriangle
-                                            size={14}
-                                            className="text-[#8B949E]"
-                                        />
-                                        <span className="text-[#C9D1D9]">
-                                            Опасность:{" "}
-                                            {getDangerStars(
-                                                mission.dangerLevel,
-                                            )}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="p-2 bg-[#0D1117] rounded border border-[#30363D]">
-                                    <div className="text-[#8B949E] text-xs mb-1">
-                                        Цель:
-                                    </div>
-                                    <div className="text-[#C9D1D9] text-sm">
-                                        {mission.objective}
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                )}
+
+                {/* Create Mission Modal */}
+                <Modal
+                    isOpen={showCreateModal}
+                    onClose={() => setShowCreateModal(false)}
+                    title="Создание новой миссии"
+                >
+                    <form onSubmit={handleCreateMission}>
+                        <Input
+                            name="name"
+                            label="Название миссии"
+                            placeholder="Операция 'Глубокое погружение'"
+                            required
+                        />
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                            <Select
+                                name="biomeId"
+                                label="Биом"
+                                options={biomes.map(b => ({ value: String(b.id), label: b.name || `Биом ${b.id}` }))}
+                                required
+                            />
+                            <Select
+                                name="teamId"
+                                label="Команда"
+                                options={teams.map(t => ({ value: String(t.id), label: t.name || `Команда ${t.id}` }))}
+                                required
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <Input
+                                name="requiredExperience"
+                                type="number"
+                                label="Треб. опыт"
+                                placeholder="0"
+                            />
+                             <Input
+                                name="missionStart"
+                                type="datetime-local"
+                                label="Начало миссии"
+                            />
+                        </div>
+
+                        <Textarea
+                            name="description"
+                            label="Описание"
+                            placeholder="Цели и задачи миссии..."
+                            required
+                        />
+
+                        <div className="flex gap-2 justify-end mt-4">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => setShowCreateModal(false)}
+                            >
+                                Отмена
+                            </Button>
+                            <Button type="submit">Создать</Button>
+                        </div>
+                    </form>
+                </Modal>
 
                 {/* Mission Details Modal */}
                 {selectedMission && (
@@ -178,14 +300,14 @@ export function MissionsPage() {
                             <div>
                                 <div className="flex items-center gap-3 mb-3">
                                     <span className="text-4xl">
-                                        {getMissionIcon(selectedMission.type)}
+                                        🎯
                                     </span>
                                     <div>
                                         <h3 className="text-[#C9D1D9] text-xl">
                                             {selectedMission.name}
                                         </h3>
                                         <p className="text-[#8B949E]">
-                                            {selectedMission.type}
+                                            ID: {selectedMission.id}
                                         </p>
                                     </div>
                                     <Badge
@@ -211,24 +333,21 @@ export function MissionsPage() {
                                         Локация
                                     </div>
                                     <div className="text-[#C9D1D9]">
-                                        {selectedMission.biome}
-                                    </div>
-                                    <div className="text-[#8B949E] text-sm mt-1">
-                                        {selectedMission.planet}
+                                        Биом ID: {selectedMission.biomeId}
                                     </div>
                                 </div>
 
                                 <div className="p-4 bg-[#0D1117] border border-[#30363D] rounded">
                                     <div className="text-[#8B949E] text-sm mb-2">
-                                        Уровень опасности
+                                        Сложность (Опыт)
                                     </div>
                                     <div className="text-2xl">
                                         {getDangerStars(
-                                            selectedMission.dangerLevel,
+                                            selectedMission.requiredExperience || 0
                                         )}
                                     </div>
                                     <div className="text-[#8B949E] text-sm mt-1">
-                                        Уровень {selectedMission.dangerLevel}
+                                        {selectedMission.requiredExperience} XP
                                     </div>
                                 </div>
 
@@ -237,11 +356,7 @@ export function MissionsPage() {
                                         Команда
                                     </div>
                                     <div className="text-[#C9D1D9] text-xl">
-                                        {selectedMission.teamSize}/
-                                        {selectedMission.maxTeamSize}
-                                    </div>
-                                    <div className="text-[#8B949E] text-sm mt-1">
-                                        Шахтеров
+                                        ID: {selectedMission.teamId}
                                     </div>
                                 </div>
 
@@ -267,22 +382,22 @@ export function MissionsPage() {
                             {/* Objective */}
                             <div className="p-4 bg-[#161B22] border border-[#30363D] rounded">
                                 <div className="text-[#8B949E] mb-2">
-                                    Цель миссии
+                                    Описание миссии
                                 </div>
                                 <div className="text-[#C9D1D9]">
-                                    {selectedMission.objective}
+                                    {selectedMission.description}
                                 </div>
                             </div>
 
                             {/* Timeline */}
-                            {(selectedMission.startDate ||
-                                selectedMission.endDate) && (
+                            {(selectedMission.missionStart ||
+                                selectedMission.missionEnd) && (
                                 <div className="p-4 bg-[#161B22] border border-[#30363D] rounded">
                                     <div className="text-[#8B949E] mb-3">
                                         Временная шкала
                                     </div>
                                     <div className="space-y-2">
-                                        {selectedMission.startDate && (
+                                        {selectedMission.missionStart && (
                                             <div className="flex items-center gap-2">
                                                 <Calendar
                                                     size={16}
@@ -291,12 +406,12 @@ export function MissionsPage() {
                                                 <span className="text-[#C9D1D9] text-sm">
                                                     Начало:{" "}
                                                     {new Date(
-                                                        selectedMission.startDate,
+                                                        selectedMission.missionStart
                                                     ).toLocaleString("ru-RU")}
                                                 </span>
                                             </div>
                                         )}
-                                        {selectedMission.endDate && (
+                                        {selectedMission.missionEnd && (
                                             <div className="flex items-center gap-2">
                                                 <Calendar
                                                     size={16}
@@ -305,7 +420,7 @@ export function MissionsPage() {
                                                 <span className="text-[#C9D1D9] text-sm">
                                                     Завершение:{" "}
                                                     {new Date(
-                                                        selectedMission.endDate,
+                                                        selectedMission.missionEnd
                                                     ).toLocaleString("ru-RU")}
                                                 </span>
                                             </div>
@@ -314,33 +429,10 @@ export function MissionsPage() {
                                 </div>
                             )}
 
-                            {/* Actions */}
+                            {/* Actions - disabled for now as logic is complex */}
                             <div className="flex flex-wrap gap-2">
-                                {selectedMission.status === "PLANNED" && (
-                                    <Button variant="success">
-                                        <Rocket size={18} className="mr-2" />
-                                        Запустить миссию
-                                    </Button>
-                                )}
-                                {selectedMission.status === "ACTIVE" && (
-                                    <>
-                                        <Button variant="warning">
-                                            <AlertTriangle
-                                                size={18}
-                                                className="mr-2"
-                                            />
-                                            Запросить помощь
-                                        </Button>
-                                        <Button variant="info">
-                                            <Target
-                                                size={18}
-                                                className="mr-2"
-                                            />
-                                            Мониторинг
-                                        </Button>
-                                    </>
-                                )}
-                                <Button variant="ghost">Подробности</Button>
+                                {/* Placeholders for actions */}
+                                <Button variant="ghost" disabled>Действия (WIP)</Button>
                             </div>
                         </div>
                     </Modal>
