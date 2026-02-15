@@ -25,12 +25,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/auth-service/auth/login",
+              "raw": "http://localhost:1381/auth-service/auth/login",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "auth-service",
                 "auth",
@@ -60,12 +60,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/request-service/request",
+              "raw": "http://localhost:1381/request-service/request",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "request-service",
                 "request"
@@ -93,12 +93,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:6789/request-service/request/to-my-department",
+              "raw": "http://localhost:1381/request-service/request/to-my-department",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "request-service",
                 "request",
@@ -123,12 +123,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/request-service/request/7",
+              "raw": "http://localhost:1381/request-service/request/7",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "request-service",
                 "request",
@@ -144,12 +144,12 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "http://localhost:6789/station-service/station/1/setAttacked",
+              "raw": "http://localhost:1381/station-service/station/1/setAttacked",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "station-service",
                 "station",
@@ -178,12 +178,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/station-service/station/1/changeStatus",
+              "raw": "http://localhost:1381/station-service/station/1/changeStatus",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "station-service",
                 "station",
@@ -248,12 +248,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/request-service/request",
+              "raw": "http://localhost:1381/request-service/request",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "request-service",
                 "request"
@@ -277,12 +277,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/ecosystem-service/biome",
+              "raw": "http://localhost:1381/ecosystem-service/biome",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "ecosystem-service",
                 "biome"
@@ -306,12 +306,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/request-service/request",
+              "raw": "http://localhost:1381/request-service/request",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "request-service",
                 "request"
@@ -335,12 +335,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/mission-service/mission",
+              "raw": "http://localhost:1381/mission-service/mission",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "mission-service",
                 "mission"
@@ -355,12 +355,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:6789/mission-service/mission/10/getRecommendedWeapons",
+              "raw": "http://localhost:1381/mission-service/mission/10/getRecommendedWeapons",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "mission-service",
                 "mission",
@@ -386,12 +386,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/mission-service/mission/send/10",
+              "raw": "http://localhost:1381/mission-service/mission/send/10",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "mission-service",
                 "mission",
@@ -417,12 +417,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/logistics-service/shipment/",
+              "raw": "http://localhost:1381/logistics-service/shipment/",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "logistics-service",
                 "shipment",
@@ -477,12 +477,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/mission-service/mission/10",
+              "raw": "http://localhost:1381/mission-service/mission/10",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "mission-service",
                 "mission",
@@ -498,12 +498,12 @@
             "method": "PUT",
             "header": [],
             "url": {
-              "raw": "http://localhost:6789/store-service/changeStatusForCargo/{id}?status=ON_THE_WAY",
+              "raw": "http://localhost:1381/store-service/changeStatusForCargo/{id}?status=ON_THE_WAY",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "store-service",
                 "changeStatusForCargo",
@@ -534,12 +534,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/logistics-service/logistics/6",
+              "raw": "http://localhost:1381/logistics-service/logistics/6",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "logistics-service",
                 "logistics",
@@ -564,12 +564,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/store-service/items/add/1",
+              "raw": "http://localhost:1381/store-service/items/add/1",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "store-service",
                 "items",
@@ -586,12 +586,12 @@
             "method": "PUT",
             "header": [],
             "url": {
-              "raw": "http://localhost:6789/team-service/team/{id}?status=DEFORMED&cargoId=1",
+              "raw": "http://localhost:1381/team-service/team/{id}?status=DEFORMED&cargoId=1",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "team-service",
                 "team",
@@ -665,12 +665,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/request-service/request",
+              "raw": "http://localhost:1381/request-service/request",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "request-service",
                 "request"
@@ -694,12 +694,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/request-service/request",
+              "raw": "http://localhost:1381/request-service/request",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "request-service",
                 "request"
@@ -723,11 +723,11 @@
               }
             },
             "url": {
-              "raw": "localhost:6789/station-service/station",
+              "raw": "localhost:1381/station-service/station",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "station-service",
                 "station"
@@ -751,11 +751,11 @@
               }
             },
             "url": {
-              "raw": "localhost:6789/station-service/station/{id}/changeStatus",
+              "raw": "localhost:1381/station-service/station/{id}/changeStatus",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "station-service",
                 "station",
@@ -820,11 +820,11 @@
               }
             },
             "url": {
-              "raw": "localhost:6789/employee-service/employees",
+              "raw": "localhost:1381/employee-service/employees",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "employee-service",
                 "employees"
@@ -840,7 +840,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"name\":\"Sashka BV\",\r\n    \"password\":\"1234567890\",\r\n    \"employee_id\":1234567890\r\n}",
+              "raw": "{\r\n    \"name\":\"Sashka BV\",\r\n    \"password\":\"1234513810\",\r\n    \"employee_id\":1234513810\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -848,11 +848,11 @@
               }
             },
             "url": {
-              "raw": "localhost:6789/auth-service/auth/register",
+              "raw": "localhost:1381/auth-service/auth/register",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "auth-service",
                 "auth",
@@ -877,12 +877,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:6789/request-service/request",
+              "raw": "http://localhost:1381/request-service/request",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "6789",
+              "port": "1381",
               "path": [
                 "request-service",
                 "request"

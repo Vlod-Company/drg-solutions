@@ -32,6 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 name: tokenInfo.username || "Unknown", 
                 roles: (tokenInfo.roles as Role[]) || ["ROLE_USER"],
                 department: tokenInfo.department || "Unknown",
+                employeeId: tokenInfo.employee_id,
             };
             setUser(mappedUser);
         } catch (error) {

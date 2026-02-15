@@ -21,6 +21,9 @@ export function EmployeesPage() {
     const [selectedEmployee, setSelectedEmployee] = useState<EmployeeResponseDto | null>(
         null
     );
+    const [isEditing, setIsEditing] = useState(false);
+    const [editData, setEditData] = useState<Partial<EmployeeResponseDto>>({});
+    const [activeTab, setActiveTab] = useState("Все");
 
     const fetchEmployees = async () => {
         try {
@@ -41,14 +44,20 @@ export function EmployeesPage() {
     const handleCreateEmployee = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
+        const experience = Number(formData.get("experience") || 0);
+        if (experience < 0) {
+            toast.error("Опыт не может быть отрицательным");
+            return;
+        }
+
         try {
             await EmployeeService.create({
                 name: formData.get("name") as string,
                 post: formData.get("post") as string,
                 department: formData.get("department") as string,
-                experience: Number(formData.get("experience") || 0),
-                status: "WORKING",
-                hiredDate: new Date().toISOString().split("T")[0],
+                experience: experience,
+                status: "ACTIVE",
+                hiredDate: new Date().toISOString(),
             });
             toast.success("Сотрудник зарегистрирован");
             setShowCreateModal(false);
@@ -59,42 +68,61 @@ export function EmployeesPage() {
         }
     };
 
-    // Helper to map API status to UI colors/labels
-    const getStatusColor = (status: string) => {
+    const handleUpdateEmployee = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!selectedEmployee?.id) return;
+        
+        if (editData.experience !== undefined && editData.experience < 0) {
+            toast.error("Опыт не может быть отрицательным");
+            return;
+        }
+
+        try {
+            const updated = await EmployeeService.update(selectedEmployee.id, editData);
+            toast.success("Данные сотрудника обновлены");
+            setIsEditing(false);
+            setSelectedEmployee(updated);
+            fetchEmployees();
+        } catch (error) {
+            console.error(error);
+            toast.error("Ошибка при обновлении данных");
+        }
+    };
+
+    const getStatusColor = (status: string | undefined) => {
         switch (status) {
             case "ACTIVE":
                 return "success";
-            case "ON_MISSION":
+            case "ON_VACATION":
                 return "warning";
-            case "RESTING":
-                return "info";
-            case "INJURED":
+            case "FIRED":
                 return "danger";
             default:
                 return "default";
         }
     };
 
-    const getStatusLabel = (status: string) => {
+    const getStatusLabel = (status: string | undefined) => {
         switch (status) {
             case "ACTIVE":
                 return "Активен";
-            case "ON_MISSION":
-                return "На миссии";
-            case "RESTING":
-                return "Отдыхает";
-            case "INJURED":
-                return "Ранен";
+            case "ON_VACATION":
+                return "В отпуске";
+            case "FIRED":
+                return "Уволен";
             default:
-                return status;
+                return status || "Неизвестно";
         }
     };
 
-    // Helpers to safely access properties that might differ in DTO
-    const getDepartment = (e: EmployeeResponseDto) => (e as any).department || "Неопределен";
-    const getQualification = (e: EmployeeResponseDto) => (e as any).qualification || "Специалист";
-    const getMissionsCompleted = (e: EmployeeResponseDto) => (e as any).missionsCompleted || 0;
-    const getJoinedAt = (e: EmployeeResponseDto) => (e as any).employmentDate || (e as any).joinedAt || new Date().toISOString();
+    const formatDate = (dateStr: string | undefined) => {
+        if (!dateStr) return "—";
+        return new Date(dateStr).toLocaleDateString("ru-RU", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        });
+    };
 
     return (
         <Layout currentPage="/employees">
@@ -115,6 +143,25 @@ export function EmployeesPage() {
                     </Button>
                 </div>
 
+                {/* Tabs / Filter */}
+                {!loading && (
+                    <div className="flex flex-wrap gap-2 mb-8 p-1 bg-[#161B22] border border-[#30363D] rounded-lg w-fit">
+                        {["Все", ...Array.from(new Set(employees.map(e => e.department).filter(Boolean)))].map((dept) => (
+                            <button
+                                key={dept}
+                                onClick={() => setActiveTab(dept as string)}
+                                className={`px-4 py-2 rounded-md transition-all text-sm font-medium ${
+                                    activeTab === dept
+                                        ? "bg-[#FF6B35] text-white shadow-lg shadow-[#FF6B35]/20"
+                                        : "text-[#8B949E] hover:text-[#C9D1D9] hover:bg-[#30363D]"
+                                }`}
+                            >
+                                {dept}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
                 {/* Stats */}
                 {!loading && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -126,15 +173,15 @@ export function EmployeesPage() {
                                 color: "text-[#4FC3F7]",
                             },
                             {
-                                label: "На миссиях",
+                                label: "В отпуске",
                                 count: employees.filter(
-                                    (e) => e.status === "ON_MISSION",
+                                    (e) => e.status === "ON_VACATION",
                                 ).length,
                                 icon: Target,
                                 color: "text-[#FF6B35]",
                             },
                             {
-                                label: "Активные",
+                                label: "Активны",
                                 count: employees.filter(
                                     (e) => e.status === "ACTIVE",
                                 ).length,
@@ -142,9 +189,9 @@ export function EmployeesPage() {
                                 color: "text-[#56C271]",
                             },
                             {
-                                label: "Раненые",
+                                label: "Уволены",
                                 count: employees.filter(
-                                    (e) => e.status === "INJURED",
+                                    (e) => e.status === "FIRED",
                                 ).length,
                                 icon: Heart,
                                 color: "text-[#D32F2F]",
@@ -174,9 +221,11 @@ export function EmployeesPage() {
                     <div className="text-[#C9D1D9]">Загрузка сотрудников...</div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {employees.map((employee) => (
-                            <Card
-                                key={employee.id}
+                        {employees
+                            .filter(e => activeTab === "Все" || e.department === activeTab)
+                            .map((employee) => (
+                                <Card
+                                    key={employee.id}
                                 onClick={() => setSelectedEmployee(employee)}
                                 className="cursor-pointer hover:border-[#FF6B35] transition-colors"
                             >
@@ -208,21 +257,19 @@ export function EmployeesPage() {
                                     </div>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-[#8B949E]">
-                                                Отдел:
-                                            </span>
-                                            <span className="text-[#C9D1D9]">
-                                                {getDepartment(employee)}
-                                            </span>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-[#8B949E]">Отдел:</span>
+                                            <span className="text-[#C9D1D9] font-medium">{employee.department || "—"}</span>
                                         </div>
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-[#8B949E]">
-                                                Квалификация:
-                                            </span>
-                                            <Badge variant="info">
-                                                {getQualification(employee)}
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-[#8B949E]">Должность:</span>
+                                            <span className="text-[#C9D1D9]">{employee.post || "—"}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-sm pt-2 border-t border-[#30363D]">
+                                            <span className="text-[#8B949E]">Опыт:</span>
+                                            <Badge variant="outline" className="text-[#FF6B35] border-[#FF6B35]/30 font-mono">
+                                                {employee.experience || 0} XP
                                             </Badge>
                                         </div>
                                     </div>
@@ -269,9 +316,10 @@ export function EmployeesPage() {
                         
                         <Input
                             name="experience"
-                            label="Опыт (лет)"
+                            label="Опыт (XP)"
                             type="number"
-                            placeholder="5"
+                            min="0"
+                            placeholder="0"
                             required
                         />
 
@@ -292,100 +340,159 @@ export function EmployeesPage() {
                 {selectedEmployee && (
                     <Modal
                         isOpen={!!selectedEmployee}
-                        onClose={() => setSelectedEmployee(null)}
-                        title="Профиль сотрудника"
+                        onClose={() => {
+                            setSelectedEmployee(null);
+                            setIsEditing(false);
+                        }}
+                        title={isEditing ? "Редактирование профиля" : "Профиль сотрудника"}
+                        size="lg"
                     >
-                        <div className="space-y-6">
-                            {/* Employee Header */}
-                            <div className="flex items-center gap-4">
-                                <div className="w-16 h-16 bg-[#FF6B35] rounded-full flex items-center justify-center">
-                                    <Users size={32} className="text-white" />
+                        {isEditing ? (
+                            <form onSubmit={handleUpdateEmployee} className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input
+                                        label="ФИО"
+                                        value={editData.name || ""}
+                                        onChange={e => setEditData({...editData, name: e.target.value})}
+                                        required
+                                    />
+                                    <Select
+                                        label="Статус"
+                                        value={editData.status || ""}
+                                        onChange={e => setEditData({...editData, status: e.target.value as any})}
+                                        options={[
+                                            { value: "ACTIVE", label: "Активен" },
+                                            { value: "ON_VACATION", label: "В отпуске" },
+                                            { value: "FIRED", label: "Уволен" },
+                                        ]}
+                                    />
                                 </div>
-                                <div className="flex-1">
-                                    <h3 className="text-[#C9D1D9] text-xl">
-                                        {selectedEmployee.name}
-                                    </h3>
-                                    <p className="text-[#8B949E] font-mono text-sm">
-                                        ID: {selectedEmployee.id}
-                                    </p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input
+                                        label="Отдел"
+                                        value={editData.department || ""}
+                                        onChange={e => setEditData({...editData, department: e.target.value})}
+                                    />
+                                    <Input
+                                        label="Должность"
+                                        value={editData.post || ""}
+                                        onChange={e => setEditData({...editData, post: e.target.value})}
+                                    />
                                 </div>
-                                <Badge
-                                    variant={getStatusColor(
-                                        selectedEmployee.status
-                                    )}
-                                >
-                                    {getStatusLabel(selectedEmployee.status)}
-                                </Badge>
-                            </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input
+                                        label="Опыт (XP)"
+                                        type="number"
+                                        min="0"
+                                        value={editData.experience || 0}
+                                        onChange={e => setEditData({...editData, experience: Number(e.target.value)})}
+                                    />
+                                    <Input
+                                        label="Дата найма"
+                                        type="date"
+                                        value={editData.hiredDate ? editData.hiredDate.split("T")[0] : ""}
+                                        onChange={e => setEditData({...editData, hiredDate: new Date(e.target.value).toISOString()})}
+                                    />
+                                </div>
+                                {editData.status === "FIRED" && (
+                                    <Input
+                                        label="Дата увольнения"
+                                        type="date"
+                                        value={editData.firedDate ? editData.firedDate.split("T")[0] : ""}
+                                        onChange={e => setEditData({...editData, firedDate: new Date(e.target.value).toISOString()})}
+                                    />
+                                )}
 
-                            {/* Info Grid */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-[#0D1117] border border-[#30363D] rounded">
-                                    <div className="text-[#8B949E] text-sm mb-2">
-                                        Отдел
-                                    </div>
-                                    <div className="text-[#C9D1D9]">
-                                        {getDepartment(selectedEmployee)}
-                                    </div>
+                                <div className="flex gap-2 justify-end mt-6">
+                                    <Button type="button" variant="ghost" onClick={() => setIsEditing(false)}>
+                                        Отмена
+                                    </Button>
+                                    <Button type="submit">Сохранить изменения</Button>
                                 </div>
-
-                                <div className="p-4 bg-[#0D1117] border border-[#30363D] rounded">
-                                    <div className="text-[#8B949E] text-sm mb-2">
-                                        Квалификация
+                            </form>
+                        ) : (
+                            <div className="space-y-6">
+                                {/* Employee Header */}
+                                <div className="flex items-center gap-4 p-4 bg-[#161B22] border border-[#30363D] rounded-lg">
+                                    <div className="w-16 h-16 bg-[#FF6B35] rounded-full flex items-center justify-center">
+                                        <Users size={32} className="text-white" />
                                     </div>
-                                    <Badge variant="info">
-                                        {getQualification(selectedEmployee)}
+                                    <div className="flex-1">
+                                        <h3 className="text-[#C9D1D9] text-xl font-bold">
+                                            {selectedEmployee.name}
+                                        </h3>
+                                        <p className="text-[#8B949E] font-mono text-sm">
+                                            ID: {selectedEmployee.id}
+                                        </p>
+                                    </div>
+                                    <Badge variant={getStatusColor(selectedEmployee.status)}>
+                                        {getStatusLabel(selectedEmployee.status)}
                                     </Badge>
                                 </div>
 
-                                <div className="p-4 bg-[#0D1117] border border-[#30363D] rounded">
-                                    <div className="text-[#8B949E] text-sm mb-2">
-                                        Миссий завершено
+                                {/* Info Grid */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-4 bg-[#0D1117] border border-[#30363D] rounded">
+                                        <div className="text-[#8B949E] text-[10px] uppercase font-mono mb-1">Отдел</div>
+                                        <div className="text-[#C9D1D9]">{selectedEmployee.department || "—"}</div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <Award
-                                            className="text-[#FF6B35]"
-                                            size={20}
-                                        />
-                                        <span className="text-[#C9D1D9] text-xl font-bold">
-                                            {getMissionsCompleted(selectedEmployee)}
-                                        </span>
-                                    </div>
-                                </div>
 
-                                <div className="p-4 bg-[#0D1117] border border-[#30363D] rounded">
-                                    <div className="text-[#8B949E] text-sm mb-2">
-                                        Дата приема
+                                    <div className="p-4 bg-[#0D1117] border border-[#30363D] rounded">
+                                        <div className="text-[#8B949E] text-[10px] uppercase font-mono mb-1">Должность</div>
+                                        <div className="text-[#C9D1D9]">{selectedEmployee.post || "—"}</div>
                                     </div>
-                                    <div className="text-[#C9D1D9]">
-                                        {new Date(
-                                            getJoinedAt(selectedEmployee)
-                                        ).toLocaleDateString("ru-RU")}
+
+                                    <div className="p-4 bg-[#0D1117] border border-[#30363D] rounded">
+                                        <div className="text-[#8B949E] text-[10px] uppercase font-mono mb-1">Опыт</div>
+                                        <div className="flex items-center gap-2">
+                                            <Award className="text-[#FF6B35]" size={18} />
+                                            <span className="text-[#C9D1D9] text-lg font-bold font-mono">{selectedEmployee.experience || 0} XP</span>
+                                        </div>
                                     </div>
+
+                                    <div className="p-4 bg-[#0D1117] border border-[#30363D] rounded">
+                                        <div className="text-[#8B949E] text-[10px] uppercase font-mono mb-1">Дата найма</div>
+                                        <div className="text-[#C9D1D9] font-mono">{formatDate(selectedEmployee.hiredDate)}</div>
+                                    </div>
+
+                                    {selectedEmployee.status === "FIRED" && (
+                                        <div className="p-4 bg-[#0D1117] border border-[#30363D] rounded col-span-2">
+                                            <div className="text-[#D32F2F] text-[10px] uppercase font-mono mb-1">Дата увольнения</div>
+                                            <div className="text-[#C9D1D9] font-mono">{formatDate(selectedEmployee.firedDate)}</div>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                {/* Actions */}
+                                <div className="flex gap-2 pt-4 border-t border-[#30363D]">
+                                    <Button
+                                        onClick={() => {
+                                            setEditData(selectedEmployee);
+                                            setIsEditing(true);
+                                        }}
+                                    >
+                                        Редактировать
+                                    </Button>
+                                    <Button
+                                        variant="danger"
+                                        onClick={async () => {
+                                            if (confirm("Вы уверены, что хотите удалить сотрудника?")) {
+                                                try {
+                                                    await EmployeeService.delete(selectedEmployee.id as number);
+                                                    toast.success("Сотрудник удален");
+                                                    setSelectedEmployee(null);
+                                                    fetchEmployees();
+                                                } catch (e) {
+                                                    toast.error("Ошибка при удалении сотрудника");
+                                                }
+                                            }
+                                        }}
+                                    >
+                                        Удалить сотрудника
+                                    </Button>
                                 </div>
                             </div>
-                            
-                            {/* Actions */}
-                            <div className="flex gap-2">
-                                <Button
-                                    variant="danger"
-                                    onClick={async () => {
-                                        if (confirm("Вы уверены, что хотите удалить сотрудника?")) {
-                                            try {
-                                                await EmployeeService.delete(selectedEmployee.id as number);
-                                                toast.success("Сотрудник удален");
-                                                setSelectedEmployee(null);
-                                                fetchEmployees();
-                                            } catch (e) {
-                                                toast.error("Ошибка при удалении сотрудника");
-                                            }
-                                        }
-                                    }}
-                                >
-                                    Удалить сотрудника
-                                </Button>
-                            </div>
-                        </div>
+                        )}
                     </Modal>
                 )}
             </div>

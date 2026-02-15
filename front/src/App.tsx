@@ -9,6 +9,7 @@ import { BiomesPage } from "./pages/BiomesPage";
 import { EmployeesPage } from "./pages/EmployeesPage";
 import { GlossaryPage } from "./pages/GlossaryPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { TeamsPage } from "./pages/TeamsPage";
 import { Toaster } from "sonner@2.0.3";
 
 function Router() {
@@ -76,6 +77,8 @@ function Router() {
             return <GlossaryPage />;
         case "/profile":
             return <ProfilePage />;
+        case "/teams":
+            return <TeamsPage />;
         default:
             // Redirect to dashboard for unknown routes
             if (isAuthenticated) {

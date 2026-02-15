@@ -17,6 +17,16 @@ import {
     AttackedDTO,
     PlanetDto,
     TeamDto,
+    GlossaryBiome,
+    EquipmentInfoDTO,
+    ResourceInfoDTO,
+    MonsterDto,
+    WeaponInfoDTO,
+    DeliveryPointResponseDTO,
+    ItemResponseDTO,
+    CreateTeamDto,
+    UpdateTeamDto,
+    TeamMembersResponse,
 } from "../types/api";
 
 export const AuthService = {
@@ -37,6 +47,12 @@ export const EmployeeService = {
     },
     getById: async (id: number): Promise<EmployeeResponseDto> => {
         const response = await api.get(`/employee-service/employees/${id}`);
+        return response.data;
+    },
+    getByIds: async (ids: number[]): Promise<EmployeeResponseDto[]> => {
+        const response = await api.get("/employee-service/employees/byIds", {
+            params: { ids: ids.join(",") }
+        });
         return response.data;
     },
     create: async (data: any): Promise<EmployeeResponseDto> => {
@@ -135,8 +151,57 @@ export const EcosystemService = {
         const response = await api.get("/ecosystem-service/biome");
         return response.data;
     },
+    getAllMonsters: async (): Promise<MonsterDto[]> => {
+        const response = await api.get("/ecosystem-service/monster");
+        return response.data;
+    },
     getAllPlanets: async (): Promise<PlanetDto[]> => {
         const response = await api.get("/planet-service/api/planets");
+        return response.data;
+    },
+    updateBiome: async (id: number, data: any): Promise<BiomeDto> => {
+        const response = await api.put(`/ecosystem-service/biome/${id}`, data);
+        return response.data;
+    },
+    updatePlanet: async (id: number, data: any): Promise<PlanetDto> => {
+        const response = await api.put(`/planet-service/api/planets/${id}`, data);
+        return response.data;
+    },
+    createBiome: async (data: CreateBiomeDto): Promise<BiomeDto> => {
+        const response = await api.post("/ecosystem-service/biome", data);
+        return response.data;
+    },
+};
+
+export const DeliveryPointService = {
+    getById: async (id: number): Promise<any> => {
+        const response = await api.get(`/delivery-point-service/deliveryPoint/${id}`);
+        return response.data;
+    },
+};
+
+export const StoreService = {
+    findItemsInDeliveryPoint: async (deliveryPointId: number): Promise<DeliveryPointResponseDTO[]> => {
+        const response = await api.post(`/store-service/items/${deliveryPointId}/all`);
+        return response.data;
+    },
+};
+
+export const GlossaryService = {
+    getBiomes: async (): Promise<GlossaryBiome[]> => {
+        const response = await api.get("/glossary-service/biome/all");
+        return response.data;
+    },
+    getEquipment: async (): Promise<EquipmentInfoDTO[]> => {
+        const response = await api.get("/glossary-service/equipmentInfo/all");
+        return response.data;
+    },
+    getResources: async (): Promise<ResourceInfoDTO[]> => {
+        const response = await api.get("/glossary-service/resourceInfo/all");
+        return response.data;
+    },
+    getWeapons: async (): Promise<WeaponInfoDTO[]> => {
+        const response = await api.get("/glossary-service/weaponInfo/all");
         return response.data;
     },
 };
@@ -150,16 +215,24 @@ export const TeamService = {
         const response = await api.get(`/team-service/team/${id}`);
         return response.data;
     },
-    create: async (teamName: string): Promise<TeamDto> => {
-        const response = await api.post("/team-service/team", null, {
-            params: { teamName },
-        });
+    create: async (data: CreateTeamDto): Promise<TeamDto> => {
+        const response = await api.post("/team-service/team", data);
+        return response.data;
+    },
+    update: async (id: number, data: Partial<TeamDto>): Promise<TeamDto> => {
+        const response = await api.put(`/team-service/team/${id}`, data);
+        return response.data;
+    },
+    getTeamMembers: async (id: number): Promise<TeamMembersResponse> => {
+        const response = await api.get(`/team-service/team/${id}/getTeamMembers`);
         return response.data;
     },
     updateStatus: async (id: number, status: string, cargoId?: number): Promise<void> => {
-        await api.put(`/team-service/team/${id}`, null, {
-            params: { status, cargoId },
-        });
+        const data: UpdateTeamDto = {
+            teamStatus: status,
+            cargoId: cargoId
+        };
+        await api.put(`/team-service/team/${id}`, data);
     },
 };
 

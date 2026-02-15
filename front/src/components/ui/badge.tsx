@@ -2,7 +2,7 @@ import React from "react";
 
 interface BadgeProps {
     children: React.ReactNode;
-    variant?: "default" | "success" | "danger" | "warning" | "info";
+    variant?: "default" | "success" | "danger" | "warning" | "info" | "outline";
     className?: string;
 }
 
@@ -17,6 +17,7 @@ export function Badge({
         danger: "bg-[#D32F2F] text-white",
         warning: "bg-[#FF6B35] text-white",
         info: "bg-[#4FC3F7] text-white",
+        outline: "border border-[#30363D] text-[#8B949E]",
     };
 
     return (

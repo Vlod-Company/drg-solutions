@@ -4,7 +4,7 @@ info:
   description: Aggregated API documentation for all services
   version: 1.0.0
 servers:
-  - url: http://localhost:6789
+  - url: http://localhost:1381
     description: API Gateway
 
 tags:
@@ -436,6 +436,18 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ResourceInfoDTO"
+  /glossary-service/weaponInfo/all:
+    get:
+      tags: [Glossary Service]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WeaponInfoDTO"
 
   # Logistics Service
   /logistics-service/logistics/{id}:
@@ -983,12 +995,11 @@ paths:
                   $ref: "#/components/schemas/TeamDto"
     post:
       tags: [Team Service]
-      parameters:
-        - name: teamName
-          in: query
-          required: true
-          schema:
-            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTeamDto"
       responses:
         "200":
           description: OK
@@ -996,7 +1007,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TeamDto"
-  /team-service/team/{id}:
+  /team-service/team/{id}/getTeamMembers:
     get:
       tags: [Team Service]
       parameters:
@@ -1012,7 +1023,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TeamDto"
+                $ref: "#/components/schemas/TeamMembersResponse"
     put:
       tags: [Team Service]
       parameters:
@@ -1618,6 +1629,18 @@ components:
           type: string
         impactTypeName:
           type: string
+    WeaponInfoDTO:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        weight:
+          type: number
+          format: double
+        impactType:
+          $ref: "#/components/schemas/ImpactTypeDto"
 
     TeamDto:
       type: object
@@ -1635,3 +1658,24 @@ components:
           format: int64
         status:
           type: string
+          enum:
+            [
+              CREATED,
+              ASSIGNED,
+              ON_MISSION,
+              DELIVERED,
+              ON_THE_WAY,
+              KILLED,
+              DEFORMED,
+            ]
+
+    CreateTeamDto:
+      type: object
+      properties:
+        teamName:
+          type: string
+        employeeIds:
+          type: array
+          items:
+            type: integer
+            format: int64

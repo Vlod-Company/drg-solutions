@@ -17,6 +17,7 @@ import {
     Users,
 } from "lucide-react";
 import {
+    EmployeeService,
     MissionService,
     RequestService,
     StationService,
@@ -29,7 +30,7 @@ export function DashboardPage() {
         activeRequests: 0,
         activeMissions: 0,
         operationalStations: 0,
-        criticalAlerts: 0,
+        totalPersonnel: 0,
     });
     const [tasks, setTasks] = useState<RequestDto[]>([]);
     const [recentRequests, setRecentRequests] = useState<RequestDto[]>([]);
@@ -71,22 +72,24 @@ export function DashboardPage() {
 
                 // Fetch Stations
                 const stationsData = await StationService.getAll();
-                const stations = Array.isArray(stationsData) ? stationsData : [];
-                const operationalStationsCount = stations.filter(
+                const operationalStationsCount = (stationsData || []).filter(
                     (s) => {
                         const st = s.status?.toUpperCase().trim();
                         return st === "OPERATIONAL" || st === "ACTIVE" || st === "ONLINE";
                     }
                 ).length;
                 
-                // Critical alerts equivalent
-                const criticalCount = requests.filter(r => r.status?.toUpperCase() === 'NEW').length;
+                // Fetch Personnel
+                const employeesData = await EmployeeService.getAll();
+                const activePersonnelCount = (employeesData || []).filter(
+                    (e) => e.status === "ACTIVE"
+                ).length;
 
                 setStats({
                     activeRequests: activeRequestsCount,
                     activeMissions: activeMissionsCount,
                     operationalStations: operationalStationsCount,
-                    criticalAlerts: criticalCount,
+                    totalPersonnel: activePersonnelCount,
                 });
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
@@ -183,15 +186,15 @@ export function DashboardPage() {
                         <CardContent className="flex items-center justify-between">
                             <div>
                                 <div className="text-[#8B949E] text-sm mb-1">
-                                    Новые запросы
+                                    Активный персонал
                                 </div>
                                 <div className="text-[#C9D1D9] text-2xl font-bold">
-                                    {stats.criticalAlerts}
+                                    {stats.totalPersonnel}
                                 </div>
                             </div>
-                            <div className="w-12 h-12 bg-[#D32F2F] bg-opacity-10 rounded-lg flex items-center justify-center">
-                                <AlertTriangle
-                                    className="text-[#D32F2F]"
+                            <div className="w-12 h-12 bg-[#FFD700] bg-opacity-10 rounded-lg flex items-center justify-center">
+                                <Users
+                                    className="text-[#FFD700]"
                                     size={24}
                                 />
                             </div>
@@ -212,7 +215,7 @@ export function DashboardPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-3">
+                            <div className="space-y-3 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
                                 {tasks.length === 0 && (
                                     <div className="text-[#8B949E] text-sm">Нет активных задач</div>
                                 )}
@@ -259,7 +262,7 @@ export function DashboardPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-3">
+                            <div className="space-y-3 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
                                 {recentRequests.length === 0 && (
                                     <div className="text-[#8B949E] text-sm">Нет запросов</div>
                                 )}

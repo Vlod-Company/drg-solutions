@@ -33,7 +33,7 @@ export interface EmployeeResponseDto {
     post?: string;
     department?: string;
     experience?: number;
-    status?: string | "WORKING" | "FIRED" | "ON_LEAVE";
+    status?: string | "ACTIVE" | "FIRED" | "ON_VACATION";
     hiredDate?: string;
     firedDate?: string;
 }
@@ -43,7 +43,7 @@ export interface EmployeeRequestDto {
     post?: string;
     department?: string;
     experience?: number;
-    status?: "WORKING" | "FIRED" | "ON_LEAVE";
+    status?: "ACTIVE" | "FIRED" | "ON_VACATION";
     hiredDate?: string;
 }
 
@@ -118,6 +118,13 @@ export interface ResourceInfoDTO {
     name?: string;
     description?: string;
     weightPerUnit?: number;
+}
+
+export interface WeaponInfoDTO {
+    name?: string;
+    description?: string;
+    weight?: number;
+    impactType?: ImpactTypeDto;
 }
 
 export interface Logistic {
@@ -300,4 +307,19 @@ export interface LoginRequest {
 
 export interface ValidateTokenRequest {
     token?: string;
+}
+
+export interface CreateTeamDto {
+    teamName: string;
+    employeeIds: number[];
+    locatedAt: number;
+}
+
+export interface UpdateTeamDto {
+    teamStatus: string;
+    cargoId?: number;
+}
+
+export interface TeamMembersResponse {
+    employeeId: number[];
 }

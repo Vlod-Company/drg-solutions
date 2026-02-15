@@ -4,6 +4,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: "primary" | "secondary" | "danger" | "success" | "ghost";
     size?: "sm" | "md" | "lg";
     children: React.ReactNode;
+    onClick?: React.MouseEventHandler<HTMLButtonElement>;
+    type?: "button" | "submit" | "reset";
 }
 
 export function Button({
@@ -14,7 +16,7 @@ export function Button({
     ...props
 }: ButtonProps) {
     const baseClasses =
-        "rounded transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
+        "inline-flex items-center justify-center rounded transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
 
     const variantClasses = {
         primary: "bg-[#FF6B35] hover:bg-[#FF7A47] text-white",

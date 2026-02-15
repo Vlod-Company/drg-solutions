@@ -13,6 +13,7 @@ import {
     Bell,
     Menu,
     X,
+    Shield,
 } from "lucide-react";
 import { Badge } from "./ui/Badge";
 
@@ -75,6 +76,12 @@ export function Layout({ children, currentPage }: LayoutProps) {
                 icon: Users,
                 path: "/employees",
                 roles: ["ROLE_ADMIN", "ROLE_MANAGEMENT_EMPLOYEE"],
+            },
+            {
+                name: "Команды",
+                icon: Shield,
+                path: "/teams",
+                roles: ["ROLE_ADMIN", "ROLE_MISSION_CONTROL_EMPLOYEE", "ROLE_MINER_EMPLOYEE"],
             },
             { name: "Глоссарий", icon: BookOpen, path: "/glossary" },
         ];

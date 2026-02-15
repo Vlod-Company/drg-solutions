@@ -16,6 +16,7 @@ export interface User {
     name: string;
     roles: Role[];
     department: string;
+    employeeId?: number;
     avatar?: string;
 }
 
