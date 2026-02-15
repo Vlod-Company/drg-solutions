@@ -25,7 +25,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
 
             const tokenInfo = await AuthService.getMe();
-            // Map TokenInfo to User
             const mappedUser: User = {
                 id: tokenInfo.user_id?.toString() || "0",
                 username: tokenInfo.username || "",

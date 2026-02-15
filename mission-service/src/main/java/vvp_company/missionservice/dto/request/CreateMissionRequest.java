@@ -29,6 +29,7 @@ public class CreateMissionRequest {
     private Long teamId;
 
     @Min(value=0)
+    @Builder.Default
     private Integer requiredExperience = 0;
 
     @NotNull

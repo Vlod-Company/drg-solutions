@@ -13,12 +13,15 @@ feign:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVER:http://localhost:8543/eureka}
+      defaultZone: ${EUREKA_SERVER:http://localhost:1390/eureka}
   instance:
     prefer-ip-address: true
 
 server:
-  port: ${SERVER_PORT:6789}
+  port: ${SERVER_PORT:1381}
+  tomcat:
+    threads:
+      max: 5
 logging:
   level:
     com:

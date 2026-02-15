@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import vvp_company.storeservice.dto.nested.HowMuchAtTimeItem;
 import vvp_company.storeservice.dto.nested.ItemSearchDTO;
 import vvp_company.storeservice.dto.nested.sendItem.SendItemDTO;
 import vvp_company.storeservice.dto.request.ReserveCargoRequest;
@@ -36,6 +37,15 @@ public class ItemController {
             @PathVariable Long deliveryPointId,
             @Valid @RequestBody List<ItemSearchDTO> searchItems) {
         return itemService.findItemsInDeliveryPoint(deliveryPointId, searchItems);
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_LAUNCH_CONTROL_EMPLOYEE')")
+    @PostMapping("/{deliveryPointId}/all")
+    public List<DeliveryPointResponseDTO> findItemsInAllDeliveryPoints(
+            @PathVariable Long deliveryPointId
+    ){
+        return itemService.findAllInDeliveryPoint(deliveryPointId);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') " +

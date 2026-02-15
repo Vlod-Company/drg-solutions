@@ -53,6 +53,18 @@ public class ItemService {
     private final TeamRepository teamRepository;
 
     @Transactional
+    public List<DeliveryPointResponseDTO> findAllInDeliveryPoint(Long deliveryPointId) {
+        var items = warehouseRepository.howMuchAtTimeInDeliveryPoint(deliveryPointId, LocalDateTime.now());
+        var deliveryPoint = deliveryPointClient.getDeliveryPointById(deliveryPointId);
+
+        var response = howMuchAtTimeItemsToDeliveryPointResponse(items, deliveryPoint);
+        if (isNull(response)) {
+            throw new ResponseStatusException(NOT_FOUND);
+        }
+        return List.of(response);
+    }
+
+    @Transactional
     public void addItemsToDeliveryPoint(Long deliveryPointId, List<SendItemDTO> items) {
         List<SendItemEquipment> equipmentList = new ArrayList<>();
         List<SendItemResource> resourceList = new ArrayList<>();
@@ -123,6 +135,7 @@ public class ItemService {
         return List.of(howMuchAtTimeItemsToDeliveryPointResponse);
     }
 
+    @Transactional
     public List<DeliveryPointResponseDTO> findItemsInAllDeliveryPoints(List<ItemSearchDTO> items) {
         var searchItemsByType = itemSearchDtoToMap(items);
 

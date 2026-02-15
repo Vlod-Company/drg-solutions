@@ -32,7 +32,6 @@ public class EmployeeController {
     @PreAuthorize("hasRole('ROLE_ADMIN') " +
             "or hasRole('ROLE_MANAGEMENT_EMPLOYEE')")
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public EmployeeResponseDto createEmployee(@Valid @RequestBody EmployeeRequestDto dto) {
         return service.create(dto);
     }
@@ -51,5 +50,12 @@ public class EmployeeController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteEmployee(@PathVariable Long id) {
         service.delete(id);
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_MANAGEMENT_EMPLOYEE')")
+    @GetMapping("byIds")
+    public List<EmployeeResponseDto> getEmployeesByIds(@RequestParam("ids") List<Long> ids) {
+        return service.getByIds(ids);
     }
 }

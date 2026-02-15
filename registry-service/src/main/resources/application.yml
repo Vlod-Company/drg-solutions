@@ -1,10 +1,15 @@
 server:
-  port: 8543
+  port: ${REGISTRY_PORT:1390}
+  tomcat:
+    threads:
+      max: 5
 
 eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
+    service-url:
+      defaultZone: ${EUREKA_SERVER:http://localhost:1390/eureka}
   server:
     enable-self-preservation: false
 

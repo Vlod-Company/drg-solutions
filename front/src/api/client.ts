@@ -1,5 +1,6 @@
 import axios from "axios";
 
+// @ts-ignore
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:1381";
 
 export const api = axios.create({

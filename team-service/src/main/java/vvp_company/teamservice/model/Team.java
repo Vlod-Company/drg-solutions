@@ -29,5 +29,6 @@ public class Team {
 
     @Column(name = "status", nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private TeamStatus status = TeamStatus.CREATED;
 }

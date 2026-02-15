@@ -38,8 +38,8 @@ public class LogisticService {
         var logistic = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         cargoRepository.recalculateCargo(logistic.getCargoId());
-        logistic.setStatus(request.getNewStatus());
-        logistic.setSendTime(request.getNewDate() == null ? logistic.getSendTime() : request.getNewDate());
+        logistic.setStatus(request.getNewStatus() != null ? request.getNewStatus() : logistic.getStatus());
+        logistic.setSendTime(request.getNewDate() != null ? request.getNewDate() : logistic.getSendTime());
         return repository.save(logistic);
     }
 
