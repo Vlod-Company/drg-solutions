@@ -27,6 +27,7 @@ import {
     CreateTeamDto,
     UpdateTeamDto,
     TeamMembersResponse,
+    CreateBiomeDto,
 } from "../types/api";
 
 export const AuthService = {
@@ -92,6 +93,10 @@ export const MissionService = {
     },
     delete: async (id: number): Promise<void> => {
         await api.delete(`/mission-service/mission/${id}`);
+    },
+    createSendMissionRequest: async (missionId: number, items: any[]): Promise<RequestDto> => {
+        const response = await api.post(`/mission-service/mission/send/${missionId}`, items);
+        return response.data;
     },
 };
 

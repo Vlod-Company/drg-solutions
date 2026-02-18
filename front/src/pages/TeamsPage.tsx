@@ -167,18 +167,10 @@ export function TeamsPage() {
         }
     };
 
-    const handleUpdateStatus = async (id: number, status: string) => {
-        try {
-            await TeamService.updateStatus(id, status, cargoId);
-            toast.success(`Статус обновлен: ${status}`);
-            // Update local state for immediate feedback in modal
-            if (selectedTeam && selectedTeam.id === id) {
-                setSelectedTeam({...selectedTeam, status});
-            }
-            fetchData();
-        } catch (error) {
-            console.error("Error updating team status:", error);
-            toast.error("Ошибка при обновлении статуса");
+    const handleUpdateStatus = (id: number, status: string) => {
+        // Only update local state for feedback in modal
+        if (selectedTeam && selectedTeam.id === id) {
+            setSelectedTeam({...selectedTeam, status});
         }
     };
 
@@ -512,13 +504,12 @@ export function TeamsPage() {
                                                 variant={selectedTeam.status === st ? "primary" : "ghost"}
                                                 size="sm" 
                                                 className={`flex flex-col items-center justify-center text-[9px] min-h-[44px] w-full p-1 bg-[#0D1117] border border-[#30363D] hover:border-[#FF6B35]/50 transition-all leading-none ${
-                                                    selectedTeam.status === st ? "ring-2 ring-[#FF6B35]/50 border-[#FF6B35]" : ""
+                                                    selectedTeam.status === st ? "ring-2 ring-[#FF6B35]/50 border-[#FF6B35] !bg-[#FF6B35]/10" : "opacity-70 hover:opacity-100"
                                                 }`}
                                                 onClick={() => handleUpdateStatus(selectedTeam.id!, st)}
-                                                disabled={selectedTeam.status === st}
                                             >
-                                                <div className="mb-1 opacity-70">{getStatusIcon(st)}</div>
-                                                <span className="text-center break-words">{getStatusLabel(st)}</span>
+                                                <div className="mb-1">{getStatusIcon(st)}</div>
+                                                <span className="text-center break-words font-bold">{getStatusLabel(st)}</span>
                                             </Button>
                                         ))}
                                     </div>
@@ -528,25 +519,26 @@ export function TeamsPage() {
                             {/* Technical Configuration (Editing) */}
                             {canManageTeams && (
                                 <div className="pt-4 border-t border-[#30363D]">
-                                    <form onSubmit={handleUpdateParams} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
-                                        <Input
-                                            label="ID Локации (Только просмотр)"
-                                            value={selectedTeam.locatedAtId || "NONE"}
-                                            disabled
-                                        />
-                                        <div className="flex gap-2 items-end">
-                                            <div className="flex-1">
-                                                <Input
-                                                    label="ID Груза"
-                                                    type="number"
-                                                    value={cargoId || ""}
-                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCargoId(e.target.value ? Number(e.target.value) : undefined)}
-                                                />
-                                            </div>
-                                            <Button type="submit" disabled={isSubmitting || cargoId === selectedTeam.cargoId}>
-                                                Сохранить
-                                            </Button>
+                                    <form onSubmit={handleUpdateParams} className="flex gap-2 items-end max-w-md pb-4">
+                                        <div className="flex-1">
+                                            <Input
+                                                label="ID Груза"
+                                                type="number"
+                                                value={cargoId || ""}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCargoId(e.target.value ? Number(e.target.value) : undefined)}
+                                                placeholder="Введите ID"
+                                                className="mb-0"
+                                            />
                                         </div>
+                                        <Button 
+                                            type="submit" 
+                                            disabled={isSubmitting || (
+                                                cargoId === teams.find(t => t.id === selectedTeam.id)?.cargoId && 
+                                                selectedTeam.status === teams.find(t => t.id === selectedTeam.id)?.status
+                                            )}
+                                        >
+                                            {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : "Сохранить"}
+                                        </Button>
                                     </form>
                                 </div>
                             )}

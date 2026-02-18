@@ -263,8 +263,10 @@ export interface ReserveCargoRequest {
 }
 
 export interface SendItemDTO {
-    itemType?: string;
-    name?: string;
+    itemType: "EQUIPMENT" | "WEAPON" | "TEAM";
+    itemName?: string;
+    quantity?: number;
+    teamId?: number;
 }
 
 export interface RoleRequest {

@@ -17,8 +17,9 @@ import {
     Calendar,
     Rocket,
     Plus,
+    Loader2
 } from "lucide-react";
-import { MissionService, EcosystemService, TeamService } from "../api/services";
+import { MissionService, EcosystemService, TeamService, GlossaryService } from "../api/services";
 import { MissionDto, BiomeDto, TeamDto } from "../types/api";
 import { Input, Select, Textarea } from "../components/ui/Input";
 import { toast } from "sonner";
@@ -32,9 +33,23 @@ export function MissionsPage() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [biomes, setBiomes] = useState<BiomeDto[]>([]);
     const [teams, setTeams] = useState<TeamDto[]>([]);
+    const [equipmentGlossary, setEquipmentGlossary] = useState<any[]>([]);
+    const [weaponGlossary, setWeaponGlossary] = useState<any[]>([]);
     const [filter, setFilter] = useState<
         "ALL" | "PLANNED" | "ACTIVE" | "COMPLETED"
     >("ALL");
+
+    // Multi-step form state
+    const [createStep, setCreateStep] = useState(1);
+    const [missionFormData, setMissionFormData] = useState<any>({});
+    const [sendItems, setSendItems] = useState<any[]>([]);
+    const [newItem, setNewItem] = useState<any>({
+        itemType: "EQUIPMENT",
+        itemName: "",
+        quantity: 1,
+        teamId: undefined
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fetchMissions = async () => {
         try {
@@ -71,29 +86,85 @@ export function MissionsPage() {
              }
         };
 
+        const fetchGlossary = async () => {
+            try {
+                const [eq, wp] = await Promise.all([
+                    GlossaryService.getEquipment(),
+                    GlossaryService.getWeapons()
+                ]);
+                setEquipmentGlossary(eq);
+                setWeaponGlossary(wp);
+            } catch (e) {
+                console.error("Failed to fetch glossary items", e);
+            }
+        };
+
         fetchBiomes();
         fetchTeams();
+        fetchGlossary();
     }, []);
 
-    const handleCreateMission = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleNextStep = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        
+        const data = {
+            name: formData.get("name") as string,
+            description: formData.get("description") as string,
+            biomeId: Number(formData.get("biomeId")),
+            teamId: Number(formData.get("teamId")),
+            requiredExperience: Number(formData.get("requiredExperience")),
+            missionStart: formData.get("missionStart") ? new Date(formData.get("missionStart") as string).toISOString() : undefined,
+        };
+        setMissionFormData(data);
+        setCreateStep(2);
+    };
+
+    const handleAddItem = () => {
+        if (newItem.itemType === "TEAM") {
+            if (!newItem.teamId) {
+                toast.error("Выберите команду");
+                return;
+            }
+        } else if (!newItem.itemName) {
+            toast.error("Введите название предмета");
+            return;
+        }
+        setSendItems([...sendItems, { ...newItem }]);
+        setNewItem({
+            itemType: "EQUIPMENT",
+            itemName: "",
+            quantity: 1,
+            teamId: undefined
+        });
+    };
+
+    const handleRemoveItem = (index: number) => {
+        setSendItems(sendItems.filter((_, i) => i !== index));
+    };
+
+    const handleFinalSubmit = async () => {
+        setIsSubmitting(true);
         try {
-            await MissionService.create({
-                name: formData.get("name") as string,
-                description: formData.get("description") as string,
-                biomeId: Number(formData.get("biomeId")),
-                teamId: Number(formData.get("teamId")),
-                requiredExperience: Number(formData.get("requiredExperience")),
-                missionStart: formData.get("missionStart") ? new Date(formData.get("missionStart") as string).toISOString() : undefined,
-            });
-            toast.success("Миссия создана");
+            // 1. Create Mission
+            const mission = await MissionService.create(missionFormData);
+            
+            if (!mission.id) throw new Error("ID миссии не получен");
+
+            // 2. Create Equipment Request
+            if (sendItems.length > 0) {
+                await MissionService.createSendMissionRequest(mission.id, sendItems);
+            }
+
+            toast.success("Миссия и запрос оборудования созданы");
             setShowCreateModal(false);
+            setCreateStep(1);
+            setSendItems([]);
             fetchMissions();
         } catch (error) {
             console.error(error);
-            toast.error("Ошибка при создании миссии");
+            toast.error("Ошибка при создании миссии или оборудования");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -123,7 +194,12 @@ export function MissionsPage() {
                             Планирование и мониторинг операций на Hoxxes IV
                         </p>
                     </div>
-                    <Button onClick={() => setShowCreateModal(true)}>
+                    <Button onClick={() => {
+                        setCreateStep(1);
+                        setSendItems([]);
+                        setMissionFormData({});
+                        setShowCreateModal(true);
+                    }}>
                         <Plus size={18} className="mr-2" />
                         Создать миссию
                     </Button>
@@ -236,64 +312,209 @@ export function MissionsPage() {
                 {/* Create Mission Modal */}
                 <Modal
                     isOpen={showCreateModal}
-                    onClose={() => setShowCreateModal(false)}
-                    title="Создание новой миссии"
+                    onClose={() => !isSubmitting && setShowCreateModal(false)}
+                    title={createStep === 1 ? "Создание новой миссии" : "Запрос снаряжения и оружия"}
                 >
-                    <form onSubmit={handleCreateMission}>
-                        <Input
-                            name="name"
-                            label="Название миссии"
-                            placeholder="Операция 'Глубокое погружение'"
-                            required
-                        />
-                        
-                        <div className="grid grid-cols-2 gap-4">
-                            <Select
-                                name="biomeId"
-                                label="Биом"
-                                options={biomes.map(b => ({ value: String(b.id), label: b.name || `Биом ${b.id}` }))}
-                                required
-                            />
-                            <Select
-                                name="teamId"
-                                label="Команда"
-                                options={teams.map(t => ({ value: String(t.id), label: t.name || `Команда ${t.id}` }))}
-                                required
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
+                    {createStep === 1 ? (
+                        <form onSubmit={handleNextStep}>
                             <Input
-                                name="requiredExperience"
-                                type="number"
-                                label="Треб. опыт"
-                                placeholder="0"
+                                name="name"
+                                label="Название миссии"
+                                defaultValue={missionFormData.name}
+                                placeholder="Операция 'Глубокое погружение'"
+                                required
                             />
-                             <Input
-                                name="missionStart"
-                                type="datetime-local"
-                                label="Начало миссии"
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <Select
+                                    name="biomeId"
+                                    label="Биом"
+                                    defaultValue={missionFormData.biomeId}
+                                    options={biomes.map(b => ({ value: String(b.id), label: b.name || `Биом ${b.id}` }))}
+                                    required
+                                />
+                                <Select
+                                    name="teamId"
+                                    label="Команда"
+                                    defaultValue={missionFormData.teamId}
+                                    options={teams.map(t => ({ value: String(t.id), label: t.name || `Команда ${t.id}` }))}
+                                    required
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input
+                                    name="requiredExperience"
+                                    type="number"
+                                    label="Треб. опыт"
+                                    defaultValue={missionFormData.requiredExperience}
+                                    placeholder="0"
+                                />
+                                 <Input
+                                    name="missionStart"
+                                    type="datetime-local"
+                                    label="Начало миссии"
+                                    defaultValue={missionFormData.missionStart ? new Date(missionFormData.missionStart).toISOString().slice(0, 16) : ""}
+                                />
+                            </div>
+
+                            <Textarea
+                                name="description"
+                                label="Описание"
+                                defaultValue={missionFormData.description}
+                                placeholder="Цели и задачи миссии..."
+                                required
                             />
-                        </div>
 
-                        <Textarea
-                            name="description"
-                            label="Описание"
-                            placeholder="Цели и задачи миссии..."
-                            required
-                        />
+                            <div className="flex gap-2 justify-end mt-4">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={() => setShowCreateModal(false)}
+                                >
+                                    Отмена
+                                </Button>
+                                <Button type="submit">
+                                    Далее
+                                </Button>
+                            </div>
+                        </form>
+                    ) : (
+                        <div className="space-y-6">
+                            <div className="p-4 bg-[#161B22] border border-[#30363D] rounded-lg">
+                                <h4 className="text-[#C9D1D9] text-sm font-bold mb-4 uppercase tracking-wider">Добавить предмет запроса</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                                    <Select
+                                        label="Тип"
+                                        value={newItem.itemType}
+                                        onChange={(e: any) => setNewItem({ 
+                                            ...newItem, 
+                                            itemType: e.target.value,
+                                            itemName: "",
+                                            teamId: undefined
+                                        })}
+                                        options={[
+                                            { value: "EQUIPMENT", label: "Снаряжение" },
+                                            { value: "WEAPON", label: "Оружие" },
+                                            { value: "TEAM", label: "Команда" }
+                                        ]}
+                                    />
+                                    <div className="md:col-span-2">
+                                        {newItem.itemType === "TEAM" ? (
+                                            <Select
+                                                label="Выбор команды"
+                                                value={newItem.teamId}
+                                                onChange={(e: any) => {
+                                                    const teamId = Number(e.target.value);
+                                                    const team = teams.find(t => t.id === teamId);
+                                                    setNewItem({ 
+                                                        ...newItem, 
+                                                        teamId, 
+                                                        itemName: team?.name || `Команда ${teamId}` 
+                                                    });
+                                                }}
+                                                options={teams.map(t => ({ value: String(t.id), label: t.name || `Команда ${t.id}` }))}
+                                                className="mb-0"
+                                            />
+                                        ) : newItem.itemType === "EQUIPMENT" ? (
+                                            <Select
+                                                label="Выбор снаряжения"
+                                                value={newItem.itemName}
+                                                onChange={(e: any) => setNewItem({ ...newItem, itemName: e.target.value })}
+                                                options={equipmentGlossary.map(e => ({ value: e.name, label: e.name }))}
+                                                className="mb-0"
+                                            />
+                                        ) : newItem.itemType === "WEAPON" ? (
+                                            <Select
+                                                label="Выбор оружия"
+                                                value={newItem.itemName}
+                                                onChange={(e: any) => setNewItem({ ...newItem, itemName: e.target.value })}
+                                                options={weaponGlossary.map(w => ({ value: w.name, label: w.name }))}
+                                                className="mb-0"
+                                            />
+                                        ) : (
+                                            <Input
+                                                label="Название предмета"
+                                                value={newItem.itemName}
+                                                onChange={(e: any) => setNewItem({ ...newItem, itemName: e.target.value })}
+                                                placeholder="Введите название..."
+                                                className="mb-0"
+                                            />
+                                        )}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <div className="w-20">
+                                            <Input
+                                                label="Кол-во"
+                                                type="number"
+                                                min="1"
+                                                value={newItem.quantity}
+                                                onChange={(e: any) => setNewItem({ ...newItem, quantity: Number(e.target.value) })}
+                                                className="mb-0"
+                                            />
+                                        </div>
+                                        <Button onClick={handleAddItem} className="h-10">
+                                            <Plus size={18} />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
 
-                        <div className="flex gap-2 justify-end mt-4">
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                onClick={() => setShowCreateModal(false)}
-                            >
-                                Отмена
-                            </Button>
-                            <Button type="submit">Создать</Button>
+                            <div className="space-y-2">
+                                <h4 className="text-[#8B949E] text-xs font-bold uppercase">Список оборудования к отправке</h4>
+                                <div className="max-h-60 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                                    {sendItems.length > 0 ? sendItems.map((item, index) => (
+                                        <div key={index} className="flex items-center justify-between p-3 bg-[#0D1117] border border-[#30363D] rounded-lg group">
+                                            <div className="flex items-center gap-3">
+                                                <Badge variant={item.itemType === "WEAPON" ? "danger" : item.itemType === "TEAM" ? "primary" : "info"}>
+                                                    {item.itemType}
+                                                </Badge>
+                                                <span className="text-[#C9D1D9] font-medium">{item.itemName}</span>
+                                                <span className="text-[#8B949E] text-sm">× {item.quantity}</span>
+                                            </div>
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                onClick={() => handleRemoveItem(index)}
+                                                className="opacity-0 group-hover:opacity-100 text-[#D32F2F] hover:bg-[#D32F2F]/10"
+                                            >
+                                                Удалить
+                                            </Button>
+                                        </div>
+                                    )) : (
+                                        <div className="text-center py-8 border border-dashed border-[#30363D] rounded-lg text-[#8B949E]">
+                                            Ничего не добавлено. Вы можете создать миссию без запроса оборудования.
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="flex gap-2 justify-between mt-6 pt-4 border-t border-[#30363D]">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={() => setCreateStep(1)}
+                                    disabled={isSubmitting}
+                                >
+                                    Назад
+                                </Button>
+                                <div className="flex gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        onClick={() => setShowCreateModal(false)}
+                                        disabled={isSubmitting}
+                                    >
+                                        Отмена
+                                    </Button>
+                                    <Button onClick={handleFinalSubmit} disabled={isSubmitting}>
+                                        {isSubmitting ? <Loader2 className="animate-spin mr-2" size={18} /> : null}
+                                        Сформировать миссию
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
-                    </form>
+                    )}
                 </Modal>
 
                 {/* Mission Details Modal */}
