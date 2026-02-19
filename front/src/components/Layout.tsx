@@ -14,6 +14,7 @@ import {
     Menu,
     X,
     Shield,
+    Truck,
 } from "lucide-react";
 import { Badge } from "./ui/Badge";
 
@@ -24,7 +25,14 @@ interface LayoutProps {
 
 export function Layout({ children, currentPage }: LayoutProps) {
     const { user, logout } = useAuth();
+    const [openDropdowns, setOpenDropdowns] = useState<string[]>([]);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const toggleDropdown = (name: string) => {
+        setOpenDropdowns((prev: string[]) => 
+            prev.includes(name) ? prev.filter((n: string) => n !== name) : [...prev, name]
+        );
+    };
 
     const getNavigationItems = () => {
         const allItems = [
@@ -83,6 +91,16 @@ export function Layout({ children, currentPage }: LayoutProps) {
                 path: "/teams",
                 roles: ["ROLE_ADMIN", "ROLE_MISSION_CONTROL_EMPLOYEE", "ROLE_MINER_EMPLOYEE"],
             },
+            {
+                name: "Логистика",
+                icon: Truck,
+                path: "/logistics",
+                roles: ["ROLE_ADMIN", "ROLE_LAUNCH_CONTROL_EMPLOYEE"],
+                subItems: [
+                    { name: "Шипменты", path: "/logistics/shipments" },
+                    { name: "Грузы", path: "/logistics/cargo" },
+                ]
+            },
             { name: "Глоссарий", icon: BookOpen, path: "/glossary" },
         ];
 
@@ -93,7 +111,64 @@ export function Layout({ children, currentPage }: LayoutProps) {
         );
     };
 
+    const NavLink = ({ item }: { item: any }) => {
+        const hasSub = item.subItems && item.subItems.length > 0;
+        const isOpen = openDropdowns.includes(item.name);
+        const isActive = currentPage === item.path || (hasSub && item.subItems.some((s: any) => s.path === currentPage));
 
+        if (hasSub) {
+            return (
+                <div className="space-y-1">
+                    <button
+                        onClick={() => toggleDropdown(item.name)}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded transition-colors ${
+                            isActive
+                                ? "bg-[#FF6B35]/10 text-[#FF6B35]"
+                                : "text-[#8B949E] hover:text-[#C9D1D9] hover:bg-[#0D1117]"
+                        }`}
+                    >
+                        <div className="flex items-center gap-3">
+                            <item.icon size={18} />
+                            <span>{item.name}</span>
+                        </div>
+                        <Menu size={14} className={`transition-transform ${isOpen ? "rotate-90" : ""}`} />
+                    </button>
+                    {isOpen && (
+                        <div className="ml-9 space-y-1">
+                            {item.subItems.map((sub: any) => (
+                                <a
+                                    key={sub.path}
+                                    href={sub.path}
+                                    className={`block px-3 py-2 rounded text-sm transition-colors ${
+                                        currentPage === sub.path
+                                            ? "text-[#FF6B35] bg-[#FF6B35]/5"
+                                            : "text-[#8B949E] hover:text-[#C9D1D9] hover:bg-[#0D1117]"
+                                    }`}
+                                >
+                                    {sub.name}
+                                </a>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        return (
+            <a
+                key={item.path}
+                href={item.path}
+                className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${
+                    currentPage === item.path
+                        ? "bg-[#FF6B35] text-white"
+                        : "text-[#8B949E] hover:text-[#C9D1D9] hover:bg-[#0D1117]"
+                }`}
+            >
+                <item.icon size={18} />
+                <span>{item.name}</span>
+            </a>
+        );
+    };
 
     return (
         <div className="min-h-screen bg-[#0D1117]">
@@ -161,19 +236,7 @@ export function Layout({ children, currentPage }: LayoutProps) {
                 {isMobileMenuOpen && (
                     <div className="md:hidden border-t border-[#30363D] p-2">
                         {getNavigationItems().map((item) => (
-                            <a
-                                key={item.path}
-                                href={item.path}
-                                className={`flex items-center gap-2 px-3 py-2 rounded ${
-                                    currentPage === item.path
-                                        ? "bg-[#FF6B35] text-white"
-                                        : "text-[#8B949E] hover:text-[#C9D1D9] hover:bg-[#0D1117]"
-                                }`}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                                <item.icon size={18} />
-                                <span>{item.name}</span>
-                            </a>
+                            <NavLink key={item.path} item={item} />
                         ))}
                     </div>
                 )}
@@ -184,18 +247,7 @@ export function Layout({ children, currentPage }: LayoutProps) {
                 <aside className="hidden md:block w-64 bg-[#161B22] border-r border-[#30363D] min-h-[calc(100vh-57px)] p-4">
                     <nav className="space-y-1">
                         {getNavigationItems().map((item) => (
-                            <a
-                                key={item.path}
-                                href={item.path}
-                                className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${
-                                    currentPage === item.path
-                                        ? "bg-[#FF6B35] text-white"
-                                        : "text-[#8B949E] hover:text-[#C9D1D9] hover:bg-[#0D1117]"
-                                }`}
-                            >
-                                <item.icon size={18} />
-                                <span>{item.name}</span>
-                            </a>
+                            <NavLink key={item.path || item.name} item={item} />
                         ))}
                     </nav>
 

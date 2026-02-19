@@ -8,6 +8,8 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     value?: string | number;
     onChange?: React.ChangeEventHandler<HTMLInputElement>;
     required?: boolean;
+    defaultValue?: string | number | readonly string[];
+    min?: string | number;
     className?: string;
     placeholder?: string;
 }
@@ -71,6 +73,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
     value?: string | number;
     onChange?: React.ChangeEventHandler<HTMLSelectElement>;
     required?: boolean;
+    defaultValue?: string | number | readonly string[];
     className?: string;
 }
 

@@ -25,6 +25,8 @@ import {
     AlertOctagon,
     Loader2,
     Settings2,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
 import { TeamService, EmployeeService } from "../api/services";
 import { TeamDto, EmployeeResponseDto } from "../types/api";
@@ -51,21 +53,31 @@ export function TeamsPage() {
     const [newTeamName, setNewTeamName] = useState("");
     const [newLocatedAt, setNewLocatedAt] = useState<number | undefined>(undefined);
     
-    const [activeTab, setActiveTab] = useState("ALL");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [activeTab, setActiveTab] = useState("ALL");
+    const [page, setPage] = useState(0);
+    const [totalItems, setTotalItems] = useState(0);
+    const pageSize = 9;
 
-    const fetchData = async () => {
+    const fetchData = async (pageNumber = 0) => {
         setLoading(true);
         try {
-            const [teamsData, employeesData] = await Promise.all([
-                TeamService.getAll(),
-                EmployeeService.getAll()
+            const [teamsResponse, employeesData] = await Promise.all([
+                TeamService.getAll(pageNumber, pageSize),
+                EmployeeService.getAll(0, 500) // Get all employees for membership check
             ]);
-            setTeams(Array.isArray(teamsData) ? teamsData : []);
+            
+            if (Array.isArray(teamsResponse)) {
+                setTeams(teamsResponse);
+                setTotalItems(teamsResponse.length);
+            } else {
+                setTeams(teamsResponse.data || []);
+                setTotalItems(teamsResponse.total || 0);
+            }
             
             // Filter only ACTIVE employees for team creation
-            const active = (Array.isArray(employeesData) ? employeesData : [])
-                .filter((emp: EmployeeResponseDto) => emp.status === "ACTIVE");
+            const employeesArray = Array.isArray(employeesData) ? employeesData : (employeesData.data || []);
+            const active = employeesArray.filter((emp: EmployeeResponseDto) => emp.status === "ACTIVE");
             setActiveEmployees(active);
         } catch (error) {
             console.error("Error fetching teams/employees:", error);
@@ -76,8 +88,8 @@ export function TeamsPage() {
     };
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        fetchData(page);
+    }, [page]);
 
     const fetchTeamMembers = async (teamId: number) => {
         setLoadingMembers(true);
@@ -350,6 +362,43 @@ export function TeamsPage() {
                         ))}
                     </div>
                 )}
+
+                {/* Pagination */}
+                <div className="flex items-center justify-between mt-8 mb-12 px-1">
+                    <div className="text-[#8B949E] text-sm font-mono bg-[#161B22]/50 border border-[#30363D] px-3 py-1.5 rounded-md">
+                        <span className="text-[#FF6B35]">
+                            {totalItems === 0 ? 0 : page * pageSize + 1}
+                        </span>
+                        {" - "}
+                        <span className="text-[#FF6B35]">
+                            {Math.min((page + 1) * pageSize, totalItems)}
+                        </span>
+                        {" / "}
+                        <span className="text-[#C9D1D9]">{totalItems}</span>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled={page === 0}
+                            onClick={() => setPage(page - 1)}
+                            className="bg-[#161B22] border-[#30363D]"
+                        >
+                            <ChevronLeft size={16} className="mr-1" />
+                            Назад
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled={(page + 1) * pageSize >= totalItems}
+                            onClick={() => setPage(page + 1)}
+                            className="bg-[#161B22] border-[#30363D]"
+                        >
+                            Вперед
+                            <ChevronRight size={16} className="ml-1" />
+                        </Button>
+                    </div>
+                </div>
 
                 {/* Create Team Modal */}
                 <Modal

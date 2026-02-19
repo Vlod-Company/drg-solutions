@@ -10,6 +10,8 @@ import { EmployeesPage } from "./pages/EmployeesPage";
 import { GlossaryPage } from "./pages/GlossaryPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { TeamsPage } from "./pages/TeamsPage";
+import { LogisticsPage } from "./pages/LogisticsPage";
+import { CargoPage } from "./pages/CargoPage";
 import { Toaster } from "sonner@2.0.3";
 
 function Router() {
@@ -79,6 +81,11 @@ function Router() {
             return <ProfilePage />;
         case "/teams":
             return <TeamsPage />;
+        case "/logistics":
+        case "/logistics/shipments":
+            return <LogisticsPage />;
+        case "/logistics/cargo":
+            return <CargoPage />;
         default:
             // Redirect to dashboard for unknown routes
             if (isAuthenticated) {

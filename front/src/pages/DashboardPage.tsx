@@ -21,6 +21,7 @@ import {
     MissionService,
     RequestService,
     StationService,
+    RequestFilter,
 } from "../api/services";
 import { RequestDto } from "../types/api";
 
@@ -40,8 +41,15 @@ export function DashboardPage() {
         const fetchData = async () => {
             try {
                 // Fetch Requests (My Department)
-                const requestsData = await RequestService.getMyDepartmentRequests();
-                const requests = Array.isArray(requestsData) ? requestsData : [];
+                const requestsData = await RequestService.getFiltered(0, 100, {
+                    recipientDepartment: user?.department
+                });
+                let requests: RequestDto[] = [];
+                if (Array.isArray(requestsData)) {
+                    requests = requestsData;
+                } else if (requestsData && requestsData.data) {
+                    requests = requestsData.data;
+                }
                 
                 const activeRequestsCount = requests.filter(
                     (r) => {
@@ -71,9 +79,10 @@ export function DashboardPage() {
                 ).length || 0;
 
                 // Fetch Stations
-                const stationsData = await StationService.getAll();
-                const operationalStationsCount = (stationsData || []).filter(
-                    (s) => {
+                const stationsResult = await StationService.getAll(0, 50);
+                const stations = Array.isArray(stationsResult) ? stationsResult : (stationsResult?.data || []);
+                const operationalStationsCount = stations.filter(
+                    (s: any) => {
                         const st = s.status?.toUpperCase().trim();
                         return st === "OPERATIONAL" || st === "ACTIVE" || st === "ONLINE";
                     }

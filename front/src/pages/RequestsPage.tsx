@@ -19,8 +19,10 @@ import {
     Edit2,
     Loader2,
     Eye,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
-import { RequestService, EmployeeService } from "../api/services";
+import { RequestService, EmployeeService, RequestFilter } from "../api/services";
 import { RequestDto, EmployeeResponseDto } from "../types/api";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
@@ -49,13 +51,19 @@ export function RequestsPage() {
         status: "",
         recipientEmployeeId: null as number | null,
     });
+    const [page, setPage] = useState(0);
+    const [totalItems, setTotalItems] = useState(0);
+    const pageSize = 9;
 
     const fetchEmployees = async () => {
         try {
-            const data = await EmployeeService.getAll();
-            setRawEmployees(data);
+            const employeesData = await EmployeeService.getAll();
+            setRawEmployees(employeesData);
+            const activePersonnelCount = (employeesData || []).filter(
+                (e: EmployeeResponseDto) => e.status === "ACTIVE"
+            ).length;
             const map: Record<number, string> = {};
-            data.forEach((emp) => {
+            employeesData.forEach((emp: EmployeeResponseDto) => {
                 if (emp.id) map[emp.id] = emp.name || "Unknown";
             });
             setEmployees(map);
@@ -64,39 +72,50 @@ export function RequestsPage() {
         }
     };
 
-    const fetchRequests = useCallback(async () => {
+    const fetchRequests = useCallback(async (pageNumber = 0) => {
         setLoading(true);
         try {
-            const data =
-                requestMode === "TO_ME"
-                    ? await RequestService.getMyDepartmentRequests()
-                    : await RequestService.getFromMyDepartmentRequests();
-            setRequests(data);
+            const apiFilter: RequestFilter = {};
+            
+            if (requestMode === "TO_ME" && user?.department) {
+                apiFilter.recipientDepartment = user.department;
+            } else if (requestMode === "FROM_ME" && user?.department) {
+                apiFilter.senderDepartment = user.department;
+            }
+
+            if (filter !== "ALL") {
+                apiFilter.status = filter;
+            }
+
+            const response = await RequestService.getFiltered(pageNumber, pageSize, apiFilter);
+            
+            if (Array.isArray(response)) {
+                setRequests(response);
+                setTotalItems(response.length);
+            } else if (response && typeof response === 'object') {
+                const data = response.data || response.content || [];
+                setRequests(data);
+                // Try various field names for total items
+                setTotalItems(response.totalElements ?? response.total ?? response.totalCount ?? data.length);
+            }
         } catch (error) {
             console.error("Failed to fetch requests", error);
             toast.error("Не удалось загрузить запросы");
         } finally {
             setLoading(false);
         }
-    }, [requestMode]);
+    }, [requestMode, filter, user?.department]);
 
     useEffect(() => {
-        fetchRequests();
+        fetchRequests(page);
+    }, [fetchRequests, page]);
+
+    useEffect(() => {
         fetchEmployees();
-    }, [fetchRequests]);
+    }, []);
 
     const filteredRequests = Array.isArray(requests)
         ? requests.filter((r) => {
-            // Status filter
-            let matchStatus = true;
-            if (filter !== "ALL") {
-                const s = r.status?.toUpperCase().trim();
-                if (filter === "CREATED") matchStatus = (s === "CREATED");
-                else if (filter === "IN_PROGRESS") matchStatus = (s === "IN_PROGRESS");
-                else if (filter === "SOLVED") matchStatus = (s === "SOLVED" || s === "COMPLETED");
-            }
-            if (!matchStatus) return false;
-
             // Sub-filter (My)
             if (subFilter === "MY" && user?.employeeId) {
                 if (requestMode === "TO_ME") {
@@ -141,7 +160,7 @@ export function RequestsPage() {
             toast.success("Вы назначены исполнителем");
             fetchRequests();
             if (selectedRequest?.id === requestId) {
-                setSelectedRequest(prev => prev ? { ...prev, recipientEmployeeId: user.employeeId, status: "IN_PROGRESS" } : null);
+                setSelectedRequest((prev: RequestDto | null) => prev ? { ...prev, recipientEmployeeId: user.employeeId, status: "IN_PROGRESS" } : null);
             }
         } catch (error) {
             console.error("Failed to assign recipient", error);
@@ -225,14 +244,25 @@ export function RequestsPage() {
                                 Исходящие
                             </button>
                         </div>
-                        <Button 
-                            onClick={() => setShowCreateModal(true)}
-                            className="bg-[#FF6B35] text-white hover:bg-[#ff8554]"
-                        >
-                            <Plus size={18} className="mr-2" />
-                            Создать
-                        </Button>
                     </div>
+                    <Button 
+                        onClick={() => {
+                            setPage(0);
+                            setRequestMode(requestMode === "TO_ME" ? "TO_ME" : "FROM_ME"); // Trigger reload if same, but redundant
+                        }}
+                        variant="ghost"
+                        size="sm"
+                        className="text-[#8B949E] hover:text-[#C9D1D9]"
+                    >
+                        Обновить
+                    </Button>
+                    <Button 
+                        onClick={() => setShowCreateModal(true)}
+                        className="bg-[#FF6B35] text-white hover:bg-[#ff8554]"
+                    >
+                        <Plus size={18} className="mr-2" />
+                        Создать
+                    </Button>
                 </div>
 
                 {/* Filters & Sub-filters */}
@@ -390,6 +420,43 @@ export function RequestsPage() {
                         ))}
                     </div>
                 )}
+
+                {/* Pagination */}
+                <div className="flex items-center justify-between mt-8 mb-12 px-1">
+                    <div className="text-[#8B949E] text-sm font-mono bg-[#161B22]/50 border border-[#30363D] px-3 py-1.5 rounded-md">
+                        <span className="text-[#FF6B35]">
+                            {totalItems === 0 ? 0 : page * pageSize + 1}
+                        </span>
+                        {" - "}
+                        <span className="text-[#FF6B35]">
+                            {Math.min((page + 1) * pageSize, totalItems)}
+                        </span>
+                        {" / "}
+                        <span className="text-[#C9D1D9]">{totalItems}</span>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled={page === 0}
+                            onClick={() => setPage(page - 1)}
+                            className="bg-[#161B22] border-[#30363D]"
+                        >
+                            <ChevronLeft size={16} className="mr-1" />
+                            Назад
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled={(page + 1) * pageSize >= totalItems}
+                            onClick={() => setPage(page + 1)}
+                            className="bg-[#161B22] border-[#30363D]"
+                        >
+                            Вперед
+                            <ChevronRight size={16} className="ml-1" />
+                        </Button>
+                    </div>
+                </div>
 
                 {/* Empty State */}
                 {!loading && filteredRequests.length === 0 && (
@@ -583,13 +650,13 @@ export function RequestsPage() {
                                         Назначить себя исполнителем
                                     </Button>
                                 )}
-                                <Button 
-                                    variant="outline" 
-                                    className="flex-1 border-[#30363D] text-[#C9D1D9]"
-                                    onClick={() => handleOpenEdit(selectedRequest)}
-                                >
-                                    Редактировать
-                                </Button>
+                                 <Button 
+                                     variant="secondary" 
+                                     className="flex-1 border-[#30363D] text-[#C9D1D9]"
+                                     onClick={() => handleOpenEdit(selectedRequest)}
+                                 >
+                                     Редактировать
+                                 </Button>
                             </div>
                         </div>
                     </Modal>

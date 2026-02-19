@@ -9,7 +9,7 @@ import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { Input, Select } from "../components/ui/Input";
 import { Modal } from "../components/ui/Modal";
-import { Users, UserPlus, Target, Heart, Award } from "lucide-react";
+import { Users, UserPlus, Target, Heart, Award, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { EmployeeService } from "../api/services";
 import { EmployeeResponseDto } from "../types/api";
 import { toast } from "sonner"; // Fixed import
@@ -22,24 +22,34 @@ export function EmployeesPage() {
         null
     );
     const [isEditing, setIsEditing] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [editData, setEditData] = useState<Partial<EmployeeResponseDto>>({});
-    const [activeTab, setActiveTab] = useState("Все");
+    const [activeTab, setActiveTab] = useState("ALL");
+    const [page, setPage] = useState(0);
+    const [totalItems, setTotalItems] = useState(0);
+    const pageSize = 9;
 
-    const fetchEmployees = async () => {
+    const fetchEmployees = async (pageNumber = 0) => {
+        setLoading(true);
         try {
-            const data = await EmployeeService.getAll();
-            setEmployees(data);
+            const response = await EmployeeService.getAll(pageNumber, pageSize);
+            if (Array.isArray(response)) {
+                setEmployees(response);
+                setTotalItems(response.length);
+            } else {
+                setEmployees(response.data || []);
+                setTotalItems(response.total || 0);
+            }
         } catch (error) {
             console.error("Failed to fetch employees", error);
-            // toast.error("Не удалось загрузить сотрудников");
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchEmployees();
-    }, []);
+        fetchEmployees(page);
+    }, [page]);
 
     const handleCreateEmployee = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -149,7 +159,10 @@ export function EmployeesPage() {
                         {["Все", ...Array.from(new Set(employees.map(e => e.department).filter(Boolean)))].map((dept) => (
                             <button
                                 key={dept}
-                                onClick={() => setActiveTab(dept as string)}
+                                onClick={() => {
+                                    setActiveTab(dept as string);
+                                    setPage(0);
+                                }}
                                 className={`px-4 py-2 rounded-md transition-all text-sm font-medium ${
                                     activeTab === dept
                                         ? "bg-[#FF6B35] text-white shadow-lg shadow-[#FF6B35]/20"
@@ -218,7 +231,10 @@ export function EmployeesPage() {
 
                 {/* Employees Grid */}
                 {loading ? (
-                    <div className="text-[#C9D1D9]">Загрузка сотрудников...</div>
+                    <div className="flex flex-col items-center justify-center py-24">
+                        <Loader2 className="animate-spin text-[#FF6B35] mb-4" size={40} />
+                        <p className="text-[#8B949E] font-mono">Синхронизация данных...</p>
+                    </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {employees
@@ -278,6 +294,43 @@ export function EmployeesPage() {
                         ))}
                     </div>
                 )}
+
+                {/* Pagination */}
+                <div className="flex items-center justify-between mt-8 mb-12 px-1">
+                    <div className="text-[#8B949E] text-sm font-mono bg-[#161B22]/50 border border-[#30363D] px-3 py-1.5 rounded-md">
+                        <span className="text-[#FF6B35]">
+                            {totalItems === 0 ? 0 : page * pageSize + 1}
+                        </span>
+                        {" - "}
+                        <span className="text-[#FF6B35]">
+                            {Math.min((page + 1) * pageSize, totalItems)}
+                        </span>
+                        {" / "}
+                        <span className="text-[#C9D1D9]">{totalItems}</span>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled={page === 0}
+                            onClick={() => setPage(page - 1)}
+                            className="bg-[#161B22] border-[#30363D]"
+                        >
+                            <ChevronLeft size={16} className="mr-1" />
+                            Назад
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled={(page + 1) * pageSize >= totalItems}
+                            onClick={() => setPage(page + 1)}
+                            className="bg-[#161B22] border-[#30363D]"
+                        >
+                            Вперед
+                            <ChevronRight size={16} className="ml-1" />
+                        </Button>
+                    </div>
+                </div>
                 
                 {!loading && employees.length === 0 && (
                      <div className="text-center py-12 text-[#8B949E]">

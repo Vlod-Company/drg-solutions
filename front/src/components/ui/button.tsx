@@ -6,6 +6,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     children: React.ReactNode;
     onClick?: React.MouseEventHandler<HTMLButtonElement>;
     type?: "button" | "submit" | "reset";
+    className?: string;
+    disabled?: boolean;
 }
 
 export function Button({

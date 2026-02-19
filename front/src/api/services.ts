@@ -28,6 +28,7 @@ import {
     UpdateTeamDto,
     TeamMembersResponse,
     CreateBiomeDto,
+    RecommendedWeaponDto,
 } from "../types/api";
 
 export const AuthService = {
@@ -42,8 +43,10 @@ export const AuthService = {
 };
 
 export const EmployeeService = {
-    getAll: async (): Promise<EmployeeResponseDto[]> => {
-        const response = await api.get("/employee-service/employees");
+    getAll: async (pageNumber: number = 0, pageSize: number = 20): Promise<any> => {
+        const response = await api.get("/employee-service/employees", {
+            params: { pageNumber, pageSize }
+        });
         return response.data;
     },
     getById: async (id: number): Promise<EmployeeResponseDto> => {
@@ -70,12 +73,9 @@ export const EmployeeService = {
 };
 
 export const MissionService = {
-    getAll: async (
-        pageNumber: number = 0,
-        pageSize: number = 10
-    ): Promise<PagedResponseMissionDto> => {
+    getAll: async (pageNumber: number = 0, pageSize: number = 10): Promise<any> => {
         const response = await api.get("/mission-service/mission", {
-            params: { pageNumber, pageSize },
+            params: { pageNumber, pageSize }
         });
         return response.data;
     },
@@ -98,6 +98,10 @@ export const MissionService = {
         const response = await api.post(`/mission-service/mission/send/${missionId}`, items);
         return response.data;
     },
+    getRecommendedWeapons: async (id: number): Promise<RecommendedWeaponDto[]> => {
+        const response = await api.get(`/mission-service/mission/${id}/getRecommendedWeapons`);
+        return response.data;
+    },
 };
 
 export const RequestService = {
@@ -114,24 +118,37 @@ export const RequestService = {
         return response.data;
     },
     // Endpoint found in Postman collection but not in OpenAPI (assumed to exist)
-    getMyDepartmentRequests: async (): Promise<RequestDto[]> => {
+    getMyDepartmentRequests: async (pageNumber: number = 0, pageSize: number = 10): Promise<any> => {
         const response = await api.get(
-            "/request-service/request/to-my-department"
+            "/request-service/request/to-my-department",
+            { params: { pageNumber, pageSize } }
         );
-        // Handle paged response or direct array
-        return Array.isArray(response.data) ? response.data : (response.data?.data || []);
+        return response.data;
     },
-    getFromMyDepartmentRequests: async (): Promise<RequestDto[]> => {
+    getFromMyDepartmentRequests: async (pageNumber: number = 0, pageSize: number = 10): Promise<any> => {
         const response = await api.get(
-            "/request-service/request/from-my-department"
+            "/request-service/request/from-my-department",
+            { params: { pageNumber, pageSize } }
         );
-        // Handle paged response or direct array
-        return Array.isArray(response.data) ? response.data : (response.data?.data || []);
+        return response.data;
+    },
+    getFiltered: async (pageNumber: number = 0, pageSize: number = 10, filter: RequestFilter): Promise<any> => {
+        const response = await api.post("/request-service/request/filters", filter, {
+            params: { pageNumber, pageSize }
+        });
+        return response.data;
     },
 };
 
+export interface RequestFilter {
+    code?: string;
+    senderDepartment?: string;
+    recipientDepartment?: string;
+    status?: string;
+}
+
 export const StationService = {
-    getAll: async (): Promise<Station[]> => {
+    getAll: async (): Promise<any[]> => {
         const response = await api.get("/station-service/station");
         return response.data;
     },
@@ -150,6 +167,25 @@ export const StationService = {
         return response.data;
     },
 };
+
+export const LogisticsService = {
+    getAll: async (): Promise<any[]> => {
+        const response = await api.get("/logistics-service/logistics");
+        return response.data;
+    },
+    getById: async (id: number): Promise<any> => {
+        const response = await api.get(`/logistics-service/logistics/${id}`);
+        return response.data;
+    },
+    update: async (id: number, data: any): Promise<any> => {
+        const response = await api.put(`/logistics-service/logistics/${id}`, data);
+        return response.data;
+    },
+    createShipment: async (data: any): Promise<void> => {
+        await api.post("/logistics-service/shipment", data);
+    },
+};
+
 
 export const EcosystemService = {
     getAllBiomes: async (): Promise<BiomeDto[]> => {
@@ -190,6 +226,36 @@ export const StoreService = {
         const response = await api.post(`/store-service/items/${deliveryPointId}/all`);
         return response.data;
     },
+    getWeaponIds: async (deliveryPointId: number, name: string): Promise<string[]> => {
+        const response = await api.get(`/store-service/items/${deliveryPointId}/getWeaponIds`, {
+            params: { name }
+        });
+        return response.data;
+    },
+    getEquipmentIds: async (deliveryPointId: number, name: string): Promise<string[]> => {
+        const response = await api.get(`/store-service/items/${deliveryPointId}/getEquipmentIds`, {
+            params: { name }
+        });
+        return response.data;
+    },
+    reserveForCargo: async (data: any): Promise<void> => {
+        await api.post("/store-service/items/reserveCargo", data);
+    },
+};
+
+export const SpaceShipService = {
+    getAll: async (): Promise<any[]> => {
+        const response = await api.get("/spaceship-service/spaceship");
+        return response.data;
+    },
+    getById: async (id: number): Promise<any> => {
+        const response = await api.get(`/spaceship-service/spaceship/${id}`);
+        return response.data;
+    },
+    create: async (data: any): Promise<any> => {
+        const response = await api.post("/spaceship-service/spaceship", data);
+        return response.data;
+    },
 };
 
 export const GlossaryService = {
@@ -212,8 +278,10 @@ export const GlossaryService = {
 };
 
 export const TeamService = {
-    getAll: async (): Promise<TeamDto[]> => {
-        const response = await api.get("/team-service/team");
+    getAll: async (pageNumber: number = 0, pageSize: number = 20): Promise<any> => {
+        const response = await api.get("/team-service/team", {
+            params: { pageNumber, pageSize }
+        });
         return response.data;
     },
     getById: async (id: number): Promise<TeamDto> => {
@@ -240,4 +308,3 @@ export const TeamService = {
         await api.put(`/team-service/team/${id}`, data);
     },
 };
-

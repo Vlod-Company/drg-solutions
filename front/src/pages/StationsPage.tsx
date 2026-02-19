@@ -16,8 +16,11 @@ import {
     AlertTriangle,
     Shield,
     Wrench,
-    Plus,
     Globe,
+    ChevronLeft,
+    ChevronRight,
+    Loader2,
+    Plus,
 } from "lucide-react";
 import { StationService, EcosystemService, StoreService } from "../api/services";
 import { Station, PlanetDto, ItemResponseDTO, DeliveryPointResponseDTO } from "../types/api";
@@ -30,6 +33,9 @@ export function StationsPage() {
     const [selectedStation, setSelectedStation] = useState<Station | null>(
         null
     );
+    const [page, setPage] = useState(0);
+    const [totalItems, setTotalItems] = useState(0);
+    const pageSize = 9;
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [editForm, setEditForm] = useState({
@@ -38,10 +44,19 @@ export function StationsPage() {
     const [planets, setPlanets] = useState<PlanetDto[]>([]);
     const [resourcesMap, setResourcesMap] = useState<Record<number, ItemResponseDTO[]>>({});
 
-    const fetchStations = async () => {
+    const fetchStations = async (pageNumber = 0) => {
         try {
             setLoading(true);
-            const data = await StationService.getAll();
+            const response = await StationService.getAll(pageNumber, pageSize);
+            
+            let data: Station[] = [];
+            if (Array.isArray(response)) {
+                data = response;
+                setTotalItems(response.length);
+            } else if (response && typeof response === 'object') {
+                data = response.data || response.content || [];
+                setTotalItems(response.totalElements ?? response.total ?? response.totalCount ?? data.length);
+            }
             setStations(data);
 
             // Fetch resources from store-service
@@ -52,7 +67,7 @@ export function StationsPage() {
                         const allItems = responses.flatMap(r => r.data || []);
                         
                         if (allItems.length > 0) {
-                            setResourcesMap((prev: Record<number, ItemResponseDTO[]>) => ({
+                            setResourcesMap((prev: any) => ({
                                 ...prev,
                                 [station.id!]: allItems
                             }));
@@ -64,22 +79,27 @@ export function StationsPage() {
             }
         } catch (error) {
             console.error("Failed to fetch stations", error);
+            toast.error("Не удалось загрузить станции");
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchStations();
-        
         const fetchPlanets = async () => {
             try {
-                 const data = await EcosystemService.getAllPlanets();
-                 setPlanets(data);
-            } catch (e: any) { console.error("Failed to fetch planets", e); }
+                const data = await EcosystemService.getAllPlanets();
+                setPlanets(data);
+            } catch (e: any) {
+                console.error("Failed to fetch planets", e);
+            }
         };
         fetchPlanets();
     }, []);
+
+    useEffect(() => {
+        fetchStations(page);
+    }, [page]);
 
     const handleCreateStation = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -344,6 +364,43 @@ export function StationsPage() {
                          Станции не найдены
                      </div>
                 )}
+
+                {/* Pagination */}
+                <div className="flex items-center justify-between mt-8 mb-12 px-1">
+                    <div className="text-[#8B949E] text-sm font-mono bg-[#161B22]/50 border border-[#30363D] px-3 py-1.5 rounded-md">
+                        <span className="text-[#FF6B35]">
+                            {totalItems === 0 ? 0 : page * pageSize + 1}
+                        </span>
+                        {" - "}
+                        <span className="text-[#FF6B35]">
+                            {Math.min((page + 1) * pageSize, totalItems)}
+                        </span>
+                        {" / "}
+                        <span className="text-[#C9D1D9]">{totalItems}</span>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled={page === 0}
+                            onClick={() => setPage(page - 1)}
+                            className="bg-[#161B22] border-[#30363D]"
+                        >
+                            <ChevronLeft size={16} className="mr-1" />
+                            Назад
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled={(page + 1) * pageSize >= totalItems}
+                            onClick={() => setPage(page + 1)}
+                            className="bg-[#161B22] border-[#30363D]"
+                        >
+                            Вперед
+                            <ChevronRight size={16} className="ml-1" />
+                        </Button>
+                    </div>
+                </div>
 
                 {/* Create Station Modal */}
                 <Modal

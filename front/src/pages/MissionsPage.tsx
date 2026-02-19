@@ -14,6 +14,11 @@ import {
     Users,
     AlertTriangle,
     MapPin,
+    CheckCircle2,
+    Clock,
+    History,
+    ChevronLeft,
+    ChevronRight,
     Calendar,
     Rocket,
     Plus,
@@ -50,16 +55,24 @@ export function MissionsPage() {
         teamId: undefined
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [currentMissionId, setCurrentMissionId] = useState<number | null>(null);
 
     const fetchMissions = async () => {
+        setLoading(true);
         try {
-            const response = await MissionService.getAll(0, 50);
-            if (response.data) {
-                setMissions(response.data);
+            // Fetch with a large pageSize to simulate "loading all at once" 
+            // since the API requires these parameters.
+            const response = await MissionService.getAll(0, 100);
+            
+            let data: any[] = [];
+            if (Array.isArray(response)) {
+                data = response;
+            } else if (response && typeof response === 'object') {
+                data = response.data || response.content || [];
             }
+            setMissions(data);
         } catch (error) {
             console.error("Failed to fetch missions:", error);
-            // toast.error("Не удалось загрузить миссии");
         } finally {
             setLoading(false);
         }
@@ -67,6 +80,9 @@ export function MissionsPage() {
 
     useEffect(() => {
         fetchMissions();
+    }, []);
+
+    useEffect(() => {
         
         const fetchBiomes = async () => {
              try {
@@ -79,8 +95,12 @@ export function MissionsPage() {
 
         const fetchTeams = async () => {
              try {
-                const teamsData = await TeamService.getAll();
-                setTeams(teamsData);
+                const response = await TeamService.getAll(0, 100);
+                if (Array.isArray(response)) {
+                    setTeams(response);
+                } else if (response && typeof response === 'object') {
+                    setTeams(response.data || response.content || []);
+                }
              } catch (e) {
                  console.error("Failed to fetch teams", e);
              }
@@ -104,7 +124,7 @@ export function MissionsPage() {
         fetchGlossary();
     }, []);
 
-    const handleNextStep = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleNextStep = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
         const data = {
@@ -115,17 +135,37 @@ export function MissionsPage() {
             requiredExperience: Number(formData.get("requiredExperience")),
             missionStart: formData.get("missionStart") ? new Date(formData.get("missionStart") as string).toISOString() : undefined,
         };
-        setMissionFormData(data);
-        setCreateStep(2);
+        
+        setIsSubmitting(true);
+        try {
+            let mission;
+            if (currentMissionId) {
+                mission = await MissionService.update(currentMissionId, data);
+            } else {
+                mission = await MissionService.create(data);
+            }
+            
+            if (!mission.id) throw new Error("ID миссии не получен");
+            
+            setCurrentMissionId(mission.id);
+            setMissionFormData(data);
+            setSendItems([]); // Clear items for the second step
+            
+            setCreateStep(2);
+        } catch (error) {
+            console.error(error);
+            toast.error("Ошибка при инициализации миссии");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleAddItem = () => {
         if (newItem.itemType === "TEAM") {
-            if (!newItem.teamId) {
-                toast.error("Выберите команду");
-                return;
-            }
-        } else if (!newItem.itemName) {
+            toast.error("Вы не можете добавить еще одну команду");
+            return;
+        }
+        if (!newItem.itemName) {
             toast.error("Введите название предмета");
             return;
         }
@@ -138,37 +178,68 @@ export function MissionsPage() {
         });
     };
 
-    const handleRemoveItem = (index: number) => {
-        setSendItems(sendItems.filter((_, i) => i !== index));
-    };
-
-    const handleFinalSubmit = async () => {
+    const handleFetchRecommended = async () => {
+        if (!currentMissionId) return;
         setIsSubmitting(true);
         try {
-            // 1. Create Mission
-            const mission = await MissionService.create(missionFormData);
-            
-            if (!mission.id) throw new Error("ID миссии не получен");
-
-            // 2. Create Equipment Request
-            if (sendItems.length > 0) {
-                await MissionService.createSendMissionRequest(mission.id, sendItems);
+            const recommended = await MissionService.getRecommendedWeapons(currentMissionId);
+            if (recommended && recommended.length > 0) {
+                const newWeapons = recommended.map(w => ({
+                    itemType: "WEAPON" as const,
+                    itemName: w.weaponName,
+                    quantity: 1,
+                    weaponId: w.weaponId
+                }));
+                
+                // Avoid adding duplicates by name
+                const existingNames = new Set(sendItems.map((i: any) => i.itemName));
+                const itemsToAdd = newWeapons.filter((w: any) => !existingNames.has(w.itemName));
+                
+                if (itemsToAdd.length > 0) {
+                    setSendItems([...sendItems, ...itemsToAdd]);
+                    toast.success(`Добавлено ${itemsToAdd.length} рек. предметов`);
+                } else {
+                    toast.info("Все рекомендованные предметы уже в списке");
+                }
+            } else {
+                toast.info("Для данной миссии нет рекомендаций");
             }
-
-            toast.success("Миссия и запрос оборудования созданы");
-            setShowCreateModal(false);
-            setCreateStep(1);
-            setSendItems([]);
-            fetchMissions();
         } catch (error) {
             console.error(error);
-            toast.error("Ошибка при создании миссии или оборудования");
+            toast.error("Не удалось получить рекомендации");
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const filteredMissions = missions.filter((m) => {
+    const handleRemoveItem = (index: number) => {
+        setSendItems(sendItems.filter((_: any, i: number) => i !== index));
+    };
+
+    const handleFinalSubmit = async () => {
+        if (!currentMissionId) return;
+        setIsSubmitting(true);
+        try {
+            // Mission is already created, just create Equipment Request
+            if (sendItems.length > 0) {
+                await MissionService.createSendMissionRequest(currentMissionId, sendItems);
+            }
+
+            toast.success("Запрос оборудования успешно отправлен");
+            setShowCreateModal(false);
+            setCreateStep(1);
+            setCurrentMissionId(null);
+            setSendItems([]);
+            fetchMissions();
+        } catch (error) {
+            console.error(error);
+            toast.error("Ошибка при отправке запроса оборудования");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const filteredMissions = missions.filter((m: MissionDto) => {
         if (filter === "ALL") return true;
         const s = m.status?.toUpperCase().trim();
         if (filter === "PLANNED") return s === "PLANNED" || s === "CREATED" || s === "NEW";
@@ -198,6 +269,7 @@ export function MissionsPage() {
                         setCreateStep(1);
                         setSendItems([]);
                         setMissionFormData({});
+                        setCurrentMissionId(null);
                         setShowCreateModal(true);
                     }}>
                         <Plus size={18} className="mr-2" />
@@ -208,14 +280,16 @@ export function MissionsPage() {
                 {/* Filters */}
                 <div className="flex flex-wrap gap-2 mb-6">
                     {(["ALL", "PLANNED", "ACTIVE", "COMPLETED"] as const).map(
-                        (status) => (
+                        (status: "ALL" | "PLANNED" | "ACTIVE" | "COMPLETED") => (
                             <Button
                                 key={status}
                                 variant={
                                     filter === status ? "primary" : "ghost"
                                 }
                                 size="sm"
-                                onClick={() => setFilter(status)}
+                                onClick={() => {
+                                    setFilter(status);
+                                }}
                             >
                                 {status === "ALL"
                                     ? "Все"
@@ -234,79 +308,103 @@ export function MissionsPage() {
                     <div className="text-[#C9D1D9]">Загрузка миссий...</div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {filteredMissions.map((mission) => (
-                            <Card
-                                key={mission.id}
-                                onClick={() => setSelectedMission(mission)}
-                                className="cursor-pointer hover:border-[#FF6B35] transition-colors"
-                            >
-                                <CardHeader>
-                                    <div className="flex items-start justify-between mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-2xl">
-                                                🎯
-                                            </span>
-                                            <span className="text-[#C9D1D9] font-mono text-sm">
-                                                ID: {mission.id}
-                                            </span>
+                        {filteredMissions.length > 0 ? (
+                            filteredMissions.map((mission: MissionDto) => (
+                                <Card
+                                    key={mission.id}
+                                    onClick={() => setSelectedMission(mission)}
+                                    className="cursor-pointer hover:border-[#FF6B35] transition-colors"
+                                >
+                                    <CardHeader>
+                                        <div className="flex items-start justify-between mb-2">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-2xl">
+                                                    🎯
+                                                </span>
+                                                <span className="text-[#C9D1D9] font-mono text-sm">
+                                                    ID: {mission.id}
+                                                </span>
+                                            </div>
+                                            <Badge
+                                                variant={
+                                                    ["ACTIVE", "IN_PROGRESS", "STARTED"].includes(mission.status?.toUpperCase() || "")
+                                                        ? "warning"
+                                                        : ["COMPLETED", "FINISHED", "SUCCESS"].includes(mission.status?.toUpperCase() || "")
+                                                          ? "success"
+                                                          : "info"
+                                                }
+                                            >
+                                                {mission.status}
+                                            </Badge>
                                         </div>
-                                        <Badge
-                                            variant={
-                                                ["ACTIVE", "IN_PROGRESS", "STARTED"].includes(mission.status?.toUpperCase() || "")
-                                                    ? "warning"
-                                                    : ["COMPLETED", "FINISHED", "SUCCESS"].includes(mission.status?.toUpperCase() || "")
-                                                      ? "success"
-                                                      : "info"
-                                            }
-                                        >
-                                            {mission.status}
-                                        </Badge>
-                                    </div>
-                                    <CardTitle className="truncate">{mission.name}</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-2 mb-3">
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <MapPin
-                                                size={14}
-                                                className="text-[#8B949E]"
-                                            />
-                                            <span className="text-[#C9D1D9]">
-                                                Биом ID: {mission.biomeId}
-                                            </span>
+                                        <CardTitle className="truncate">{mission.name}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-2 mb-3">
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <MapPin
+                                                    size={14}
+                                                    className="text-[#8B949E]"
+                                                />
+                                                <span className="text-[#C9D1D9]">
+                                                    Биом ID: {mission.biomeId}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <Users
+                                                    size={14}
+                                                    className="text-[#8B949E]"
+                                                />
+                                                <span className="text-[#C9D1D9]">
+                                                    Команда ID: {mission.teamId}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <AlertTriangle
+                                                    size={14}
+                                                    className="text-[#8B949E]"
+                                                />
+                                                <span className="text-[#C9D1D9]">
+                                                    Опыт:{" "}
+                                                    {mission.requiredExperience}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <Users
-                                                size={14}
-                                                className="text-[#8B949E]"
-                                            />
-                                            <span className="text-[#C9D1D9]">
-                                                Команда ID: {mission.teamId}
-                                            </span>
+                                        <div className="p-2 bg-[#0D1117] rounded border border-[#30363D]">
+                                            <div className="text-[#8B949E] text-xs mb-1">
+                                                Описание:
+                                            </div>
+                                            <div className="text-[#C9D1D9] text-sm line-clamp-2">
+                                                {mission.description}
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <AlertTriangle
-                                                size={14}
-                                                className="text-[#8B949E]"
-                                            />
-                                            <span className="text-[#C9D1D9]">
-                                                Опыт:{" "}
-                                                {mission.requiredExperience}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="p-2 bg-[#0D1117] rounded border border-[#30363D]">
-                                        <div className="text-[#8B949E] text-xs mb-1">
-                                            Описание:
-                                        </div>
-                                        <div className="text-[#C9D1D9] text-sm line-clamp-2">
-                                            {mission.description}
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
+                                    </CardContent>
+                                </Card>
+                            ))
+                        ) : (
+                            <div className="col-span-full py-12 text-center border-2 border-dashed border-[#30363D] rounded-xl bg-[#161B22]/50">
+                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#161B22] border border-[#30363D] mb-4">
+                                    <Plus size={24} className="text-[#8B949E] rotate-45" />
+                                </div>
+                                <p className="text-[#C9D1D9] font-medium">Миссии не найдены</p>
+                                <p className="text-[#8B949E] text-sm mt-1">На текущей странице нет миссий с этим статусом.</p>
+                                <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="mt-4 text-[#FF6B35] hover:text-[#FF7A47]"
+                                    onClick={() => setFilter("ALL")}
+                                >
+                                    Сбросить фильтр
+                                </Button>
+                            </div>
+                        )}
                     </div>
+                )}
+
+                {!loading && missions.length === 0 && (
+                     <div className="text-center py-12 text-[#8B949E]">
+                         Миссии не найдены
+                     </div>
                 )}
 
                 {/* Create Mission Modal */}
@@ -387,41 +485,31 @@ export function MissionsPage() {
                                     <Select
                                         label="Тип"
                                         value={newItem.itemType}
-                                        onChange={(e: any) => setNewItem({ 
-                                            ...newItem, 
-                                            itemType: e.target.value,
-                                            itemName: "",
-                                            teamId: undefined
-                                        })}
+                                        onChange={(e: any) => {
+                                            const type = e.target.value;
+                                            setNewItem({ 
+                                                ...newItem, 
+                                                itemType: type,
+                                                itemName: "", // Will be selected via placeholder or manual choice
+                                                teamId: undefined
+                                            });
+                                        }}
                                         options={[
                                             { value: "EQUIPMENT", label: "Снаряжение" },
                                             { value: "WEAPON", label: "Оружие" },
-                                            { value: "TEAM", label: "Команда" }
+                                            // Team removed per requirement: "другие добавить нельзя"
                                         ]}
                                     />
                                     <div className="md:col-span-2">
-                                        {newItem.itemType === "TEAM" ? (
-                                            <Select
-                                                label="Выбор команды"
-                                                value={newItem.teamId}
-                                                onChange={(e: any) => {
-                                                    const teamId = Number(e.target.value);
-                                                    const team = teams.find(t => t.id === teamId);
-                                                    setNewItem({ 
-                                                        ...newItem, 
-                                                        teamId, 
-                                                        itemName: team?.name || `Команда ${teamId}` 
-                                                    });
-                                                }}
-                                                options={teams.map(t => ({ value: String(t.id), label: t.name || `Команда ${t.id}` }))}
-                                                className="mb-0"
-                                            />
-                                        ) : newItem.itemType === "EQUIPMENT" ? (
+                                        {newItem.itemType === "EQUIPMENT" ? (
                                             <Select
                                                 label="Выбор снаряжения"
                                                 value={newItem.itemName}
                                                 onChange={(e: any) => setNewItem({ ...newItem, itemName: e.target.value })}
-                                                options={equipmentGlossary.map(e => ({ value: e.name, label: e.name }))}
+                                                options={[
+                                                    { value: "", label: "Выберите снаряжение..." },
+                                                    ...equipmentGlossary.map((e: any) => ({ value: e.name, label: e.name }))
+                                                ]}
                                                 className="mb-0"
                                             />
                                         ) : newItem.itemType === "WEAPON" ? (
@@ -429,7 +517,10 @@ export function MissionsPage() {
                                                 label="Выбор оружия"
                                                 value={newItem.itemName}
                                                 onChange={(e: any) => setNewItem({ ...newItem, itemName: e.target.value })}
-                                                options={weaponGlossary.map(w => ({ value: w.name, label: w.name }))}
+                                                options={[
+                                                    { value: "", label: "Выберите оружие..." },
+                                                    ...weaponGlossary.map((w: any) => ({ value: w.name, label: w.name }))
+                                                ]}
                                                 className="mb-0"
                                             />
                                         ) : (
@@ -443,16 +534,18 @@ export function MissionsPage() {
                                         )}
                                     </div>
                                     <div className="flex gap-2">
-                                        <div className="w-20">
-                                            <Input
-                                                label="Кол-во"
-                                                type="number"
-                                                min="1"
-                                                value={newItem.quantity}
-                                                onChange={(e: any) => setNewItem({ ...newItem, quantity: Number(e.target.value) })}
-                                                className="mb-0"
-                                            />
-                                        </div>
+                                        {newItem.itemType !== "TEAM" && (
+                                            <div className="w-20">
+                                                <Input
+                                                    label="Кол-во"
+                                                    type="number"
+                                                    min="1"
+                                                    value={newItem.quantity}
+                                                    onChange={(e: any) => setNewItem({ ...newItem, quantity: Number(e.target.value) })}
+                                                    className="mb-0"
+                                                />
+                                            </div>
+                                        )}
                                         <Button onClick={handleAddItem} className="h-10">
                                             <Plus size={18} />
                                         </Button>
@@ -460,10 +553,22 @@ export function MissionsPage() {
                                 </div>
                             </div>
 
+                            <div className="flex justify-center pt-2">
+                                <Button 
+                                    type="button"
+                                    variant="ghost" 
+                                    className="text-[#FF6B35] border-[#FF6B35] hover:bg-[#FF6B35]/10 w-full"
+                                    onClick={handleFetchRecommended}
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? <Loader2 className="animate-spin mr-2" size={16} /> : "🚀"} Рекомендованное оружие
+                                </Button>
+                            </div>
+
                             <div className="space-y-2">
                                 <h4 className="text-[#8B949E] text-xs font-bold uppercase">Список оборудования к отправке</h4>
                                 <div className="max-h-60 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-                                    {sendItems.length > 0 ? sendItems.map((item, index) => (
+                                    {sendItems.length > 0 ? sendItems.map((item: any, index: number) => (
                                         <div key={index} className="flex items-center justify-between p-3 bg-[#0D1117] border border-[#30363D] rounded-lg group">
                                             <div className="flex items-center gap-3">
                                                 <Badge variant={item.itemType === "WEAPON" ? "danger" : item.itemType === "TEAM" ? "primary" : "info"}>
@@ -472,14 +577,16 @@ export function MissionsPage() {
                                                 <span className="text-[#C9D1D9] font-medium">{item.itemName}</span>
                                                 <span className="text-[#8B949E] text-sm">× {item.quantity}</span>
                                             </div>
-                                            <Button 
-                                                variant="ghost" 
-                                                size="sm" 
-                                                onClick={() => handleRemoveItem(index)}
-                                                className="opacity-0 group-hover:opacity-100 text-[#D32F2F] hover:bg-[#D32F2F]/10"
-                                            >
-                                                Удалить
-                                            </Button>
+                                            {item.itemType !== "TEAM" && (
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="sm" 
+                                                    onClick={() => handleRemoveItem(index)}
+                                                    className="opacity-0 group-hover:opacity-100 text-[#D32F2F] hover:bg-[#D32F2F]/10"
+                                                >
+                                                    Удалить
+                                                </Button>
+                                            )}
                                         </div>
                                     )) : (
                                         <div className="text-center py-8 border border-dashed border-[#30363D] rounded-lg text-[#8B949E]">
@@ -523,7 +630,7 @@ export function MissionsPage() {
                         isOpen={!!selectedMission}
                         onClose={() => setSelectedMission(null)}
                         title={`Миссия ${selectedMission.id}`}
-                        size="lg"
+                        size="md"
                     >
                         <div className="space-y-6">
                             {/* Mission Header */}
