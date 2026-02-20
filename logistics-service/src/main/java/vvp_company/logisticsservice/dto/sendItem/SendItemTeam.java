@@ -6,7 +6,7 @@ public record SendItemTeam(
         Long teamId
 ) implements SendItemDTO{
     @Override
-    public String getTypeName() {
+    public String getItemType() {
         return SendItemType.TEAM.name();
     }
 }

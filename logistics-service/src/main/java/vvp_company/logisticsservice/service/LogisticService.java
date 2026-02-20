@@ -11,6 +11,7 @@ import vvp_company.logisticsservice.repository.CargoRepository;
 import vvp_company.logisticsservice.repository.LogisticRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static vvp_company.logisticsservice.enm.LogisticStatus.CREATED;
 
@@ -45,5 +46,9 @@ public class LogisticService {
 
     public Logistic getLogisticById(Long id) {
         return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    public List<Logistic> getLogistics() {
+        return repository.findAll();
     }
 }

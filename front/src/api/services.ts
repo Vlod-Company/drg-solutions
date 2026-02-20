@@ -42,6 +42,91 @@ export const AuthService = {
     },
 };
 
+export const WeaponInfoService = {
+    getAll: async (): Promise<any[]> => {
+        const response = await api.get("/glossary-service/weaponInfo/all");
+        return response.data;
+    },
+
+    getByName: async (name: string): Promise<any> => {
+        const response = await api.get("/glossary-service/weaponInfo", { params: { weaponName: name } });
+        return response.data;
+    },
+
+    create: async (data: { name: string; description: string; weight: number; impactTypeId: number }): Promise<any> => {
+        const response = await api.post("/glossary-service/weaponInfo", data);
+        return response.data;
+    },
+
+    update: async (id: number, data: { name: string; description: string; weight: number; impactTypeId: number }): Promise<any> => {
+        const response = await api.put(`/glossary-service/weaponInfo/${id}`, data);
+        return response.data;
+    },
+
+    delete: async (id: number): Promise<void> => {
+        await api.delete(`/glossary-service/weaponInfo/${id}`);
+    },
+};
+
+export const ResourceInfoService = {
+    getAll: async (): Promise<any[]> => {
+        const response = await api.get("/glossary-service/resourceInfo/all");
+        return response.data;
+    },
+
+    getByName: async (name: string): Promise<any> => {
+        const response = await api.get("/glossary-service/resourceInfo", { params: { resourceName: name } });
+        return response.data;
+    },
+
+    create: async (data: { name: string; description: string; weightPerUnit: number }): Promise<any> => {
+        const response = await api.post("/glossary-service/resourceInfo", data);
+        return response.data;
+    },
+
+    update: async (id: number, data: { name: string; description: string; weightPerUnit: number }): Promise<any> => {
+        const response = await api.put(`/glossary-service/resourceInfo/${id}`, data);
+        return response.data;
+    },
+
+    delete: async (id: number): Promise<void> => {
+        await api.delete(`/glossary-service/resourceInfo/${id}`);
+    },
+};
+
+export const EquipmentInfoService = {
+    getAll: async (): Promise<any[]> => {
+        const response = await api.get("/glossary-service/equipmentInfo/all");
+        return response.data;
+    },
+
+    getByName: async (name: string): Promise<any> => {
+        const response = await api.get("/glossary-service/equipmentInfo", { params: { equipmentName: name } });
+        return response.data;
+    },
+
+    create: async (data: { name: string; description: string; weight: number }): Promise<any> => {
+        const response = await api.post("/glossary-service/equipmentInfo", data);
+        return response.data;
+    },
+
+    update: async (id: number, data: { name: string; description: string; weight: number }): Promise<any> => {
+        const response = await api.put(`/glossary-service/equipmentInfo/${id}`, data);
+        return response.data;
+    },
+
+    delete: async (id: number): Promise<void> => {
+        await api.delete(`/glossary-service/equipmentInfo/${id}`);
+    },
+};
+
+export const ImpactTypeService = {
+    getAll: async(): Promise<any> => {
+        const response = await api.get("/glossary-service/impactTypes");
+        return response.data;
+    }
+}
+
 export const EmployeeService = {
     getAll: async (pageNumber: number = 0, pageSize: number = 20): Promise<any> => {
         const response = await api.get("/employee-service/employees", {
@@ -145,6 +230,8 @@ export interface RequestFilter {
     senderDepartment?: string;
     recipientDepartment?: string;
     status?: string;
+    isMine?: boolean;
+    isRecipient?: boolean;
 }
 
 export const StationService = {
@@ -212,6 +299,44 @@ export const EcosystemService = {
         const response = await api.post("/ecosystem-service/biome", data);
         return response.data;
     },
+    getMonsterById: async (id: number): Promise<any> => {
+        const response = await api.get(`/ecosystem-service/monster/${id}`);
+        return response.data;
+    },
+
+    createMonster: async (data: {
+        name: string;
+        description: string;
+        dangerLevel: number;
+        heritage: string;
+        monsterType: string;
+        biomeId: number;
+        armorType: string;
+        weaknesses: number[];
+        strengths: number[];
+    }): Promise<any> => {
+        const response = await api.post("/ecosystem-service/monster", data);
+        return response.data;
+    },
+
+    updateMonster: async (id: number, data: {
+        name: string;
+        description: string;
+        dangerLevel: number;
+        heritage: string;
+        monsterType: string;
+        biomeId: number;
+        armorType: string;
+        weaknesses: number[];
+        strengths: number[];
+    }): Promise<any> => {
+        const response = await api.put(`/ecosystem-service/monster/${id}`, data);
+        return response.data;
+    },
+
+    deleteMonster: async (id: number): Promise<void> => {
+        await api.delete(`/ecosystem-service/monster/${id}`);
+    },
 };
 
 export const DeliveryPointService = {
@@ -221,9 +346,47 @@ export const DeliveryPointService = {
     },
 };
 
+export const CargoService = {
+    getById: async (id: number): Promise<any> => {
+        const response = await api.get(`/logistics-service/cargo/${id}`);
+        return response.data;
+    },
+};
+
+export const UserService = {
+    getAll: async (): Promise<any> => {
+        const response = await api.get("/auth-service/auth/users");
+        return response.data;
+    },
+
+    getById: async (userId: number): Promise<any> => {
+        const response = await api.get(`/auth-service/auth/users/${userId}`);
+        return response.data;
+    },
+
+    register: async (data: { name: string; password: string; employee_id: number }): Promise<any> => {
+        const response = await api.post("/auth-service/auth/register", data);
+        return response.data;
+    },
+
+    addRole: async (userId: number, data: { roleName: string }): Promise<any> => {
+        const response = await api.post(`/auth-service/auth/users/${userId}/roles/add`, data);
+        return response.data;
+    },
+
+    removeRole: async (userId: number, data: { roleName: string }): Promise<any> => {
+        const response = await api.post(`/auth-service/auth/users/${userId}/roles/remove`, data);
+        return response.data;
+    },
+};
+
 export const StoreService = {
     findItemsInDeliveryPoint: async (deliveryPointId: number): Promise<DeliveryPointResponseDTO[]> => {
         const response = await api.post(`/store-service/items/${deliveryPointId}/all`);
+        return response.data;
+    },
+    getCargoItems: async (cargoId: number): Promise<any[]> => {
+        const response = await api.get(`/store-service/items/getCargoItems/${cargoId}`);
         return response.data;
     },
     getWeaponIds: async (deliveryPointId: number, name: string): Promise<string[]> => {
@@ -240,6 +403,10 @@ export const StoreService = {
     },
     reserveForCargo: async (data: any): Promise<void> => {
         await api.post("/store-service/items/reserveCargo", data);
+    },
+    addItemsToDeliveryPoint: async (deliveryPointId: number, items: any[]) => {
+        const response = await api.post(`/store-service/items/add/${deliveryPointId}`, items);
+        return response.data;
     },
 };
 

@@ -408,10 +408,6 @@ export function TeamsPage() {
                     className="max-w-2xl"
                 >
                     <form onSubmit={handleCreateTeam} className="space-y-6">
-                        <div className="p-4 bg-[#FF6B35]/5 border border-[#FF6B35]/20 rounded-lg text-[#FF6B35] text-sm">
-                             Внимание: выбор сотрудников для команды является окончательным. Только персонал со статусом «ACTIVE».
-                        </div>
-
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <Input
                                 label="Название команды"
@@ -421,7 +417,7 @@ export function TeamsPage() {
                                 required
                             />
                             <Input
-                                label="ID Локации (Старт)"
+                                label="ID Локации"
                                 type="number"
                                 value={newLocatedAt || ""}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewLocatedAt(e.target.value ? Number(e.target.value) : undefined)}

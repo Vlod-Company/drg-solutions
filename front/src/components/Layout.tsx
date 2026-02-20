@@ -14,7 +14,7 @@ import {
     Menu,
     X,
     Shield,
-    Truck,
+    Truck, Archive, Carrot,
 } from "lucide-react";
 import { Badge } from "./ui/Badge";
 
@@ -102,6 +102,18 @@ export function Layout({ children, currentPage }: LayoutProps) {
                 ]
             },
             { name: "Глоссарий", icon: BookOpen, path: "/glossary" },
+            {
+                name: "Хранение",
+                icon: Archive,
+                path: "/store",
+                roles: ["ROLE_ADMIN", "ROLE_MISSION_CONTROL_EMPLOYEE"]
+            },
+            {
+                name: "Пользователи",
+                icon: Carrot,
+                path: "/users",
+                roles: ["ROLE_ADMIN"]
+            }
         ];
 
         return allItems.filter(

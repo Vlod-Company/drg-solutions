@@ -9,6 +9,10 @@ import vvp_company.authservice.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vvp_company.authservice.exception.AuthException;
+import vvp_company.authservice.service.UserService;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth")
@@ -16,6 +20,7 @@ import vvp_company.authservice.exception.AuthException;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegistrationRequest req) {
@@ -77,6 +82,11 @@ public class AuthController {
     public ResponseEntity<UserDto> getUser(@PathVariable Long userId) {
         User user = authService.getUserById(userId);
         return ResponseEntity.ok(mapToDto(user));
+    }
+
+    @GetMapping("/users")
+    public List<UserDto> getUsers() {
+        return userService.findAll().stream().map(this::mapToDto).toList();
     }
 
     private UserDto mapToDto(User user) {

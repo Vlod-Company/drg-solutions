@@ -4,5 +4,7 @@ public record RequestFilter(
         String code,
         String senderDepartment,
         String recipientDepartment,
-        String status
+        String status,
+        Boolean isMine,
+        Boolean isRecipient
 ) {}

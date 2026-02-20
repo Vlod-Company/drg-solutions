@@ -8,6 +8,8 @@ import vvp_company.logisticsservice.dto.UpdateLogisticRequest;
 import vvp_company.logisticsservice.model.Logistic;
 import vvp_company.logisticsservice.service.LogisticService;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("logistics")
@@ -26,5 +28,12 @@ public class LogisticController {
     @GetMapping("{id}")
     public Logistic getLogistic(@PathVariable Long id) {
         return logisticService.getLogisticById(id);
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_LAUNCH_CONTROL_EMPLOYEE')")
+    @GetMapping
+    public List<Logistic> getLogistics() {
+        return logisticService.getLogistics();
     }
 }

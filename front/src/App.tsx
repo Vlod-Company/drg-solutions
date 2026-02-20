@@ -13,6 +13,8 @@ import { TeamsPage } from "./pages/TeamsPage";
 import { LogisticsPage } from "./pages/LogisticsPage";
 import { CargoPage } from "./pages/CargoPage";
 import { Toaster } from "sonner@2.0.3";
+import {StorePage} from "./pages/StorePage";
+import {UsersPage} from "./pages/UsersPage";
 
 function Router() {
     const { isAuthenticated } = useAuth();
@@ -86,6 +88,10 @@ function Router() {
             return <LogisticsPage />;
         case "/logistics/cargo":
             return <CargoPage />;
+        case "/store":
+            return <StorePage />;
+        case "/users":
+            return <UsersPage />;
         default:
             // Redirect to dashboard for unknown routes
             if (isAuthenticated) {

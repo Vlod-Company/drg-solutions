@@ -48,12 +48,16 @@ public class RequestService {
         String senderDept = isBlank(filter.senderDepartment()) ? null : filter.senderDepartment();
         String recipientDept = isBlank(filter.recipientDepartment()) ? null : filter.recipientDepartment();
         String status = isBlank(filter.status()) ? null : filter.status();
+        Long sender = filter.isMine() != null ? filter.isMine() ? currentUserService.getCurrentEmployee().employeeId() : null : null;
+        Long recipient = filter.isRecipient() != null ? filter.isRecipient() ? currentUserService.getCurrentEmployee().employeeId() : null : null;
 
         Page<Request> requests = requestRepository.findAllByFilter(
-                filter.code(),
-                filter.senderDepartment(),
-                filter.recipientDepartment(),
-                filter.status(),
+                code,
+                senderDept,
+                recipientDept,
+                status,
+                sender,
+                recipient,
                 pageable
         );
         return mapToPagedRequestDto(requests);

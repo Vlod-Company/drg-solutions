@@ -22,9 +22,8 @@ export function EmployeesPage() {
         null
     );
     const [isEditing, setIsEditing] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [editData, setEditData] = useState<Partial<EmployeeResponseDto>>({});
-    const [activeTab, setActiveTab] = useState("ALL");
+    const [activeTab, setActiveTab] = useState("Все");
     const [page, setPage] = useState(0);
     const [totalItems, setTotalItems] = useState(0);
     const pageSize = 9;

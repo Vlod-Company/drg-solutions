@@ -27,6 +27,7 @@ import {
     ArrowRight
 } from "lucide-react";
 import { toast } from "sonner";
+import {useAuth} from "../context/AuthContext";
 
 export function CargoPage() {
     const [requests, setRequests] = useState<any[]>([]);
@@ -65,7 +66,7 @@ export function CargoPage() {
         setIsLoading(true);
         try {
             const [reqs, stats, tms, equip, res, wep, miss, bms] = await Promise.all([
-                RequestService.getFiltered(0, 100, { code: "REQ-TR" }),
+                RequestService.getFiltered(0, 100, { code: "REQ-TR", isRecipient: true, status: "IN_PROGRESS" }),
                 StationService.getAll(),
                 TeamService.getAll(0, 100),
                 GlossaryService.getEquipment(),
@@ -508,7 +509,7 @@ export function CargoPage() {
                                             { value: "", label: "Выберите запрос..." },
                                             ...requests.map(r => ({ 
                                                 value: String(r.id), 
-                                                label: `${r.requestCode} (ID: ${r.id}, Статус: ${r.status})` 
+                                                label: `${r.requestCode} (ID: ${r.id}, Статус: ${r.status}) ${r.description.substring(0, r.description.indexOf("\n"))}`
                                             }))
                                         ]}
                                     />
@@ -516,7 +517,7 @@ export function CargoPage() {
                                 <Button 
                                     type="button" 
                                     variant="ghost" 
-                                    className="border border-[#30363D] h-10"
+                                    className="border border-[#30363D] h-10 mb-4"
                                     onClick={handleFillFromRequest}
                                 >
                                     Заполнить
@@ -642,7 +643,7 @@ export function CargoPage() {
                                     ) : <div className="h-full flex items-end pb-2 text-xs text-[#8B949E]">N/A</div>}
                                 </div>
                                 <div className="md:col-span-2 flex items-end pb-0.5">
-                                    <Button type="button" onClick={handleAddItem} className="w-full h-10">
+                                    <Button type="button" onClick={handleAddItem} className="w-full h-10 mb-4">
                                         <Plus size={18} />
                                     </Button>
                                 </div>

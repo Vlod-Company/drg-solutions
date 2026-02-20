@@ -10,6 +10,7 @@ import vvp_company.storeservice.enm.Status;
 import vvp_company.storeservice.model.Resource;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -22,4 +23,6 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
     @Modifying
     @Query("update Resource r set r.status = :status where r.cargoId = :cargo_id")
     void updateStatusForResourceWithCargoId(@Param("status") ResourceStatus status, @Param("cargo_id") Long cargo_id);
+
+    List<Resource> getResourcesByCargoId(Long cargoId);
 }

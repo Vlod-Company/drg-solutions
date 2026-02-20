@@ -4,10 +4,10 @@ import vvp_company.logisticsservice.enm.SendItemType;
 
 public record SendItemEquipment(
         String itemName,
-        String identificationNumber
+        int quantity
 ) implements SendItemDTO {
     @Override
-    public String getTypeName() {
+    public String getItemType() {
         return SendItemType.EQUIPMENT.name();
     }
 }

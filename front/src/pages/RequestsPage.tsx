@@ -50,6 +50,7 @@ export function RequestsPage() {
         requestCode: "",
         status: "",
         recipientEmployeeId: null as number | null,
+        response: "",
     });
     const [page, setPage] = useState(0);
     const [totalItems, setTotalItems] = useState(0);
@@ -76,26 +77,33 @@ export function RequestsPage() {
         setLoading(true);
         try {
             const apiFilter: RequestFilter = {};
-            
+
+            // Фильтр по направлению (входящие/исходящие)
             if (requestMode === "TO_ME" && user?.department) {
                 apiFilter.recipientDepartment = user.department;
             } else if (requestMode === "FROM_ME" && user?.department) {
                 apiFilter.senderDepartment = user.department;
             }
 
+            // Фильтр по статусу
             if (filter !== "ALL") {
                 apiFilter.status = filter;
             }
 
+            // Фильтр "Мои запросы" - используем isMine на бэкенде
+            if (subFilter === "MY" && user?.employeeId) {
+                apiFilter.isMine = true;
+            }
+
             const response = await RequestService.getFiltered(pageNumber, pageSize, apiFilter);
-            
+
             if (Array.isArray(response)) {
                 setRequests(response);
                 setTotalItems(response.length);
             } else if (response && typeof response === 'object') {
                 const data = response.data || response.content || [];
                 setRequests(data);
-                // Try various field names for total items
+                // Пробуем различные названия поля для общего количества
                 setTotalItems(response.totalElements ?? response.total ?? response.totalCount ?? data.length);
             }
         } catch (error) {
@@ -104,7 +112,7 @@ export function RequestsPage() {
         } finally {
             setLoading(false);
         }
-    }, [requestMode, filter, user?.department]);
+    }, [requestMode, filter, subFilter, user?.department, user?.employeeId]);
 
     useEffect(() => {
         fetchRequests(page);
@@ -114,19 +122,19 @@ export function RequestsPage() {
         fetchEmployees();
     }, []);
 
-    const filteredRequests = Array.isArray(requests)
-        ? requests.filter((r) => {
-            // Sub-filter (My)
-            if (subFilter === "MY" && user?.employeeId) {
-                if (requestMode === "TO_ME") {
-                    return r.recipientEmployeeId === user.employeeId;
-                } else {
-                    return r.senderEmployeeId === user.employeeId;
-                }
-            }
-            return true;
-        })
-        : [];
+    // const requests = Array.isArray(requests)
+    //     ? requests.filter((r) => {
+    //         // Sub-filter (My)
+    //         if (subFilter === "MY" && user?.employeeId) {
+    //             if (requestMode === "TO_ME") {
+    //                 return r.recipientEmployeeId === user.employeeId;
+    //             } else {
+    //                 return r.senderEmployeeId === user.employeeId;
+    //             }
+    //         }
+    //         return true;
+    //     })
+    //     : [];
 
     const handleCreateRequest = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -177,6 +185,7 @@ export function RequestsPage() {
             requestCode: req.requestCode || "",
             status: req.status || "CREATED",
             recipientEmployeeId: req.recipientEmployeeId || null,
+            response: req.response || "",
         });
         setShowEditModal(true);
     };
@@ -189,6 +198,7 @@ export function RequestsPage() {
                 requestCode: editForm.requestCode,
                 status: editForm.status,
                 recipientEmployeeId: editForm.recipientEmployeeId,
+                response: editForm.response,
             });
             toast.success("Запрос обновлен");
             setShowEditModal(false);
@@ -245,17 +255,6 @@ export function RequestsPage() {
                             </button>
                         </div>
                     </div>
-                    <Button 
-                        onClick={() => {
-                            setPage(0);
-                            setRequestMode(requestMode === "TO_ME" ? "TO_ME" : "FROM_ME"); // Trigger reload if same, but redundant
-                        }}
-                        variant="ghost"
-                        size="sm"
-                        className="text-[#8B949E] hover:text-[#C9D1D9]"
-                    >
-                        Обновить
-                    </Button>
                     <Button 
                         onClick={() => setShowCreateModal(true)}
                         className="bg-[#FF6B35] text-white hover:bg-[#ff8554]"
@@ -317,7 +316,7 @@ export function RequestsPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {filteredRequests.map((request) => (
+                        {requests.map((request) => (
                                 <Card
                                     key={request.id}
                                     onClick={() => setSelectedRequest(request)}
@@ -373,14 +372,30 @@ export function RequestsPage() {
                                             "{request.description}"
                                         </p>
 
+                                        {request.response && (
+                                            <div className="mt-2 pt-2 border-t border-[#30363D]/50">
+                                                <div className="text-[10px] text-[#8B949E] uppercase mb-1">Ответ:</div>
+                                                <p className="text-xs text-[#C9D1D9] line-clamp-2">
+                                                    {request.response}
+                                                </p>
+                                            </div>
+                                        )}
+
                                         <div className="pt-3 border-t border-[#30363D] flex items-center justify-between">
                                             <div className="flex items-center gap-1.5 text-[10px] text-[#8B949E]">
                                                 <Clock size={12} />
                                                 {request.createdAt ? new Date(request.createdAt).toLocaleDateString("ru-RU") : "-"}
                                             </div>
-                                            
+
+                                            {request.response && (
+                                                <div className="flex items-center gap-1 text-[10px] text-[#238636]">
+                                                    <span className="w-1 h-1 rounded-full bg-[#238636]"></span>
+                                                    Есть ответ
+                                                </div>
+                                            )}
+
                                             <div className="flex gap-2">
-                                                <button 
+                                                <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         setSelectedRequest(request);
@@ -391,7 +406,7 @@ export function RequestsPage() {
                                                     <Eye size={14} />
                                                 </button>
                                                 {requestMode === "TO_ME" && request.recipientEmployeeId !== user?.employeeId && (
-                                                    <button 
+                                                    <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             handleSetSelfAsRecipient(request.id!);
@@ -402,7 +417,7 @@ export function RequestsPage() {
                                                         <User size={14} />
                                                     </button>
                                                 )}
-                                                <button 
+                                                <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         handleOpenEdit(request);
@@ -459,7 +474,7 @@ export function RequestsPage() {
                 </div>
 
                 {/* Empty State */}
-                {!loading && filteredRequests.length === 0 && (
+                {!loading && requests.length === 0 && (
                     <div className="text-center py-32 border border-dashed border-[#30363D] rounded-xl bg-[#0D1117]/50">
                         <Search className="text-[#30363D] mx-auto mb-4" size={48} />
                         <h3 className="text-[#C9D1D9] font-mono mb-1">Запросы не найдены</h3>
@@ -569,6 +584,15 @@ export function RequestsPage() {
                             className="bg-[#0D1117] border-[#30363D] text-sm"
                         />
 
+                        <Textarea
+                            label="Ответ на запрос"
+                            value={editForm.response}
+                            onChange={(e) => setEditForm({...editForm, response: e.target.value})}
+                            rows={4}
+                            placeholder="Введите ответ на запрос..."
+                            className="bg-[#0D1117] border-[#30363D] text-sm"
+                        />
+
                         <div className="flex gap-2 justify-end mt-6">
                             <Button
                                 variant="ghost"
@@ -609,6 +633,17 @@ export function RequestsPage() {
                                     {selectedRequest.description}
                                 </p>
                             </div>
+
+                            {selectedRequest.response && (
+                                <div>
+                                    <div className="text-[10px] text-[#8B949E] uppercase mb-2">Ответ на запрос</div>
+                                    <div className="p-4 bg-[#161B22] border border-[#30363D] rounded-lg">
+                                        <p className="text-[#C9D1D9] text-sm leading-relaxed whitespace-pre-wrap">
+                                            {selectedRequest.response}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-4">

@@ -109,18 +109,21 @@ export interface GlossaryBiome {
 }
 
 export interface EquipmentInfoDTO {
+    id: number;
     name?: string;
     description?: string;
     weight?: number;
 }
 
 export interface ResourceInfoDTO {
+    id: number;
     name?: string;
     description?: string;
     weightPerUnit?: number;
 }
 
 export interface WeaponInfoDTO {
+    id: number;
     name?: string;
     description?: string;
     weight?: number;

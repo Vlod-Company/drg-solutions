@@ -5,7 +5,16 @@ import { Card, CardHeader, CardContent } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { Modal } from "../components/ui/Modal";
 import { Input, Select } from "../components/ui/Input";
-import { LogisticsService, SpaceShipService, StationService, GlossaryService, RequestService, MissionService, TeamService } from "../api/services";
+import {
+    LogisticsService,
+    SpaceShipService,
+    StationService,
+    GlossaryService,
+    RequestService,
+    MissionService,
+    TeamService,
+    CargoService
+} from "../api/services";
 import { 
     Truck, 
     Ship, 
@@ -35,6 +44,8 @@ export function LogisticsPage() {
     const [teams, setTeams] = useState<any[]>([]);
     const [selectedRequestId, setSelectedRequestId] = useState("");
     const [selectedMissionId, setSelectedMissionId] = useState("");
+    const [cargoDetails, setCargoDetails] = useState<Record<number, any>>({});
+    const [loadingCargo, setLoadingCargo] = useState<Record<number, boolean>>({});
 
     const [stations, setStations] = useState<any[]>([]);
     const [ships, setShips] = useState<any[]>([]);
@@ -100,6 +111,32 @@ export function LogisticsPage() {
             setLoading(false);
         }
     };
+
+    const fetchCargoDetails = async (cargoId: number) => {
+        if (!cargoId || cargoDetails[cargoId]) return; // Уже загружено
+
+        setLoadingCargo(prev => ({ ...prev, [cargoId]: true }));
+        try {
+            const cargo = await CargoService.getById(cargoId);
+            setCargoDetails(prev => ({ ...prev, [cargoId]: cargo }));
+        } catch (error) {
+            console.error(`Failed to fetch cargo #${cargoId}:`, error);
+            // Не показываем toast, чтобы не спамить, просто логируем
+        } finally {
+            setLoadingCargo(prev => ({ ...prev, [cargoId]: false }));
+        }
+    };
+
+    // Загружаем детали грузов для всех логистик
+    useEffect(() => {
+        if (logistics.length > 0) {
+            logistics.forEach(log => {
+                if (log.cargoId) {
+                    fetchCargoDetails(log.cargoId);
+                }
+            });
+        }
+    }, [logistics]);
 
     const fetchData = async () => {
         try {
@@ -379,6 +416,46 @@ export function LogisticsPage() {
                                     </div>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
+                                    {loadingCargo[item.cargoId] ? (
+                                        <div className="flex items-center justify-center py-2 text-[#8B949E]">
+                                            <Loader2 size={14} className="animate-spin mr-2" />
+                                            <span className="text-xs">Загрузка данных груза...</span>
+                                        </div>
+                                    ) : cargoDetails[item.cargoId] && (
+                                        <div className="p-3 bg-[#0D1117] rounded border border-[#30363D] mb-2">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-2 text-[#8B949E] text-xs">
+                                                    <Package size={14} className="text-[#FF6B35]" />
+                                                    <span>Информация о грузе</span>
+                                                </div>
+                                                <Badge variant="info" className="text-[10px]">
+                                                    Вес: {cargoDetails[item.cargoId].weight} кг
+                                                </Badge>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-3 text-sm">
+                                                <div>
+                                                    <div className="text-[#8B949E] text-[10px] uppercase mb-1">
+                                                        Плановая дата доставки
+                                                    </div>
+                                                    <div className="text-[#C9D1D9] font-medium flex items-center gap-1">
+                                                        <Calendar size={12} className="text-[#FF6B35]" />
+                                                        {new Date(cargoDetails[item.cargoId].shipToDate).toLocaleDateString("ru-RU")}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-[#8B949E] text-[10px] uppercase mb-1">
+                                                        Пункт назначения
+                                                    </div>
+                                                    <div className="text-[#C9D1D9] font-medium flex items-center gap-1">
+                                                        <MapPin size={12} className="text-[#FF6B35]" />
+                                                        {stations.find(s => s.id === cargoDetails[item.cargoId].shipToPoint)?.name ||
+                                                            `Станция #${cargoDetails[item.cargoId].shipToPoint}`}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="p-3 bg-[#0D1117] rounded border border-[#30363D]">
                                             <div className="flex items-center gap-2 text-[#8B949E] text-xs mb-1">
@@ -398,9 +475,22 @@ export function LogisticsPage() {
                                         </div>
                                     </div>
 
-                                    <Button 
-                                        variant="ghost" 
-                                        size="sm" 
+                                    {cargoDetails[item.cargoId] && item.sendTime && (
+                                    <div className="flex items-center gap-2 p-2 bg-[#0D1117]/50 rounded border border-[#30363D]/50">
+                                        <Info size={14} className="text-[#8B949E]" />
+                                        <span className="text-xs text-[#8B949E]">
+                                            {new Date(item.sendTime) > new Date(cargoDetails[item.cargoId].shipToDate) ? (
+                                                <span className="text-[#F85149]">Отправка позже плановой даты</span>
+                                            ) : (
+                                                <span className="text-[#3FB950]">В соответствии с графиком</span>
+                                            )}
+                                        </span>
+                                    </div>
+                                    )}
+
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
                                         className="w-full text-[#FF6B35] border-[#FF6B35]/20 hover:bg-[#FF6B35]/10"
                                         onClick={() => {
                                             setSelectedLogistic(item);

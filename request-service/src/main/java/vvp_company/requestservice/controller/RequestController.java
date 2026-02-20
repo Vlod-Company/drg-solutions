@@ -26,7 +26,7 @@ public class RequestController {
         return requestService.getById(id);
     }
 
-    @GetMapping("/filters")
+    @PostMapping("/filters")
     public ResponseEntity<PagedRequestDto> getRequests(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,

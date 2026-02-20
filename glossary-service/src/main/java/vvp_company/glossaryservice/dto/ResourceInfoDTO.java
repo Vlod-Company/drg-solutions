@@ -8,6 +8,8 @@ import lombok.*;
 @Builder
 public class ResourceInfoDTO {
 
+    private Long id;
+
     private String name;
 
     private String description;
