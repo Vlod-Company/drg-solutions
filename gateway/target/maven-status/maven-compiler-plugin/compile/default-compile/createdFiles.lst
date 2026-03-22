@@ -1,9 +1,0 @@
-vvp_company\gateway\filter\AuthHeaderGatewayFilter.class
-vvp_company\gateway\client\dto\TokenInfo.class
-vvp_company\gateway\client\dto\TokenInfo$TokenInfoBuilder.class
-vvp_company\gateway\client\AuthServiceClient.class
-vvp_company\gateway\routes\Routes.class
-vvp_company\gateway\GatewayApplication.class
-vvp_company\gateway\config\CorsConfig.class
-vvp_company\gateway\filter\CorsDedupeFilter.class
-vvp_company\gateway\client\dto\ValidatieTokenRequest.class

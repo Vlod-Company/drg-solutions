@@ -45,7 +45,7 @@
 * Spring Data JPA
 * Spring Security
 * Spring Feign Client
-
+* Spring Test
 ---
 
 ## 4. Структура репозитория
@@ -82,11 +82,56 @@ x-service/
 
 ---
 
-## 6. Frontend
-На данный момент в работе ...
+## 6. Тестирование
+
+### 6.1 Стратегия тестирования
+
+Проект включает комплексное тестовое покрытие для всех микросервисов:
+
+* **Unit тесты** - тестирование бизнес-логики сервисов (Mockito)
+* **Контроллер тесты** - тестирование REST API endpoints (MockMvc)
+* **Интеграционные тесты** - тестирование полного процесса с БД (H2 для тестов, PostgreSQL для production)
+
+### 6.2 Запуск тестов
+
+Для запуска тестов конкретного сервиса:
+
+```bash
+cd <service-name>
+mvn clean test
+```
+
+Для запуска всех тестов в проекте:
+
+```bash
+mvn clean test  # из корня каждого сервиса
+```
+
+### 6.3 Структура тестов
+
+Каждый сервис содержит в директории `src/test/java/vvp_company/<servicename>/`:
+
+* `*ServiceUnitTest.java` - unit тесты для service layer
+* `*ControllerTest.java` - тесты REST контроллеров
+* `*ServiceIntegrationTest.java` - интеграционные тесты
+
+Конфигурация для тестов: `src/test/resources/application-test.properties`
+
+Пример для employee-service:
+- `EmployeeServiceUnitTest.java` - unit тесты сервиса (CRUD операции, исключения)
+- `EmployeeControllerTest.java` - тесты HTTP endpoints
+- `EmployeeServiceIntegrationTest.java` - полные тесты с БД (CRUD flow, валидация, edge cases)
 
 ---
-## 7. Заключение
+
+## 7. Frontend
+Разработанно + работает
+Скрины позже
+
+
+## 8. Заключение
 
 Вот такая вот система, прикольные технологии :)
+
+---
 
