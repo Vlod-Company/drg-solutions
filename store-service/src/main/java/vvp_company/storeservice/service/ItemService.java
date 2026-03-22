@@ -36,7 +36,6 @@ import static java.util.stream.Collectors.groupingBy;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static vvp_company.storeservice.enm.ItemType.valueOf;
 import static vvp_company.storeservice.enm.ResourceStatus.RESERVED;
-import static vvp_company.storeservice.enm.ResourceStatus.STORED;
 
 @Service
 @RequiredArgsConstructor
@@ -51,6 +50,32 @@ public class ItemService {
     private final GlossaryServiceClient glossaryServiceClient;
     private final DeliveryPointClient deliveryPointClient;
     private final TeamRepository teamRepository;
+
+    @Transactional
+    public List<SendItemDTO> getNonTeamItemsInCargo(Long cargoId) {
+        var weapons = weaponRepository.getWeaponsByCargoId(cargoId);
+        var equipment = equipmentRepository.getEquipmentByCargoId(cargoId);
+        var resources = resourceRepository.getResourcesByCargoId(cargoId);
+
+        var sendItemDtoList = new ArrayList<SendItemDTO>();
+        weapons.forEach(w -> sendItemDtoList.add(new SendItemWeapon(w.getName(), w.getIdentificationNumber())));
+        equipment.forEach(e -> sendItemDtoList.add(new SendItemEquipment(e.getName(), e.getIdentificationNumber())));
+        resources.forEach(r -> sendItemDtoList.add(new SendItemResource(r.getName(), r.getQuantity())));
+
+        return sendItemDtoList;
+    }
+
+    @Transactional
+    public List<DeliveryPointResponseDTO> findAllInDeliveryPoint(Long deliveryPointId) {
+        var items = warehouseRepository.howMuchAtTimeInDeliveryPoint(deliveryPointId, LocalDateTime.now());
+        var deliveryPoint = deliveryPointClient.getDeliveryPointById(deliveryPointId);
+
+        var response = howMuchAtTimeItemsToDeliveryPointResponse(items, deliveryPoint);
+        if (isNull(response)) {
+            throw new ResponseStatusException(NOT_FOUND);
+        }
+        return List.of(response);
+    }
 
     @Transactional
     public void addItemsToDeliveryPoint(Long deliveryPointId, List<SendItemDTO> items) {
@@ -92,7 +117,7 @@ public class ItemService {
 
         resourceList.forEach(resource -> {
             var lastResourceCount = resourceRepository
-                    .findFirstByLocatedAtAndNameAndStatusOrderByDateDesc(deliveryPointId, resource.itemName(), STORED)
+                    .findFirstByLocatedAtAndNameAndStatusOrderByDateDesc(deliveryPointId, resource.itemName(), ResourceStatus.STORED)
                     .map(Resource::getQuantity)
                     .orElse(0);
 
@@ -101,7 +126,7 @@ public class ItemService {
                     .quantity(resource.quantity() + lastResourceCount)
                     .locatedAt(deliveryPointId)
                     .date(LocalDateTime.now())
-                    .status(STORED)
+                    .status(ResourceStatus.STORED)
                     .build();
 
             resourceRepository.save(entity);
@@ -123,6 +148,7 @@ public class ItemService {
         return List.of(howMuchAtTimeItemsToDeliveryPointResponse);
     }
 
+    @Transactional
     public List<DeliveryPointResponseDTO> findItemsInAllDeliveryPoints(List<ItemSearchDTO> items) {
         var searchItemsByType = itemSearchDtoToMap(items);
 
@@ -152,7 +178,12 @@ public class ItemService {
             switch (item.getTypeName()) {
                 case "WEAPON" -> {
                     var weaponItem = (SendItemWeapon) item;
-                    var weaponEntity = weaponRepository.findByIdentificationNumber(weaponItem.identificationNumber()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+                    var weaponList = weaponRepository.getWeaponsByIdentificationNumber(weaponItem.identificationNumber());
+                    if (weaponList.size() != 1) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+                    }
+
+                    var weaponEntity = weaponList.get(0);
                     var weaponWithCargo = Weapon.builder()
                             .cargoId(cargoId)
                             .identificationNumber(weaponEntity.getIdentificationNumber())
@@ -166,7 +197,12 @@ public class ItemService {
                 }
                 case "EQUIPMENT" -> {
                     var equipmentItem = (SendItemEquipment) item;
-                    var equipmentEntity = equipmentRepository.findByIdentificationNumber(equipmentItem.identificationNumber()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+                    var equipmentList = equipmentRepository.getEquipmentByIdentificationNumber(equipmentItem.identificationNumber());
+                    if (equipmentList.size() != 1) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+                    }
+
+                    var equipmentEntity = equipmentList.get(0);
                     var equipmentWithCargo = Equipment.builder()
                             .cargoId(cargoId)
                             .identificationNumber(equipmentEntity.getIdentificationNumber())
@@ -180,7 +216,7 @@ public class ItemService {
                 }
                 case "RESOURCE" -> {
                     var resourceItem = (SendItemResource) item;
-                    var lastResource = resourceRepository.findFirstByNameAndLocatedAtAndStatusOrderByDateDesc(resourceItem.itemName(), locatedAt, STORED).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+                    var lastResource = resourceRepository.findFirstByNameAndLocatedAtAndStatusOrderByDateDesc(resourceItem.itemName(), locatedAt, ResourceStatus.STORED).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
                     if (lastResource.getQuantity() < resourceItem.quantity()) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -199,7 +235,7 @@ public class ItemService {
                     if (!Objects.equals(lastResource.getQuantity(), resourceItem.quantity())) {
                         var entity = Resource.builder()
                                 .cargoId(null)
-                                .status(STORED)
+                                .status(ResourceStatus.STORED)
                                 .date(LocalDateTime.now())
                                 .name(lastResource.getName())
                                 .quantity(lastResource.getQuantity() - resourceItem.quantity())
@@ -237,6 +273,26 @@ public class ItemService {
             default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         teamRepository.updateStatusForTeamWithCargoId(teamStatus, cargoId);
+    }
+
+    @Transactional
+    public List<String> getWeaponIds(Long deliveryPointId, String name) {
+        var list = weaponRepository.getWeaponsByLocatedAtAndNameAndNotStatus(deliveryPointId, name, Status.STORED);
+        if (list.isEmpty()) {
+            throw new ResponseStatusException(NOT_FOUND);
+        }
+
+        return list.stream().map(Weapon::getIdentificationNumber).toList();
+    }
+
+    @Transactional
+    public List<String> getEquipmentIds(Long deliveryPointId, String name) {
+        var list = equipmentRepository.getEquipmentByLocatedAtAndNameAndNotStatus(deliveryPointId, name, Status.STORED);
+        if (list.isEmpty()) {
+            throw new ResponseStatusException(NOT_FOUND);
+        }
+
+        return list.stream().map(Equipment::getIdentificationNumber).toList();
     }
 
     private Map<ItemType, List<String>> itemSearchDtoToMap(List<ItemSearchDTO> items) {

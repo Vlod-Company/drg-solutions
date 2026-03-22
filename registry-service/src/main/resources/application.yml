@@ -1,0 +1,24 @@
+server:
+  port: ${REGISTRY_PORT:1390}
+  tomcat:
+    threads:
+      max: 5
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: ${EUREKA_SERVER:http://localhost:1390/eureka}
+  server:
+    enable-self-preservation: false
+
+logging:
+  level:
+    com:
+      netflix:
+        eureka: WARN
+        discovery: WARN
+    org:
+      springframework:
+        cloud: WARN

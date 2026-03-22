@@ -11,6 +11,7 @@ import vvp_company.logisticsservice.repository.CargoRepository;
 import vvp_company.logisticsservice.repository.LogisticRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static vvp_company.logisticsservice.enm.LogisticStatus.CREATED;
 
@@ -38,12 +39,16 @@ public class LogisticService {
         var logistic = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         cargoRepository.recalculateCargo(logistic.getCargoId());
-        logistic.setStatus(request.getNewStatus());
-        logistic.setSendTime(request.getNewDate() == null ? logistic.getSendTime() : request.getNewDate());
+        logistic.setStatus(request.getNewStatus() != null ? request.getNewStatus() : logistic.getStatus());
+        logistic.setSendTime(request.getNewDate() != null ? request.getNewDate() : logistic.getSendTime());
         return repository.save(logistic);
     }
 
     public Logistic getLogisticById(Long id) {
         return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    public List<Logistic> getLogistics() {
+        return repository.findAll();
     }
 }

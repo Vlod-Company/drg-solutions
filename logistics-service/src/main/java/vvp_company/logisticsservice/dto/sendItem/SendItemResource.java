@@ -8,7 +8,7 @@ public record SendItemResource(
 ) implements SendItemDTO{
 
     @Override
-    public String getTypeName() {
-        return SendItemType.RESOURCES.name();
+    public String getItemType() {
+        return SendItemType.RESOURCE.name();
     }
 }

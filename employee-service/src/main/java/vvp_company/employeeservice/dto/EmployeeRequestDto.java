@@ -35,4 +35,7 @@ public class EmployeeRequestDto {
 
     @PastOrPresent(message = "Hired date cannot be in the future")
     private LocalDate hiredDate;
+
+    @PastOrPresent(message = "Fired date can be only in the future")
+    private LocalDate firedDate;
 }

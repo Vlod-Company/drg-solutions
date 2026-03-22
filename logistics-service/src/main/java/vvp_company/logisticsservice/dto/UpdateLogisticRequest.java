@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 @Data
 public class UpdateLogisticRequest {
 
-    @NotNull
     private LogisticStatus newStatus;
 
     private LocalDateTime newDate;

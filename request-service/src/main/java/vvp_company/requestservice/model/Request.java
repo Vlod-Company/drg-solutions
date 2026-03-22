@@ -19,6 +19,7 @@ public class Request {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private RequestStatus status = RequestStatus.CREATED;
 
     @Column(name = "sender_department", nullable = false)

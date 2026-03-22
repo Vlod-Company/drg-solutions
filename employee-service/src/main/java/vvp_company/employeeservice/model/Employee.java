@@ -32,6 +32,7 @@ public class Employee {
 
     @Column(name = "status", nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private EmployeeStatus status = EmployeeStatus.ACTIVE;
 
     @Column(name = "hired_date", nullable = false)

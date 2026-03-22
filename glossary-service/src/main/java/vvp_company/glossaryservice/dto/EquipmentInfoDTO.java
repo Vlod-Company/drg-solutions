@@ -8,6 +8,8 @@ import lombok.*;
 @Builder
 public class EquipmentInfoDTO {
 
+    private Long id;
+
     private String name;
 
     private String description;

@@ -11,6 +11,7 @@ import vvp_company.ecosystemservice.model.Monster;
 import vvp_company.ecosystemservice.repository.ImpactTypeRepository;
 import vvp_company.ecosystemservice.repository.MonsterRepository;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,14 +29,12 @@ public class MonsterService {
         Monster monster = monsterMapper.toEntity(dto);
 
         if (dto.weaknessIds() != null && !dto.weaknessIds().isEmpty()) {
-            Set<ImpactType> weaknesses = impactTypeRepository.findAllById(dto.weaknessIds())
-                    .stream().collect(Collectors.toSet());
+            Set<ImpactType> weaknesses = new HashSet<>(impactTypeRepository.findAllById(dto.weaknessIds()));
             monster.setWeaknesses(weaknesses);
         }
 
         if (dto.strengthIds() != null && !dto.strengthIds().isEmpty()) {
-            Set<ImpactType> strengths = impactTypeRepository.findAllById(dto.strengthIds())
-                    .stream().collect(Collectors.toSet());
+            Set<ImpactType> strengths = new HashSet<>(impactTypeRepository.findAllById(dto.strengthIds()));
             monster.setStrengths(strengths);
         }
 
@@ -47,7 +46,7 @@ public class MonsterService {
     public MonsterDto getById(Long id) {
         return monsterRepository.findById(id)
                 .map(monsterMapper::toDto)
-                .orElseThrow(); // свой NotFoundException
+                .orElseThrow();
     }
 
     @Transactional(readOnly = true)
@@ -61,21 +60,17 @@ public class MonsterService {
     public MonsterDto update(Long id, CreateMonsterDto dto) {
         Monster monster = monsterRepository.findById(id).orElseThrow();
 
-        // обновляем простые поля через mapper
         monsterMapper.updateMonsterFromDto(dto, monster);
 
-        // заново проставляем weaknesses/strengths по id
         if (dto.weaknessIds() != null) {
-            Set<ImpactType> weaknesses = impactTypeRepository
-                    .findAllById(dto.weaknessIds())
-                    .stream().collect(java.util.stream.Collectors.toSet());
+            Set<ImpactType> weaknesses = new HashSet<>(impactTypeRepository
+                    .findAllById(dto.weaknessIds()));
             monster.setWeaknesses(weaknesses);
         }
 
         if (dto.strengthIds() != null) {
-            Set<ImpactType> strengths = impactTypeRepository
-                    .findAllById(dto.strengthIds())
-                    .stream().collect(java.util.stream.Collectors.toSet());
+            Set<ImpactType> strengths = new HashSet<>(impactTypeRepository
+                    .findAllById(dto.strengthIds()));
             monster.setStrengths(strengths);
         }
 

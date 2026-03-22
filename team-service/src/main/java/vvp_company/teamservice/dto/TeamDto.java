@@ -20,5 +20,6 @@ public class TeamDto {
 
     private Long locatedAtId;
 
+    @Builder.Default
     private TeamStatus status = TeamStatus.CREATED;
 }

@@ -51,8 +51,8 @@ public class ShipmentService {
         stringData = Objects.equals(stringData, "[]") ? "" : stringData;
 
         var createCargoRequest = CreateRequestDTO.builder()
-                .recipientDepartment("store")
-                .requestCode("XXX---XXX")
+                .recipientDepartment("Launch Control")
+                .requestCode("REQ-TR")
                 .description(format(ADD_TO_CARGO_MESSAGE, cargo.getId(), stringData))
                 .build();
 

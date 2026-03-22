@@ -149,18 +149,11 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 (15, 9),  -- Rusty
 (16, 9);  -- Greta
 
--- Грузы (вес пересчитается триггером)
-INSERT INTO cargos (weight, ship_to_date, ship_to_point) VALUES
-                                                             (0, '2025-10-20', 2), -- BIOME
-                                                             (0, '2025-10-22', 2), -- BIOME
-                                                             (0, '2025-10-25', 5), -- BIOME
-                                                             (0, '2025-10-28', 1); -- WAREHOUSE
-
 -- Команды (located_at = WAREHOUSE или STATION)
 INSERT INTO teams (name, cargo_id, located_at, status) VALUES
-                                                           ('Team Rock & Stone', 1, 1, 'ON_MISSION'), -- WAREHOUSE
-                                                           ('Team Deep Core',    2, 1, 'CREATED'),    -- WAREHOUSE
-                                                           ('Team Backup Crew',  4, 3, 'CREATED');    -- STATION
+                                                           ('Team Rock & Stone', null, 1, 'ON_MISSION'), -- WAREHOUSE
+                                                           ('Team Deep Core',    null, 1, 'CREATED'),    -- WAREHOUSE
+                                                           ('Team Backup Crew',  null, 3, 'CREATED');    -- STATION
 
 -- Члены команд
 INSERT INTO team_members (team_id, employee_id) VALUES
@@ -186,19 +179,19 @@ INSERT INTO equipment_info (name, description, weight) VALUES
 
 -- weapons (located_at = WAREHOUSE/STATION)
 INSERT INTO weapons (name, identification_number, located_at, cargo_id, status, date) VALUES
-                                                                                          ('Drillsword',   'DS-001', 1, 1, 'STORED', '2025-10-15 10:00:00'),
-                                                                                          ('Boomstick',    'BS-001', 1, 1, 'STORED', '2025-10-15 10:05:00'),
-                                                                                          ('Zhukov',       'ZUK-001',1, 1, 'STORED', '2025-10-15 10:10:00'),
-                                                                                          ('PGL',          'PGL-001',3, 2, 'STORED', '2025-10-16 09:00:00'),
-                                                                                          ('Flamethrower', 'FT-001', 3, 2, 'STORED', '2025-10-16 09:15:00');
+                                                                                          ('Drillsword',   'DS-001', 1, null, 'STORED', '2025-10-15 10:00:00'),
+                                                                                          ('Boomstick',    'BS-001', 1, null, 'STORED', '2025-10-15 10:05:00'),
+                                                                                          ('Zhukov',       'ZUK-001',1, null, 'STORED', '2025-10-15 10:10:00'),
+                                                                                          ('PGL',          'PGL-001',3, null, 'STORED', '2025-10-16 09:00:00'),
+                                                                                          ('Flamethrower', 'FT-001', 3, null, 'STORED', '2025-10-16 09:15:00');
 
 -- equipment
 INSERT INTO equipment (name, identification_number, located_at, cargo_id, status, date) VALUES
-                                                                                            ('Flame Turret',  'FT-001', 1, 1, 'STORED', '2025-10-15 11:00:00'),
-                                                                                            ('Zipline',       'ZP-001', 1, 1, 'STORED', '2025-10-15 11:05:00'),
-                                                                                            ('Platform Gun',  'PG-001', 3, 2, 'STORED', '2025-10-16 09:30:00'),
-                                                                                            ('Sentry Gun',    'SG-001', 3, 2, 'STORED', '2025-10-16 09:35:00'),
-                                                                                            ('Bubble Shield', 'BS-001', 3, 2, 'STORED', '2025-10-16 09:40:00');
+                                                                                            ('Flame Turret',  'FT-001', 1, null, 'STORED', '2025-10-15 11:00:00'),
+                                                                                            ('Zipline',       'ZP-001', 1, null, 'STORED', '2025-10-15 11:05:00'),
+                                                                                            ('Platform Gun',  'PG-001', 3, null, 'STORED', '2025-10-16 09:30:00'),
+                                                                                            ('Sentry Gun',    'SG-001', 3, null, 'STORED', '2025-10-16 09:35:00'),
+                                                                                            ('Bubble Shield', 'BS-001', 3, null, 'STORED', '2025-10-16 09:40:00');
 
 -- resource_info
 INSERT INTO resource_info (name, description, weight_per_unit) VALUES
@@ -208,9 +201,9 @@ INSERT INTO resource_info (name, description, weight_per_unit) VALUES
 
 -- resources
 INSERT INTO resources (name, located_at, cargo_id, status, date, quantity) VALUES
-                                                                               ('Gold',   1, 1, 'STORED', '2025-10-19 12:00:00', 100),
-                                                                               ('Morkite',1, 1, 'STORED', '2025-10-19 12:05:00', 250),
-                                                                               ('Nitra',  3, 2, 'STORED', '2025-10-19 12:10:00', 50);
+                                                                               ('Gold',   1, null, 'STORED', '2025-10-19 12:00:00', 100),
+                                                                               ('Morkite',1, null, 'STORED', '2025-10-19 12:05:00', 250),
+                                                                               ('Nitra',  3, null, 'STORED', '2025-10-19 12:10:00', 50);
 
 -- monsters
 INSERT INTO monsters (name, description, danger_level, heritage, monster_type, biome_id, armor_type) VALUES

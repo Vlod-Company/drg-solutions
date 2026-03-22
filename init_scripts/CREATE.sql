@@ -123,7 +123,7 @@ CREATE TABLE "equipment_info" (
 CREATE TABLE "weapons" (
                            "id" BIGSERIAL PRIMARY KEY,
                            "name" VARCHAR(255) NOT NULL REFERENCES "weapon_info"("name"),
-                           "identification_number" VARCHAR(100) NOT NULL UNIQUE,
+                           "identification_number" VARCHAR(100) NOT NULL,
                            "located_at" BIGINT REFERENCES "delivery_point"("id"),
                            "cargo_id" BIGINT REFERENCES "cargos"("id"),
                            "status" VARCHAR(50) NOT NULL DEFAULT 'STORED',
@@ -133,7 +133,7 @@ CREATE TABLE "weapons" (
 CREATE TABLE "equipment" (
                              "id" BIGSERIAL PRIMARY KEY,
                              "name" VARCHAR(255) NOT NULL REFERENCES "equipment_info"("name"),
-                             "identification_number" VARCHAR(100) NOT NULL UNIQUE,
+                             "identification_number" VARCHAR(100) NOT NULL,
                              "located_at" BIGINT REFERENCES "delivery_point"("id"),
                              "cargo_id" BIGINT REFERENCES "cargos"("id"),
                              "status" VARCHAR(50) NOT NULL DEFAULT 'STORED',
@@ -166,7 +166,7 @@ CREATE TABLE "missions" (
                             "required_experience" INTEGER NOT NULL DEFAULT 0 CHECK ("required_experience" >= 0),
                             "status" VARCHAR(255) NOT NULL,
                             "mission_start" TIMESTAMP(0) NOT NULL,
-                            "mission_end" TIMESTAMP(0) NOT NULL
+                            "mission_end" TIMESTAMP(0)
 );
 
 CREATE OR REPLACE FUNCTION trg_check_team_experience()
@@ -325,7 +325,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION get_recommended_weapons(mission_id INT)
+CREATE OR REPLACE FUNCTION get_recommended_weapons(mission_id BIGINT)
     RETURNS TABLE (
                       weapon_id BIGINT,
                       weapon_name VARCHAR(255),

@@ -16,12 +16,16 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
             "(:code IS NULL OR r.requestCode = :code) AND " +
             "(:senderDepartment IS NULL OR r.senderDepartment = :senderDepartment) AND " +
             "(:recipientDepartment IS NULL OR r.recipientDepartment = :recipientDepartment) AND " +
-            "(:status IS NULL OR CAST(r.status AS text) = :status)")
+            "(:status IS NULL OR CAST(r.status AS string) = :status) AND " +
+            "(:sender IS NULL OR r.senderEmployeeId = :sender) AND " +
+            "(:recipient IS NULL OR r.recipientEmployeeId = :recipient)")
     Page<Request> findAllByFilter(
             @Param("code") String code,
             @Param("senderDepartment") String senderDepartment,
             @Param("recipientDepartment") String recipientDepartment,
             @Param("status") String status,
+            @Param("sender") Long sender,
+            @Param("recipient") Long recipient,
             Pageable pageable);
 
 

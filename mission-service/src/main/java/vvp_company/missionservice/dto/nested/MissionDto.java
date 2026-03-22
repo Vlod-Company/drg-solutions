@@ -24,8 +24,10 @@ public class MissionDto {
 
     private Long teamId;
 
+    @Builder.Default
     private Integer requiredExperience = 0;
 
+    @Builder.Default
     private MissionStatus status = MissionStatus.CREATED;
 
     private LocalDateTime missionStart;

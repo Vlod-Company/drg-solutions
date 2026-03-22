@@ -16,5 +16,5 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 })
 public interface SendItemDTO {
 
-    String getTypeName();
+    String getItemType();
 }

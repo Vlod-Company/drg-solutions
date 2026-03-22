@@ -5,5 +5,5 @@ public enum SendItemType {
     EQUIPMENT,
     TEAM,
     WEAPON,
-    RESOURCES
+    RESOURCE
 }

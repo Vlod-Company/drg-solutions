@@ -1,6 +1,7 @@
 package vvp_company.storeservice.controller;
 
 import jakarta.validation.Valid;
+import jakarta.ws.rs.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +32,13 @@ public class ItemController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN') " +
             "or hasRole('ROLE_LAUNCH_CONTROL_EMPLOYEE')")
+    @GetMapping("/getCargoItems/{cargoId}")
+    public List<SendItemDTO> getNonTeamItemsInCargo(@PathVariable Long cargoId) {
+        return itemService.getNonTeamItemsInCargo(cargoId);
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_LAUNCH_CONTROL_EMPLOYEE')")
     @PostMapping("/{deliveryPointId}")
     public List<DeliveryPointResponseDTO> findItemsInDeliveryPoint(
             @PathVariable Long deliveryPointId,
@@ -40,10 +48,29 @@ public class ItemController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN') " +
             "or hasRole('ROLE_LAUNCH_CONTROL_EMPLOYEE')")
+    @PostMapping("/{deliveryPointId}/all")
+    public List<DeliveryPointResponseDTO> findItemsInAllDeliveryPoints(
+            @PathVariable Long deliveryPointId
+    ){
+        return itemService.findAllInDeliveryPoint(deliveryPointId);
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN') " +
+            "or hasRole('ROLE_LAUNCH_CONTROL_EMPLOYEE')")
     @PostMapping
     public List<DeliveryPointResponseDTO> findItemsAnywhere(
             @Valid @RequestBody List<ItemSearchDTO> searchItems) {
         return itemService.findItemsInAllDeliveryPoints(searchItems);
+    }
+
+    @GetMapping("/{deliveryPointId}/getWeaponIds")
+    public List<String> getWeaponIds(@PathVariable Long deliveryPointId, @PathParam("name") String name) {
+        return itemService.getWeaponIds(deliveryPointId, name);
+    }
+
+    @GetMapping("/{deliveryPointId}/getEquipmentIds")
+    public List<String> getEquipmentIds(@PathVariable Long deliveryPointId, @PathParam("name") String name) {
+        return itemService.getEquipmentIds(deliveryPointId, name);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') " +

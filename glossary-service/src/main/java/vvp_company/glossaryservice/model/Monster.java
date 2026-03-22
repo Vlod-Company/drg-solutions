@@ -54,6 +54,7 @@ public class Monster {
             joinColumns = @JoinColumn(name = "monster_id"),
             inverseJoinColumns = @JoinColumn(name = "impact_type_id")
     )
+    @Builder.Default
     private Set<ImpactType> weaknesses = new HashSet<>();
 
     @ManyToMany
@@ -62,5 +63,6 @@ public class Monster {
             joinColumns = @JoinColumn(name = "monster_id"),
             inverseJoinColumns = @JoinColumn(name = "impact_type_id")
     )
+    @Builder.Default
     private Set<ImpactType> strengths = new HashSet<>();
 }

@@ -9,6 +9,8 @@ import vvp_company.glossaryservice.model.ImpactType;
 @Builder
 public class WeaponInfoDTO {
 
+    private Long id;
+
     private String name;
 
     private String description;
